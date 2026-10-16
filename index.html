@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-inner">
+    <div class="nav-user" id="navUser" title="Đi tới Quản lí">
+      <div class="nav-avatar" id="navAvatar">🎓</div>
+      <div class="nav-user-info">
+        <div class="nav-user-name" id="navUserName">Khách</div>
+        <div class="nav-user-streak" id="navUserStreak">🔥 0 ngày</div>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <button class="nav-link active" data-page="home"><span>🏠</span><span>Trang chủ</span></button>
+      <button class="nav-link" data-page="study"><span>📖</span><span>Học tập</span></button>
+      <button class="nav-link" data-page="calendar"><span>📅</span><span>Lịch</span></button>
+      <button class="nav-link" data-page="manage"><span>⚙️</span><span>Quản lí</span></button>
+    </nav>
+
+    <div class="nav-search">
+      <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Tìm...">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" title="Sáng / Tối">
+      <span class="theme-icon light">☀️</span>
+      <span class="theme-icon dark">🌙</span>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <h1 id="heroGreeting">Xin chào 👋</h1>
+      <p class="hero-sub" id="heroDate"></p>
+    </div>
+
+    <div class="card card-goal" id="goalNotifCard">
+      <h2 class="card-title">🎯 Mục tiêu hôm nay</h2>
+      <div class="goal-progress">
+        <div class="goal-bar"><div class="goal-fill" id="goalFill"></div></div>
+        <div class="goal-info" id="goalInfo"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">🗺️ Lộ trình học</h2>
+      <div class="roadmap-form">
+        <input type="text" id="roadmapInput" class="input" placeholder="Tên lộ trình (VD: Học React)">
+        <input type="number" id="roadmapTotal" class="input num-input" placeholder="Tổng buổi" min="1">
+        <button class="btn primary" id="addRoadmapBtn">Tạo</button>
+      </div>
+      <div class="roadmap-list" id="roadmapList"></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-num" id="homeStreak">0</div><div class="stat-label">Streak</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-num" id="homeDays">0</div><div class="stat-label">Ngày học</div></div>
+      <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-num" id="homeHours">0h</div><div class="stat-label">Tổng giờ</div></div>
+      <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-num" id="homeAvg">0m</div><div class="stat-label">TB/ngày</div></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">📈 7 ngày gần đây</h2>
+      <div class="chart" id="homeChart"></div>
+    </div>
+  </section>
+
+  <!-- STUDY — timeline dọc -->
+  <section class="page" id="page-study">
+    <div class="page-header">
+      <h1>📖 Học tập</h1>
+      <p class="page-sub">Dòng thời gian — click để xem nội dung đã học</p>
+    </div>
+
+    <div class="study-summary">
+      <div class="sum-pill"><span class="pill-icon">🔥</span><span class="pill-num" id="studyStreak">0</span><span class="pill-label">Chuỗi</span></div>
+      <div class="sum-pill"><span class="pill-icon">⏱️</span><span class="pill-num" id="studyHours">0h</span><span class="pill-label">Tổng giờ</span></div>
+      <div class="sum-pill"><span class="pill-icon">📅</span><span class="pill-num" id="studyDays">0</span><span class="pill-label">Ngày học</span></div>
+    </div>
+
+    <div class="card">
+      <div class="input-row">
+        <input type="date" id="studyDateInput" class="input">
+        <button class="btn primary" id="studyAddBtn">+ Ghi giờ học</button>
+      </div>
+      <p class="hint">Chọn ngày → bấm "Ghi giờ học" để thêm phút + nội dung theo từng khung giờ</p>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="page" id="page-calendar">
+    <div class="page-header">
+      <h1>📅 Lịch học</h1>
+      <p class="page-sub">Click vào ngày để lên lịch học</p>
+    </div>
+
+    <div class="study-summary">
+      <div class="sum-pill"><span class="pill-icon">🔥</span><span class="pill-num" id="calStreak">0</span><span class="pill-label">Chuỗi</span></div>
+      <div class="sum-pill"><span class="pill-icon">⏱️</span><span class="pill-num" id="calHours">0h</span><span class="pill-label">Tổng giờ</span></div>
+      <div class="sum-pill"><span class="pill-icon">📊</span><span class="pill-num" id="calMonthHours">0h</span><span class="pill-label">Tháng này</span></div>
+    </div>
+
+    <div class="card">
+      <div class="cal-header">
+        <button class="btn ghost" id="prevMonth">◀</button>
+        <h2 class="cal-title" id="calTitle"></h2>
+        <button class="btn ghost" id="nextMonth">▶</button>
+        <button class="btn soft" id="todayBtn">Hôm nay</button>
+      </div>
+      <div class="cal-weekdays">
+        <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div>
+        <div class="weekend">T7</div><div class="weekend">CN</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </section>
+
+  <!-- MANAGE -->
+  <section class="page" id="page-manage">
+    <div class="page-header">
+      <h1>⚙️ Quản lí</h1>
+      <p class="page-sub">Thông tin, mục tiêu, giao diện và dữ liệu</p>
+    </div>
+
+    <!-- Profile -->
+    <div class="card">
+      <h2 class="card-title">👤 Thông tin cá nhân</h2>
+      <div class="profile-row">
+        <div class="avatar-wrap">
+          <button class="avatar" id="avatarBtn" type="button">🎓</button>
+          <div class="avatar-menu" id="avatarMenu">
+            <button data-act="upload">📷 Tải ảnh lên</button>
+            <button data-act="emoji">😀 Chọn emoji</button>
+            <button data-act="remove" class="del">🗑 Xoá ảnh</button>
+          </div>
+        </div>
+        <div class="profile-fields">
+          <input class="input" id="profileName" type="text" placeholder="Họ và tên">
+          <input class="input" id="profileEmail" type="email" placeholder="📧 Email">
+          <input class="input" id="profilePhone" type="tel" placeholder="📱 Số điện thoại">
+        </div>
+        <input type="file" id="avatarFile" accept="image/*" hidden>
+      </div>
+      <div class="emoji-picker" id="emojiPicker"></div>
+    </div>
+
+    <!-- Goals -->
+    <div class="card">
+      <h2 class="card-title">🎯 Mục tiêu</h2>
+      <label class="field-label">Mục tiêu dài hạn</label>
+      <input class="input" id="profileGoal" type="text" placeholder="VD: Thành thạo React trong 3 tháng">
+      <label class="field-label">Mục tiêu mỗi ngày (phút)</label>
+      <div class="input-row">
+        <input class="input" id="dailyGoalInput" type="number" min="0" placeholder="VD: 60">
+        <button class="btn primary" id="saveDailyGoalBtn">Lưu</button>
+      </div>
+      <p class="hint">Đây là số phút bạn muốn học mỗi ngày. Home sẽ nhắc bạn.</p>
+    </div>
+
+    <!-- Background -->
+    <div class="card">
+      <h2 class="card-title">🖼️ Hình nền</h2>
+      <div class="bg-options" id="bgOptions">
+        <button class="bg-swatch" data-bg-type="default"><span class="bg-label">Mặc định</span></button>
+        <button class="bg-swatch" data-bg-type="color" data-bg-value="#fef3c7" style="background:#fef3c7"><span class="bg-label">Vàng nhạt</span></button>
+        <button class="bg-swatch" data-bg-type="color" data-bg-value="#dbeafe" style="background:#dbeafe"><span class="bg-label">Xanh dương</span></button>
+        <button class="bg-swatch" data-bg-type="color" data-bg-value="#dcfce7" style="background:#dcfce7"><span class="bg-label">Xanh lá</span></button>
+        <button class="bg-swatch" data-bg-type="color" data-bg-value="#fce7f3" style="background:#fce7f3"><span class="bg-label">Hồng</span></button>
+        <button class="bg-swatch" data-bg-type="gradient" data-bg-value="linear-gradient(135deg,#eef2ff,#fce7f3)" style="background:linear-gradient(135deg,#eef2ff,#fce7f3)"><span class="bg-label">Gradient 1</span></button>
+        <button class="bg-swatch" data-bg-type="gradient" data-bg-value="linear-gradient(135deg,#dbeafe,#dcfce7)" style="background:linear-gradient(135deg,#dbeafe,#dcfce7)"><span class="bg-label">Gradient 2</span></button>
+        <button class="bg-swatch" data-bg-type="gradient" data-bg-value="linear-gradient(135deg,#1e293b,#0f172a)"><span class="bg-label">Tối</span></button>
+      </div>
+      <div class="input-row" style="margin-top:14px;">
+        <input type="color" id="bgColorPicker" class="input color-input" value="#f8fafc">
+        <button class="btn soft" id="bgApplyColorBtn">Áp dụng màu</button>
+        <button class="btn soft" id="bgUploadBtn">📷 Tải ảnh nền</button>
+        <input type="file" id="bgFile" accept="image/*" hidden>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="card">
+      <h2 class="card-title">🎨 Chế độ hiển thị</h2>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Sáng / Tối</div>
+          <div class="setting-desc">Áp dụng cho toàn bộ giao diện</div>
+        </div>
+        <div class="segmented" id="themeSegment">
+          <button data-theme-value="light">☀️ Sáng</button>
+          <button data-theme-value="dark">🌙 Tối</button>
+          <button data-theme-value="auto">💻 Auto</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock chart -->
+    <div class="card">
+      <h2 class="card-title">📈 Biểu đồ tiến độ học tập</h2>
+      <div class="stock-chart-wrap">
+        <svg class="stock-chart" id="stockChart" viewBox="0 0 800 240" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="chart-legend-mini"><span>Từ ngày đầu học đến nay</span><span>Phút học / ngày</span></div>
+    </div>
+
+    <!-- Data -->
+    <div class="card">
+      <h2 class="card-title">💾 Dữ liệu</h2>
+
+      <label class="field-label">Xóa dữ liệu 1 ngày</label>
+      <div class="input-row">
+        <input type="date" id="deleteDateInput" class="input">
+        <button class="btn danger" id="deleteDayBtn">🗑 Xóa ngày này</button>
+      </div>
+
+      <label class="field-label">Xóa dữ liệu theo khoảng</label>
+      <div class="input-row">
+        <input type="date" id="deleteFrom" class="input">
+        <span class="unit-label">→</span>
+        <input type="date" id="deleteTo" class="input">
+        <button class="btn danger" id="deleteRangeBtn">🗑 Xóa</button>
+      </div>
+
+      <label class="field-label">Sao lưu / Khôi phục</label>
+      <div class="btn-row">
+        <button class="btn soft" id="exportBtn">⬇ Xuất JSON</button>
+        <button class="btn soft" id="importBtn">⬆ Nhập JSON</button>
+        <input type="file" id="importFile" accept=".json" hidden>
+      </div>
+
+      <label class="field-label" style="color:var(--danger)">Vùng nguy hiểm</label>
+      <div class="btn-row">
+        <button class="btn danger" id="resetAllBtn">⚠️ Xoá TẤT CẢ dữ liệu</button>
+      </div>
+      <p class="hint">Xóa tất cả sẽ xóa cả profile, lộ trình, background. Không thể hoàn tác!</p>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL GHI GIỜ HỌC -->
+<div class="modal" id="hourModal">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-content">
+    <h3 class="modal-title" id="modalTitle">Ghi giờ học</h3>
+    <p class="modal-sub" id="modalSub"></p>
+
+    <label class="field-label">Tổng số phút học ngày này</label>
+    <div class="input-row">
+      <input type="number" id="modalMinutes" class="input" min="0" placeholder="VD: 120">
+      <span class="unit-label">phút</span>
+    </div>
+
+    <label class="field-label">Chi tiết từng khung giờ (tuỳ chọn)</label>
+    <div class="hour-list" id="hourList"></div>
+
+    <div class="modal-actions">
+      <button class="btn ghost" data-close>Huỷ</button>
+      <button class="btn primary" id="modalSave">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
