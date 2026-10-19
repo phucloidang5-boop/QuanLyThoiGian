@@ -1,0 +1,403 @@
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Đề cương ôn tập Tiếng Anh — Luyện tập tổng hợp 202 câu</title>
+    <style>
+    :root{--bg:#f4f6fb;--card:#fff;--ink:#1b2333;--muted:#5d6879;--line:#e2e7f0;
+    --brand:#1e5aa8;--brand-dark:#123c73;--brand-soft:#e9f1fb;
+    --ok:#15774e;--ok-soft:#e6f6ee;--bad:#c23b3b;--bad-soft:#fdeceb;
+    --shadow:0 2px 12px rgba(18,60,115,.10);--r:16px}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{overscroll-behavior:none}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:16px;line-height:1.55;-webkit-user-select:none;user-select:none}
+    .wrap{max-width:720px;margin:0 auto;padding:0 14px}
+    header{background:linear-gradient(135deg,#1e5aa8,#0e2f5c);color:#fff;padding:12px 0 10px}
+    header h1{margin:1px 0 0;font-size:16px;line-height:1.25}
+    header .sub{font-size:11.5px;opacity:.9;margin-top:2px}
+    .topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:9px 0}
+    .topbar .in{max-width:720px;margin:0 auto;padding:0 14px;display:flex;gap:11px;align-items:center}
+    .counter{font-size:14px;font-weight:800;color:var(--brand-dark);white-space:nowrap}
+    .pbar{flex:1;height:8px;background:#e5eaf2;border-radius:999px;overflow:hidden}
+    .pbar i{display:block;height:100%;background:var(--brand);width:0%;transition:width .25s}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+    padding:17px 16px;margin:14px 0}
+    .kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+    .kicker b{color:var(--brand)}
+    .qtext{font-size:17px;font-weight:600;line-height:1.5}
+    .opts{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+    .opt{display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 13px;cursor:pointer;background:#fff;font-size:15.5px;transition:all .15s}
+    .opt .lt{font-weight:800;color:var(--brand-dark);flex:none;min-width:19px}
+    .opt.locked{cursor:not-allowed}
+    .opt.picked-ok{border-color:var(--ok);background:var(--ok-soft)}
+    .opt.picked-bad{border-color:var(--bad);background:var(--bad-soft)}
+    .opt.show-correct{border-color:var(--ok);background:var(--ok-soft);box-shadow:0 0 0 2px var(--ok) inset}
+    .opt.dim{opacity:.55}
+    .next{margin-top:15px}
+    .btn{border:0;border-radius:12px;padding:13px 18px;font-size:16px;font-weight:700;cursor:pointer;
+    background:var(--brand);color:#fff;box-shadow:var(--shadow);width:100%}
+    .btn:disabled{background:#8aa4c8;cursor:not-allowed}
+    .feedback{margin-top:14px;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;display:none}
+    .feedback.ok{display:block;background:var(--ok-soft);border:1px solid #b9e0cc;color:var(--ok)}
+    .feedback.bad{display:block;background:var(--bad-soft);border:1px solid #f2c4c1;color:var(--bad)}
+    .feedback b{font-weight:800}
+    #shield{position:fixed;inset:0;z-index:9999;background:#0e2f5c;color:#fff;display:none;align-items:center;
+    justify-content:center;text-align:center;padding:26px;font-size:17px;line-height:1.7}
+    #shield.on{display:flex}
+    #wm{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:.05;overflow:hidden}
+    #wm span{position:absolute;white-space:nowrap;font-weight:800;font-size:14px;color:#123c73;transform:rotate(-26deg)}
+    #gate2{position:fixed;inset:0;z-index:500;background:var(--bg);overflow:auto;padding:20px 14px 40px}
+    #gate2 .box{max-width:440px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);padding:20px}
+    #gate2 label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 5px}
+    #gate2 input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;font:inherit;font-size:16px}
+    #gate2 h2{margin:0;font-size:19px;color:var(--brand-dark)}
+    #done{display:none}
+    .score{background:linear-gradient(135deg,#1e5aa8,#0e2f5c);color:#fff;border-radius:16px;padding:20px;text-align:center;margin:14px 0}
+    .score .big{font-size:46px;font-weight:800;line-height:1.05}
+    .score .sm{font-size:13.5px;opacity:.9}
+    </style>
+    </head>
+    <body>
+
+    <div id="gate2"><div class="box">
+    <h2>Đề cương ôn tập Tiếng Anh</h2>
+    <div style="color:#5d6879;font-size:13px;margin-top:4px">Luyện tập tổng hợp · 182 câu trắc nghiệm</div>
+    <label>Họ và tên</label>
+    <input id="gName" placeholder="Nguyễn Văn A" autocomplete="off">
+    <div style="margin-top:16px"><button class="btn" onclick="startExam()">Bắt đầu làm bài</button></div>
+    </div></div>
+
+    <header style="display:none"><div class="wrap">
+    <h1>Đề cương ôn tập Tiếng Anh — Luyện tập tổng hợp</h1>
+    <div class="sub">182 câu · Listening · Grammar · Reading · Units 1-6</div>
+    </div></header>
+
+    <nav class="topbar" id="topbar" style="display:none"><div class="in">
+    <span class="counter" id="counter">Câu 1/182</span>
+    <span class="pbar"><i id="pbarfill"></i></span>
+    </div></nav>
+
+    <div id="wm"></div>
+    <div id="shield"><div><div style="font-size:42px;margin-bottom:10px">🔒</div>
+    <b>Nội dung đã được ẩn</b><br>Quay lại cửa sổ bài làm.
+    </div></div>
+
+    <div class="wrap" style="display:none" id="mainWrap"><div id="stage"></div><div id="done"></div></div>
+
+    <script id="data" type="application/json">
+    {"items":[
+    {"n":1,"grp":"Part 3 · Conversation","q":"What does the woman want the man to do?","o":["Help her with some work","Write a proposal","Cancel the project","Call the A&G Corporation"],"k":"A"},
+    {"n":2,"grp":"Part 3 · Conversation","q":"What does the woman mean when she says \"It's not like that\"?","o":["She didn't like the proposal.","She is not satisfied with the work.","Her work is not proceeding well.","Her problem has not been solved."],"k":"C"},
+    {"n":3,"grp":"Part 3 · Conversation","q":"What is the man going to do next?","o":["He is going to collect data.","He is going to write a proposal.","He is going to contact the A&G Corporation.","He is going to follow the woman's advice."],"k":"A"},
+    {"n":4,"grp":"Part 3 · Conversation","q":"What are the speakers planning to do?","o":["Talk to their supervisor","Start an event for advertisement","Release a new product","Reschedule the campaign"],"k":"B"},
+    {"n":5,"grp":"Part 3 · Conversation","q":"What is the woman going to do before next week?","o":["She will come up with a draft.","She will brainstorm some ideas.","She will prepare a report.","She will write a proposal."],"k":"B"},
+    {"n":6,"grp":"Part 3 · Conversation","q":"Why can't the speakers have a meeting next week?","o":["One of their colleagues is sick.","One of the participants is not available.","The product has not been released yet.","They need to go on vacation."],"k":"B"},
+    {"n":7,"grp":"Part 2 · Listening","q":"What is the fastest way to get to Central Station?","o":["It will take 20 minutes.","Take the number 6 bus.","Usually once a month."],"k":"B"},
+    {"n":8,"grp":"Part 2 · Listening","q":"What is the name of the company you work for now?","o":["I work very hard.","It's a big company.","JC Motors."],"k":"C"},
+    {"n":9,"grp":"Part 2 · Listening","q":"Who are you speaking to at the moment?","o":["He is on the third floor.","They are talking about the new project.","She's a journalist for the local daily paper."],"k":"C"},
+    {"n":10,"grp":"Part 2 · Listening","q":"What time are you meeting your client?","o":["At five in the afternoon.","We failed to sign the contract.","I have plenty of time."],"k":"A"},
+    {"n":11,"grp":"Part 2 · Listening","q":"Who will be the new manager?","o":["Mr. Brown.","Ms. Robinson will be.","Next week."],"k":"B"},
+    {"n":12,"grp":"Part 2 · Listening","q":"Which advertisement do you like better?","o":["The green one seems better.","I saw it yesterday.","Thank you."],"k":"A"},
+    {"n":13,"grp":"Part 2 · Listening","q":"What shift are you working on Friday?","o":["In the morning.","The afternoon one.","It's hard work."],"k":"B"},
+    {"n":14,"grp":"Part 2 · Listening","q":"Who should I talk to about the office equipment?","o":["Mr. Simpson on the management team.","It's very expensive.","Yes, it is."],"k":"A"},
+    {"n":15,"grp":"Part 2 · Listening","q":"What do you think of the new marketing manager?","o":["The marketing strategy was successful.","He was promoted in November.","It is too early to say."],"k":"C"},
+    {"n":16,"grp":"Part 2 · Listening","q":"Who was chosen for the advertising project?","o":["I have no idea.","Mr. Scott was transferred to the New York office.","It was successful."],"k":"A"},
+    {"n":17,"grp":"Part 4 · Product issue","q":"What is wrong with the product?","o":["It is the wrong color.","It is the wrong size.","It is damaged.","It is too expensive."],"k":"A"},
+    {"n":18,"grp":"Part 4 · Product issue","q":"What is the speaker going to do tomorrow?","o":["She is going to get a refund.","She is going to move to a new place.","She is going to send the product back.","She is going to visit the store."],"k":"C"},
+    {"n":19,"grp":"Part 4 · Product issue","q":"What does the speaker want to know as soon as possible?","o":["Whether a size can be changed","Whether an additional discount can be offered","Whether extra products can be sold","Whether a different address can be used"],"k":"D"},
+    {"n":20,"grp":"Part 4 · Graphic","q":"Look at the graphic. Which quantity on the original order form is no longer accurate?","o":["1","3","7","10"],"k":"C"},
+    {"n":21,"grp":"Part 4 · Announcement","q":"What event will take place on Wednesday?","o":["An orientation session","A business meeting","A staff party","An employee training session"],"k":"B"},
+    {"n":22,"grp":"Part 4 · Announcement","q":"Why does the speaker want a return call?","o":["To talk to the manager","To order more items","To cancel the order","To confirm a delivery date"],"k":"D"},
+    {"n":23,"grp":"Unit 3 · Interview","q":"Who most likely is the woman?","o":["An interviewee","A sales representative","An interviewer","A receptionist"],"k":"D"},
+    {"n":24,"grp":"Unit 3 · Interview","q":"Look at the graphic. Where will the man most likely go?","o":["To the Sales Department","To meeting room A","To meeting room B","To the reception desk"],"k":"C"},
+    {"n":25,"grp":"Unit 3 · Interview","q":"What does the woman ask the man to do?","o":["Double-check his schedule","Wait a few minutes","Come back in a few minutes","Finish the interview soon"],"k":"B"},
+    {"n":26,"grp":"Unit 3 · Job opening","q":"What are they talking about?","o":["A newly hired employee","A job opening","Their job satisfaction","The resignation procedures"],"k":"B"},
+    {"n":27,"grp":"Unit 3 · Job opening","q":"What will the man probably do next?","o":["Apply for the job","Put out a job advertisement","Talk to his friend about the job","Contact Mike to discuss some details"],"k":"C"},
+    {"n":28,"grp":"Unit 3 · Job opening","q":"What does the woman mean when she says \"That would make things much easier\"?","o":["The man will be able to leave the company.","She will be able to find Mike's replacement.","The man will be able to find a new job.","She will be able to let Mike go."],"k":"B"},
+    {"n":29,"grp":"Part 2 · Listening","q":"When will the draft of the contract be ready?","o":["Yes, the CEO signed it.","On October second.","A fifteen percent discount."],"k":"B"},
+    {"n":30,"grp":"Part 2 · Listening","q":"Where is the nearest place to grab a bite to eat?","o":["Let's have coffee here.","Go one more block.","No, I'm not hungry."],"k":"B"},
+    {"n":31,"grp":"Part 2 · Listening","q":"When is the next meeting at the district office?","o":["Just down the street.","On the last Thursday of the month.","To discuss the parking lot issue."],"k":"B"},
+    {"n":32,"grp":"Part 2 · Listening","q":"Where will you make the lunch reservation?","o":["For eight people.","Tomorrow at 1 o'clock.","Kelly will make it for me."],"k":"C"},
+    {"n":33,"grp":"Part 2 · Listening","q":"When will you submit an article to the World Business Journal?","o":["The news was interesting.","Pretty soon.","He is a well-known publisher."],"k":"B"},
+    {"n":34,"grp":"Part 2 · Listening","q":"Where is the entrance to the town hall?","o":["Around the corner to the left.","Do you have your ID?","It opens at 10 A.M."],"k":"A"},
+    {"n":35,"grp":"Part 2 · Listening","q":"When did you sell your house on Pine Street?","o":["It was located on a noisy street.","Last month.","Through a real estate office."],"k":"B"},
+    {"n":36,"grp":"Part 2 · Listening","q":"When does Ms. Park want to pick up her dress?","o":["I will help you with that.","How about this red one?","She said she'd be here at 1 P.M."],"k":"C"},
+    {"n":37,"grp":"Part 2 · Listening","q":"Where did you buy that lovely raincoat?","o":["I saw the weather forecast.","Thanks. It's from DC Fashion.","You're welcome."],"k":"B"},
+    {"n":38,"grp":"Part 2 · Listening","q":"When are you interviewing the top three candidates?","o":["In meeting room 3.","In about thirty minutes.","Every May."],"k":"B"},
+    {"n":39,"grp":"Part 4 · Theater","q":"Where is the announcement most likely being made?","o":["In a museum","At an airport","At a school","In a theater"],"k":"D"},
+    {"n":40,"grp":"Part 4 · Theater","q":"What will be sold during the intermission?","o":["Books","Posters","Food","CDs"],"k":"C"},
+    {"n":41,"grp":"Part 4 · Theater","q":"What will happen after the show?","o":["A photo will be taken.","A signing event will be held.","A talk will be given.","A prize will be awarded."],"k":"C"},
+    {"n":42,"grp":"Part 4 · Bus","q":"Where is the announcement most likely being heard?","o":["On a bus","On a train","On a flight","On a cruise"],"k":"A"},
+    {"n":43,"grp":"Part 4 · Bus","q":"What is the cause of the delay?","o":["A car accident","A strike","Road repairs","A parade"],"k":"C"},
+    {"n":44,"grp":"Part 4 · Bus","q":"How long will it take to get to the destination?","o":["One hour","Two hours","Two and a half hours","One and a half hours"],"k":"B"},
+    {"n":45,"grp":"Unit 5 · AC","q":"Who most likely is the man?","o":["A secretary","A security guard","A sales representative","A technician"],"k":"D"},
+    {"n":46,"grp":"Unit 5 · AC","q":"What is the woman's problem?","o":["She can't stand the heat in her office.","She can't stand it when her office gets cold.","She can't turn on the air conditioner.","She doesn't know where a switch is."],"k":"A"},
+    {"n":47,"grp":"Unit 5 · AC","q":"What will the man do next?","o":["Go to the woman's office immediately","Visit the Accounting Department","Fix the main air conditioning","Call the customer service center"],"k":"B"},
+    {"n":48,"grp":"Unit 5 · Supplies","q":"What does the woman suggest they do?","o":["Call the store to order office supplies","Visit the store to buy paper","Drop by the store to get a coupon book","Change their main suppliers"],"k":"B"},
+    {"n":49,"grp":"Unit 5 · Supplies","q":"What does the man say about Office Land?","o":["It doesn't usually have good deals.","Its location is not very convenient.","The quality of its items is not satisfactory.","It has good promotional events."],"k":"B"},
+    {"n":50,"grp":"Unit 5 · Supplies","q":"Look at the graphic. What special offer will the speakers receive?","o":["A free box of paper","A free gift","A discount","Free delivery"],"k":"A"},
+    {"n":51,"grp":"Part 2 · Listening","q":"How many rooms did you reserve?","o":["Yes, it had a lot of rooms.","Five of them.","For the company workshop."],"k":"B"},
+    {"n":52,"grp":"Part 2 · Listening","q":"How should I pay the rent for my apartment?","o":["By the end of every month.","It is affordable.","Do you have a checking account?"],"k":"C"},
+    {"n":53,"grp":"Part 2 · Listening","q":"Why don't we meet at 7 o'clock instead?","o":["That won't be a problem.","Because the meeting is canceled.","Sure, 8 o'clock sounds good."],"k":"A"},
+    {"n":54,"grp":"Part 2 · Listening","q":"How long will it take to repaint the office?","o":["Eric can do it.","Once a year.","About three days."],"k":"C"},
+    {"n":55,"grp":"Part 2 · Listening","q":"Why don't you try that French restaurant with Ann?","o":["I have been there three times.","She is a great chef.","On February third."],"k":"A"},
+    {"n":56,"grp":"Part 2 · Listening","q":"How much paper do we need to order?","o":["It comes to 400 dollars.","Two boxes is enough.","Two copies of the report."],"k":"B"},
+    {"n":57,"grp":"Part 2 · Listening","q":"How is the online advertising going?","o":["You can send it by e-mail.","I will take care of it.","Unfortunately, not very well."],"k":"C"},
+    {"n":58,"grp":"Part 2 · Listening","q":"Why did the marketing director go to Seattle?","o":["To attend a seminar.","For 3 hours.","The flight was delayed."],"k":"A"},
+    {"n":59,"grp":"Part 2 · Listening","q":"How often do you go to the art gallery?","o":["Once in a while.","The paintings were extraordinary.","Sorry. I will be away on business."],"k":"A"},
+    {"n":60,"grp":"Part 2 · Listening","q":"Why are you traveling to Dallas?","o":["I'd like to spend some time with my cousins.","For two days.","I'm thinking about taking the train there."],"k":"A"},
+    {"n":61,"grp":"Part 7 · Advertisement","q":"What is being advertised?","o":["An online business program","Onsite leadership training","Teacher training courses","An engineering program"],"k":"A"},
+    {"n":62,"grp":"Part 7 · Advertisement","q":"According to the advertisement, what aspect does the program emphasize?","o":["The quality of the teaching","The length of the program","The convenient location","The reasonable tuition"],"k":"A"},
+    {"n":63,"grp":"Part 7 · Advertisement","q":"What will happen on July 19?","o":["The registration period will be over.","The opening ceremony will be held.","A free class will be held.","An information session will be held."],"k":"D"},
+    {"n":64,"grp":"Part 7 · Advertisement","q":"What is being advertised?","o":["Furniture","Houses","A magazine","Gardening tools"],"k":"C"},
+    {"n":65,"grp":"Part 7 · Advertisement","q":"What is emphasized in the advertisement?","o":["Lightness","Durability","The reasonable prices","The easy-to-follow guides"],"k":"D"},
+    {"n":66,"grp":"Part 7 · Advertisement","q":"What special offer is being made?","o":["A free lesson","A discount","Sample furniture","Free delivery"],"k":"A"},
+
+    {"n":67,"grp":"Part 5 · Word form","q":"The ___ of a new highway will definitely attract more tourists from other parts of the country.","o":["construct","constructing","constructive","construction"],"k":"D"},
+    {"n":68,"grp":"Part 5 · Verb tense","q":"The company's new director ___ to lay off more than a hundred employees.","o":["decide","has decided","is decided","to decide"],"k":"B"},
+    {"n":69,"grp":"Part 5 · Subject-verb","q":"Conducting a customer survey ___ useful if you want to find out what customers want.","o":["is","are","be","were"],"k":"A"},
+    {"n":70,"grp":"Part 5 · Pronoun","q":"___ clients like about this product are its quality and low price.","o":["That","Which","What","Where"],"k":"C"},
+    {"n":71,"grp":"Part 5 · Passive","q":"Information about vacation plans ___ on the company bulletin board.","o":["post","be posted","posts","will be posted"],"k":"D"},
+    {"n":72,"grp":"Part 5 · Gerund","q":"___ enough experience in the field will enable you to find a better job.","o":["Have","Having","Had","Be had"],"k":"B"},
+    {"n":73,"grp":"Part 5 · Word form","q":"The ___ of the new president will be finalized next Monday.","o":["appoint","appoints","appointment","appointing"],"k":"C"},
+    {"n":74,"grp":"Part 5 · Adjective","q":"___ coupons are enclosed in the envelope we sent yesterday.","o":["Discount","Discounts","Discounting","Discounted"],"k":"D"},
+    {"n":75,"grp":"Part 6 · Letter","q":"(9) I ___ your offering me a chance to work as a secretary at your company.","o":["apologize","appreciate","regret","contribute"],"k":"B"},
+    {"n":76,"grp":"Part 6 · Letter","q":"(10) Actually, I ___ offered a job as a travel agent from one of the biggest travel agencies in the country.","o":["have been","has been","have","has"],"k":"A"},
+    {"n":77,"grp":"Part 6 · Letter","q":"(11) And working as a travel agent ___ what I have wanted to do for a long time.","o":["is","are","have been","had been"],"k":"A"},
+    {"n":78,"grp":"Part 6 · Letter","q":"(12) ___ Truly, Deborah Higgins","o":["I hope you will understand my decision.","It was a great pleasure working with you.","I hope to hear from you soon.","I would like an opportunity to work at your company."],"k":"A"},
+    {"n":79,"grp":"Part 6 · Notice","q":"(9) There are a number of items that you are not allowed ___ in your hand baggage on the plane.","o":["carry","carried","carrying","to carry"],"k":"D"},
+    {"n":80,"grp":"Part 6 · Notice","q":"(10) However, you may always bring baby food to be consumed and medicines ___.","o":["Liquids exceeding 100ml per item are restricted.","Lighters are permitted only in checked baggage.","Thank you for following the instructions.","Sharp objects may need additional screening."],"k":"A"},
+    {"n":81,"grp":"Part 6 · Notice","q":"(11) In addition, any devices from the SAS Company are ___ banned.","o":["completely","dramatically","gradually","securely"],"k":"A"},
+    {"n":82,"grp":"Part 6 · Notice","q":"(12) Please note that this measure was taken to comply ___ an emergency order.","o":["at","on","with","for"],"k":"C"},
+    {"n":83,"grp":"Part 5 · Passive","q":"Mr. Coleman has ___ as a temporary worker at the History & Art Museum.","o":["hire","been hired","hiring","been hire"],"k":"B"},
+    {"n":84,"grp":"Part 5 · Passive","q":"College tuition payments for the next semester must be ___ by the end of the month.","o":["receive","received","to receive","being received"],"k":"B"},
+    {"n":85,"grp":"Part 5 · Infinitive","q":"All the employees are encouraged ___ the free language training course.","o":["attend","attending","to attend","being attended"],"k":"C"},
+    {"n":86,"grp":"Part 5 · Passive","q":"Mr. Han ___ a job position in Texas, and he will probably accept it.","o":["offers","has offered","has been offered","will have offered"],"k":"C"},
+    {"n":87,"grp":"Part 5 · Intransitive","q":"Unfortunately, small businesses in this town have ___ from the market.","o":["disappear","disappeared","disappearing","been disappeared"],"k":"B"},
+    {"n":88,"grp":"Part 5 · Preposition","q":"Tom and Jack's Furniture is well known ___ its outstanding designs.","o":["as","for","by","about"],"k":"B"},
+    {"n":89,"grp":"Part 5 · Passive","q":"The old office buildings downtown are being ___ .","o":["renovate","renovating","renovation","renovated"],"k":"D"},
+    {"n":90,"grp":"Part 5 · Passive","q":"The new software development meeting will ___ in Room 40B.","o":["hold","held","be held","has been held"],"k":"C"},
+    {"n":91,"grp":"Part 5 · Pronoun","q":"Staff members from the Dorito Motor Company will visit this area in order to attend ___ training sessions.","o":["they","their","them","themselves"],"k":"B"},
+    {"n":92,"grp":"Part 5 · Word form","q":"Please make sure to read the ___ for safety regulations before you use this product.","o":["inform","to inform","informing","information"],"k":"D"},
+    {"n":93,"grp":"Part 5 · Quantifier","q":"With the right equipment and ___ of your great recipes, the chef was able to serve unique food.","o":["any","no","some","each"],"k":"C"},
+    {"n":94,"grp":"Part 5 · Pronoun","q":"The writer of this book is widely known for ___ incomparable creativity and brilliant ideas.","o":["he","him","his","himself"],"k":"C"},
+    {"n":95,"grp":"Part 5 · Pronoun","q":"After quitting her job at the architecture firm, she decided to start ___ own business.","o":["she","her","hers","herself"],"k":"B"},
+    {"n":96,"grp":"Part 5 · Reflexive","q":"Please read the attached manual carefully if you would like to update the settings ___ .","o":["you","your","yourself","yours"],"k":"C"},
+    {"n":97,"grp":"Part 5 · Noun","q":"According to the latest ___ , the income tax has increased by 2 percent.","o":["report","reporting","to report","reported"],"k":"A"},
+    {"n":98,"grp":"Part 5 · Noun","q":"You should directly visit the immigration office in order to get a work ___ .","o":["permit","permits","permitting","permission"],"k":"D"},
+    {"n":99,"grp":"Part 5 · Verb tense","q":"The researchers ___ hard to develop a perfect new model over the last 2 years.","o":["work","worked","are working","have been working"],"k":"D"},
+    {"n":100,"grp":"Part 5 · Verb tense","q":"The community center ___ a variety of employment support programs for the unemployed.","o":["has","is having","to have","had had"],"k":"A"},
+    {"n":101,"grp":"Part 5 · Verb tense","q":"The city council ___ to increase funding for community sports facilities.","o":["to decide","are deciding","to have decided","has decided"],"k":"D"},
+    {"n":102,"grp":"Part 5 · Verb tense","q":"Market research at Anderson, Inc. ___ the design of its products last quarter.","o":["improves","improved","is improving","has improved"],"k":"B"},
+    {"n":103,"grp":"Part 5 · Future","q":"Sunset Co. ___ another branch office in Florida in the near future.","o":["opened","had opened","will be opened","is going to open"],"k":"D"},
+    {"n":104,"grp":"Part 5 · Future perfect","q":"By the end of this year, the personnel manager ___ the employee reviews.","o":["completes","had completed","will be completed","will have completed"],"k":"D"},
+    {"n":105,"grp":"Part 5 · Present continuous","q":"Currently, MNH Co. ___ for products for its New York station.","o":["looks","looked","is looking","had looked"],"k":"C"},
+    {"n":106,"grp":"Part 5 · Passive","q":"All the flights to Beijing and Shanghai ___ due to bad weather conditions.","o":["canceled","is canceled","have canceled","have been canceled"],"k":"D"},
+    {"n":107,"grp":"Part 7 · E-mail","q":"Why did Mr. Jang write the e-mail?","o":["To recruit a new staff member","To request a new contract","To inquire about job descriptions","To schedule training courses"],"k":"A"},
+    {"n":108,"grp":"Part 7 · E-mail","q":"When should a new teacher be available to teach?","o":["On January 1","On February 2","On March 1","On April 2"],"k":"C"},
+    {"n":109,"grp":"Part 7 · E-mail","q":"In which position does \"In addition, the person should have a minimum of 3 years' experience with either adults or children.\" best fit?","o":["[1]","[2]","[3]","[4]"],"k":"B"},
+    {"n":110,"grp":"Part 7 · Advertisement","q":"What is being advertised?","o":["A doctoral degree program","Volunteer opportunities","A job opening","Cosmetic product"],"k":"C"},
+    {"n":111,"grp":"Part 7 · Advertisement","q":"What is NOT mentioned as one of the requirements?","o":["Academic experience","Work experience","Managerial skills","Language skills"],"k":"C"},
+    {"n":112,"grp":"Part 7 · Advertisement","q":"What can be inferred about Calico Cosmetics?","o":["It provides employees with chances for professional development.","It gives more benefits to employees than any other company in the field.","It has its own academic programs.","It imports cosmetic products."],"k":"A"},
+    {"n":113,"grp":"Part 5 · Infinitive","q":"Ms. Robinson's team is making every effort ___ the deadline, which is July 24.","o":["meet","meeting","to meet","met"],"k":"C"},
+    {"n":114,"grp":"Part 5 · Infinitive","q":"Museum visitors are asked ___ their phones and cameras at the entrance.","o":["leave","left","leaving","to leave"],"k":"D"},
+    {"n":115,"grp":"Part 5 · Conjunction","q":"___ accommodate more tourists from other countries, the Med Hotel Group decided to expand its main building.","o":["According to","In order to","In spite of","Prior to"],"k":"B"},
+    {"n":116,"grp":"Part 5 · Verb pattern","q":"The troubleshooting team has managed ___ the cause of the problem on the website.","o":["to find","finding","find","to be found"],"k":"A"},
+    {"n":117,"grp":"Part 5 · Infinitive","q":"The vice president's plan ___ to Asian countries hasn't been finalized yet.","o":["travel","to travel","traveling","to be traveled"],"k":"B"},
+    {"n":118,"grp":"Part 5 · Verb pattern","q":"Mr. Davis would like the entire staff ___ overtime even though everyone will not be paid extra.","o":["work","working","to be working","will work"],"k":"C"},
+    {"n":119,"grp":"Part 5 · Purpose","q":"___ the process of online orders, the company has decided to hire more customer service representatives.","o":["To expedite","Expedition","Expediting","To be expedited"],"k":"A"},
+    {"n":120,"grp":"Part 6 · Announcement","q":"(9) It is with ___ that we announce the new chair of the H&G charity committee, Aaron Taylor.","o":["regret","pleasure","resentment","initiative"],"k":"B"},
+    {"n":121,"grp":"Part 6 · Announcement","q":"(10) Part of his new responsibilities will be ___ how the H&G Corporation can help meet the needs of the homeless.","o":["determine","to determine","determines","to be determined"],"k":"B"},
+    {"n":122,"grp":"Part 6 · Announcement","q":"(12) We are certain that he is ready ___ more people who are in need in our community.","o":["to help","helping","for helping","to be helped"],"k":"A"},
+    {"n":123,"grp":"Part 5 · Verb pattern","q":"Experts have recommended ___ the partnership between Wipro Co. and HGL Co.","o":["enhance","enhancing","to enhance","enhancement"],"k":"C"},
+    {"n":124,"grp":"Part 5 · Infinitive","q":"All of the supervisors are starting ___ about the new employees' work performance.","o":["worried","to worry","have worry","will worry"],"k":"B"},
+    {"n":125,"grp":"Part 5 · Verb pattern","q":"Simply by increasing the price of gas, the government has ___ reducing traffic congestion.","o":["success","successful","succeeded","succeeded in"],"k":"D"},
+    {"n":126,"grp":"Part 5 · Gerund","q":"___ a bigger factory is considered a better idea than rebuilding the current one.","o":["Purchase","Purchased","Purchasing","To purchasing"],"k":"C"},
+    {"n":127,"grp":"Part 5 · Gerund","q":"The board of directors objected to ___ the Cambridge office to London.","o":["relocation","relocating","be relocated","have relocated"],"k":"B"},
+    {"n":128,"grp":"Part 5 · Gerund","q":"To avoid ___ the printing machine, all employees must follow the instructions in the manual.","o":["damage","damaging","to damage","to have damaged"],"k":"B"},
+    {"n":129,"grp":"Part 5 · Gerund","q":"Mr. Shin is looking forward to ___ from Simon Co. regarding the investment.","o":["hears","hearing","be heard","hear"],"k":"B"},
+    {"n":130,"grp":"Part 5 · Gerund","q":"The researchers spent at least two months ___ the data.","o":["analyze","analyzes","analyzing","to analyze"],"k":"C"},
+    {"n":131,"grp":"Part 7 · Article","q":"What is the article about?","o":["The relocation of a headquarters","A financial analysis of a car brand","A change in company personnel","The retirement of an executive"],"k":"C"},
+    {"n":132,"grp":"Part 7 · Article","q":"Who is Bob Carter?","o":["The managing director of Hondo","The founder of BKM Motors","The CEO of S7 Motors","The chief financial officer of BKM Motors"],"k":"B"},
+    {"n":133,"grp":"Part 7 · Article","q":"What is NOT suggested in the article?","o":["Sales at BKM Motors have decreased.","The chief financial officer will resign on June 1.","The resignation is being praised in the car industry.","The chief financial officer has been in the position for less than 3 years."],"k":"C"},
+    {"n":134,"grp":"Part 7 · Article","q":"In which position does \"The company said that a search for a new chief financial officer is being conducted.\" best belong?","o":["[1]","[2]","[3]","[4]"],"k":"C"},
+    {"n":135,"grp":"Unit 1 · Word form","q":"The ___ date of the warranty is on the back of the product.","o":["expire","expiration","expires","expired"],"k":"B"},
+    {"n":136,"grp":"Unit 1 · Word form","q":"Your active ___ in this project will be appreciated.","o":["participate","participating","participated","participation"],"k":"D"},
+    {"n":137,"grp":"Unit 1 · Gerund","q":"___ a new system will require your patience and effort.","o":["Implement","Implementing","Implemented","Implementation"],"k":"B"},
+    {"n":138,"grp":"Unit 1 · Pronoun","q":"___ most customers want are lower prices and good quality.","o":["That","What","Which","When"],"k":"B"},
+    {"n":139,"grp":"Unit 1 · Subject-verb","q":"It ___ important to give employees proper training opportunities.","o":["be","is","are","is being"],"k":"B"},
+    {"n":140,"grp":"Unit 1 · Subject-verb","q":"Installing new software ___ longer than we expected.","o":["is taken","is taking","take","taking"],"k":"B"},
+    {"n":141,"grp":"Unit 1 · Verb tense","q":"Mr. Johnson ___ working as an accountant at this firm a few years ago.","o":["is started","starting","started","starts"],"k":"C"},
+    {"n":142,"grp":"Unit 1 · Passive","q":"The office building ___ by a lot of trees and grass.","o":["surrounding","surrounds","is surrounded","are surrounded"],"k":"C"},
+    {"n":143,"grp":"Unit 2 · Future","q":"Next month, Ms. Cole ___ to the headquarters in London.","o":["transfer","was transferring","was transferred","will be transferred"],"k":"D"},
+    {"n":144,"grp":"Unit 2 · Subject-verb","q":"Daily guided tours of the National Museum ___ at 2 P.M. on the second floor.","o":["begin","begins","is beginning","will be begun"],"k":"A"},
+    {"n":145,"grp":"Unit 2 · Subject-verb","q":"Simpson Manufacturing Co. ___ experienced workers to meet the high demand.","o":["hire","hiring","is hiring","are hiring"],"k":"C"},
+    {"n":146,"grp":"Unit 2 · Verb tense","q":"Last month, the coordinator ___ the instructors of job openings before advertising in newspapers.","o":["inform","informs","informed","will inform"],"k":"C"},
+    {"n":147,"grp":"Unit 2 · Present perfect","q":"The factory's productivity ___ since the introduction of the new manufacturing system.","o":["improves","improved","has improved","had improved"],"k":"C"},
+    {"n":148,"grp":"Unit 2 · Present perfect","q":"The Prince Corporation ___ the top chemical supplier for the last 10 years.","o":["was","has been","had been","will have been"],"k":"B"},
+    {"n":149,"grp":"Unit 2 · Conjunction","q":"Mr. Miller's books have never received great reviews from critics ___ they were published.","o":["as","for","since","during"],"k":"C"},
+    {"n":150,"grp":"Unit 2 · Past perfect","q":"Fashion, Inc. ___ the order before Ms. Chu requested that it be canceled.","o":["already ships","is already shipping","had already shipped","will have already shipped"],"k":"C"},
+    {"n":151,"grp":"Unit 3 · Passive","q":"Some revisions ___ to the design of the new magazine.","o":["made","have made","have been made","have been making"],"k":"C"},
+    {"n":152,"grp":"Unit 3 · Passive","q":"The city council ___ ST Construction a contract to build a new library in the area.","o":["granting","was granted","has been granted","has granted"],"k":"D"},
+    {"n":153,"grp":"Unit 3 · Passive","q":"Dr. West ___ the Nelson Award for his innovative robotic surgical devices.","o":["given","was given","was giving","has given"],"k":"B"},
+    {"n":154,"grp":"Unit 3 · Passive","q":"Commuters were ___ to use Highway 140 instead of Highway 210 due to road construction.","o":["advice","advise","advised","advising"],"k":"C"},
+    {"n":155,"grp":"Unit 3 · Infinitive","q":"Visitors to the museum are asked not ___ any exhibits.","o":["touch","touching","to touch","to be touched"],"k":"C"},
+    {"n":156,"grp":"Unit 3 · Preposition","q":"Company management was greatly satisfied ___ the successful launch of the new model.","o":["at","by","in","with"],"k":"D"},
+    {"n":157,"grp":"Unit 3 · Infinitive","q":"The participants have been reminded ___ online by the end of the month.","o":["register","to register","registering","registration"],"k":"B"},
+    {"n":158,"grp":"Unit 4 · Word form","q":"The ___ will be delivered to your house in three days.","o":["pack","packed","package","to pack"],"k":"C"},
+    {"n":159,"grp":"Unit 4 · Pronoun","q":"The catering company announced the grand opening of ___ first restaurant in the downtown area.","o":["it","its","it's","his"],"k":"B"},
+    {"n":160,"grp":"Unit 4 · Pronoun","q":"Sales representatives should talk to ___ supervisors in case they want to ask for sick leave.","o":["they","their","them","theirs"],"k":"B"},
+    {"n":161,"grp":"Unit 4 · Quantifier","q":"Unfortunately, ___ of the participants were not satisfied with the lectures given at the conference.","o":["some","none","no","either"],"k":"A"},
+    {"n":162,"grp":"Unit 4 · Pronoun","q":"The food critic visited all the restaurants and wrote a review on each of ___ .","o":["her","she","hers","herself"],"k":"A"},
+    {"n":163,"grp":"Unit 5 · Infinitive","q":"Management's attempt ___ off hundreds of employees turned out to be a failure.","o":["to lay","laying","laid","being laid"],"k":"A"},
+    {"n":164,"grp":"Unit 5 · Infinitive","q":"The purpose of this workshop is ___ new employees with all the necessary information.","o":["provide","provided","to provide","providing"],"k":"C"},
+    {"n":165,"grp":"Unit 5 · Purpose","q":"In order ___ out what its customers want, the firm has decided to conduct a comprehensive survey.","o":["find","finding","to find","found"],"k":"C"},
+    {"n":166,"grp":"Unit 5 · Infinitive","q":"I was interested ___ that the company is going to consider the possibility of an M&A with another firm.","o":["to learn","learning","learned","to be learned"],"k":"A"},
+    {"n":167,"grp":"Unit 5 · Infinitive","q":"The chief information officer has asked us ___ suggestions with regard to the recent failure on the intranet.","o":["provide","provided","to provide","provision"],"k":"C"},
+    {"n":168,"grp":"Unit 5 · Infinitive","q":"Deluca & Co.'s profits are expected ___ steadily due to the decrease in oil prices and its aggressive marketing.","o":["rise","to rise","rising","risen"],"k":"B"},
+    {"n":169,"grp":"Unit 5 · Passive","q":"Delegates participating in the sales conference are ___ to wear business attire.","o":["encourage","encouraging","encouraged","to encourage"],"k":"C"},
+    {"n":170,"grp":"Unit 6 · Gerund","q":"___ funds to build a new library downtown is a difficult task.","o":["Raise","Raising","Raised","Having raised"],"k":"B"},
+    {"n":171,"grp":"Unit 6 · Gerund","q":"Financial analysts suggest ___ employee productivity by changing working conditions.","o":["improve","improved","improving","improvement"],"k":"C"},
+    {"n":172,"grp":"Unit 6 · Infinitive","q":"All the workers tried hard ___ the defective machines before they were shipped.","o":["find","finding","to find","being found"],"k":"C"},
+    {"n":173,"grp":"Unit 6 · Gerund","q":"Charles Mechanics discontinued ___ repair and management services a month ago.","o":["provide","providing","to provide","has provided"],"k":"B"},
+    {"n":174,"grp":"Unit 6 · Gerund","q":"Ms. Kim is available for any project except for ___ the upcoming conference.","o":["organization","organize","organized","organizing"],"k":"D"},
+    {"n":175,"grp":"Unit 6 · Noun","q":"Young and new company owners have ___ increasing profits in the first few years.","o":["being difficulty","difficulty","difficult","to be difficult"],"k":"B"},
+    {"n":176,"grp":"Unit 6 · Gerund","q":"Upon ___ an effective management structure, the firm has dramatically increased its employee productivity.","o":["introduction","introducing","introduce","introduced"],"k":"B"},
+    {"n":177,"grp":"Unit 6 · Gerund","q":"The doctors at Gray Hospital spend a great deal of time ___ different types of cancer.","o":["study","studied","to study","studying"],"k":"D"},
+    {"n":178,"grp":"Unit 2 · Passive","q":"Next year's budget will be equally ___ between the Marketing Department and the R&D Department.","o":["divide","divided","dividing","division"],"k":"B"},
+    {"n":179,"grp":"Unit 5 · Passive","q":"The new product ___ to the market by the end of next month.","o":["introduce","will be introduced","introduced","introducing"],"k":"B"},
+    {"n":180,"grp":"Unit 3 · Passive","q":"All the documents ___ by the manager before the meeting.","o":["reviewed","were reviewed","reviewing","have reviewing"],"k":"B"},
+    {"n":181,"grp":"Unit 4 · Passive","q":"A new safety policy ___ by the board of directors last week.","o":["approve","approved","was approved","approving"],"k":"C"},
+    {"n":182,"grp":"Unit 6 · Passive","q":"The final report ___ by the research team tomorrow morning.","o":["submitted","will be submitted","submitting","submit"],"k":"B"}
+    ]}
+    </script>
+
+    <script>
+    const DATA = JSON.parse(document.getElementById('data').textContent);
+    const items = DATA.items;
+    let idx = 0, answers = [], locked = [];
+    let tabHiddenCount = 0;
+
+    (function(){
+    const w = document.getElementById('wm');
+    for(let i=0;i<10;i++){
+        const s = document.createElement('span');
+        s.textContent = 'ĐỀ CƯƠNG · ÔN TẬP';
+        s.style.top = (i*120)+'px';
+        s.style.left = ((i%3)*260-40)+'px';
+        w.appendChild(s);
+    }
+    })();
+
+    function startExam(){
+    const name = document.getElementById('gName').value.trim();
+    if(!name){ alert('Vui lòng nhập họ tên'); return; }
+    document.getElementById('gate2').style.display='none';
+    document.querySelector('header').style.display='block';
+    document.getElementById('topbar').style.display='block';
+    document.getElementById('mainWrap').style.display='block';
+    document.body.style.overflow='auto';
+    answers = items.map(()=>null);
+    locked = items.map(()=>false);
+    idx = 0;
+    document.addEventListener('visibilitychange',onVis);
+    render();
+    }
+
+    function onVis(){
+    if(document.hidden){
+        tabHiddenCount++;
+        if(tabHiddenCount>=3){ document.getElementById('shield').classList.add('on'); }
+    }
+    }
+
+    function render(){
+    const it = items[idx];
+    const stage = document.getElementById('stage');
+    document.getElementById('counter').textContent = `Câu ${idx+1}/${items.length}`;
+    document.getElementById('pbarfill').style.width = ((idx)/items.length*100)+'%';
+
+    const isLocked = locked[idx];
+    const picked = answers[idx];
+    const isCorrect = isLocked && picked === it.k;
+
+    let h = `<div class="card">
+        <div class="kicker"><b>${it.grp||''}</b></div>
+        <div class="qtext">Câu ${it.n}. ${it.q}</div>
+        <div class="opts">`;
+    it.o.forEach((opt,i)=>{
+        const L = 'ABCD'[i];
+        let cls = 'opt';
+        if(isLocked){
+        cls += ' locked';
+        if(L === picked && L === it.k) cls += ' picked-ok';
+        else if(L === picked && L !== it.k) cls += ' picked-bad';
+        else if(L === it.k) cls += ' show-correct';
+        else cls += ' dim';
+        } else if(picked === L){
+        cls += ' sel';
+        }
+        const onclick = isLocked ? '' : ` onclick="pick('${L}')"`;
+        h += `<div class="${cls}"${onclick}><span class="lt">${L}</span><span>${opt}</span></div>`;
+    });
+    h += `</div>`;
+
+    if(isLocked){
+        if(isCorrect){
+        h += `<div class="feedback ok"><b>✔ Chính xác!</b> Đáp án đúng là <b>${it.k}</b>.</div>`;
+        } else {
+        h += `<div class="feedback bad"><b>✘ Sai rồi boss man.</b> Bạn chọn <b>${picked}</b>. Đáp án đúng là <b>${it.k}</b> — <i>${it.o['ABCD'.indexOf(it.k)]}</i>.</div>`;
+        }
+    }
+
+    const isLast = idx === items.length-1;
+    h += `<div class="next"><button class="btn" ${isLocked?'':'disabled'} onclick="nextQ()">${isLast?'Xem kết quả':'Tiếp theo'}</button></div></div>`;
+    stage.innerHTML = h;
+    }
+
+    function pick(L){
+    if(locked[idx]) return;
+    answers[idx] = L;
+    locked[idx] = true;
+    render();
+    }
+
+    function nextQ(){
+    if(!locked[idx]) return;
+    if(idx < items.length-1){ idx++; render(); }
+    else { finish(); }
+    }
+
+    function finish(){
+    document.removeEventListener('visibilitychange',onVis);
+    document.getElementById('topbar').style.display='none';
+    let score = 0;
+    items.forEach((it,i)=>{ if(answers[i] === it.k) score++; });
+    const pct = Math.round(score/items.length*100);
+    const wrap = document.getElementById('mainWrap');
+    wrap.innerHTML = `<div class="score">
+        <div class="big">${score}/${items.length}</div>
+        <div class="sm">Đúng ${pct}% · Sai ${items.length-score} câu</div>
+    </div>
+    <div class="card">
+        <div class="kicker"><b>Chi tiết</b></div>
+        ${items.map((it,i)=>{
+        const your = answers[i] || '—';
+        const ok = your === it.k;
+        const correctText = it.o['ABCD'.indexOf(it.k)];
+        return `<div style="padding:8px 0;border-bottom:1px solid #e2e7f0">
+            <b>Câu ${it.n}:</b> ${ok?'<span style="color:#15774e">✔ Đúng</span>':'<span style="color:#c23b3b">✘ Sai</span>'}
+            <div style="font-size:13px;color:#5d6879">Bạn chọn: <b>${your}</b> — Đáp án: <b>${it.k}</b> (${correctText})</div>
+        </div>`;
+        }).join('')}
+    </div>
+    <div class="card"><button class="btn" onclick="location.reload()">Làm lại</button></div>`;
+    document.getElementById('done').style.display='block';
+    }
+    </script>
+    </body>
+    </html>

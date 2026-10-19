@@ -1,0 +1,245 @@
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chào mừng 20/10 · Phúc Lợi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&family=Dancing+Script:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style1.css">
+    </head>
+    <body>
+
+    <div class="bg-mesh"></div>
+    <div class="bg-stars" id="bgStars"></div>
+    <div class="bg-ornaments">
+    <span class="bg-orn o1">✦</span>
+    <span class="bg-orn o2">❀</span>
+    <span class="bg-orn o3">✿</span>
+    <span class="bg-orn o4">❋</span>
+    <span class="bg-orn o5">✦</span>
+    <span class="bg-orn o6">❀</span>
+    </div>
+    <div class="bg-noise"></div>
+
+    <canvas id="layer-confetti"></canvas>
+    <canvas id="layer-petals"></canvas>
+    <div id="layer-fireworks"></div>
+    <div id="layer-particles"></div>
+
+    <!-- INTRO -->
+    <div class="intro" id="intro">
+    <div class="intro-card">
+        <div class="intro-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true">
+            <defs>
+            <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffd60a"/>
+                <stop offset="50%" stop-color="#ff3ea5"/>
+                <stop offset="100%" stop-color="#a020f0"/>
+            </linearGradient>
+            </defs>
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" fill="url(#ig)"/>
+            <path d="M5 3v4M19 17v4M3 5h4M17 19h4" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        </div>
+        <p class="intro-tag">20 · 10 · 2026</p>
+        <h1 class="intro-title">Chào mừng<br><em>ngày 20/10</em></h1>
+        <div class="intro-divider">
+        <span></span><span class="div-icon">✦</span><span></span>
+        </div>
+        <p class="intro-brand">Phúc Lợi</p>
+        <p class="intro-sub">Nhập tên để nhận lời chúc riêng nhé<br><span style="font-size:11px;opacity:0.7;">(không bắt buộc)</span></p>
+        <div class="input-wrap">
+        <input class="name-input" id="nameInput" type="text" placeholder="Tên của bạn..." maxlength="30" autocomplete="off">
+        <span class="input-line"></span>
+        </div>
+        <button class="start-btn" onclick="startExperience()">
+        <span>Bắt đầu</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <p class="intro-foot">✦ Món quà nhỏ · Lời chúc ấm ✦</p>
+    </div>
+    </div>
+
+    <!-- EXPERIENCE -->
+    <div class="experience" id="experience">
+    <div class="progress-dots" id="progressDots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    </div>
+
+    <!-- STAGE 1: Greeting -->
+    <div class="stage" id="stage1">
+        <div class="stage-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+        </svg>
+        </div>
+        <h1 class="greeting" id="greeting"></h1>
+        <p class="stage-sub">Hôm nay là ngày của những đóa hồng</p>
+        <button class="next-btn" id="nextBtn1">
+        <span>Tiếp tục</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- STAGE 2: Rose -->
+    <div class="stage" id="stage2">
+        <div class="rose-stage">
+        <div class="rose-halo">
+            <div class="rose">
+            <div class="rose-petal"></div>
+            <div class="rose-petal"></div>
+            <div class="rose-petal"></div>
+            <div class="rose-center"></div>
+            </div>
+        </div>
+        <p class="date-text">20 · 10 · 2026</p>
+        </div>
+        <button class="next-btn" id="nextBtn2">
+        <span>Tiếp tục</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- STAGE 3: Lời chúc -->
+    <div class="stage" id="stage3">
+        <div class="stage-icon quote">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="url(#ig)">
+            <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+        </svg>
+        </div>
+        <div class="text-block" id="openingText"></div>
+        <p class="text-signature">— T Boss · Phúc Lợi</p>
+        <button class="next-btn" id="nextBtn3">
+        <span>Tiếp tục</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- STAGE 4: Gift box -->
+    <div class="stage" id="stage4">
+        <div class="gift-stage">
+        <p class="gift-top-label">Còn một món quà nhỏ</p>
+        <div class="gift-container" id="giftBox" onclick="openGift()">
+            <div class="gift-glow"></div>
+            <div class="gift-rays"></div>
+            <svg class="gift-svg" viewBox="0 0 200 220" aria-hidden="true">
+            <defs>
+                <linearGradient id="boxBody" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff6bb5"/>
+                <stop offset="50%" stop-color="#ff3ea5"/>
+                <stop offset="100%" stop-color="#c9184a"/>
+                </linearGradient>
+                <linearGradient id="boxLid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff8fab"/>
+                <stop offset="100%" stop-color="#ff3ea5"/>
+                </linearGradient>
+                <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffe066"/>
+                <stop offset="50%" stop-color="#ffd60a"/>
+                <stop offset="100%" stop-color="#e8c5a0"/>
+                </linearGradient>
+                <radialGradient id="bowGrad" cx="0.5" cy="0.5">
+                <stop offset="0%" stop-color="#ffe066"/>
+                <stop offset="100%" stop-color="#ffa94d"/>
+                </radialGradient>
+                <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+                <stop offset="50%" stop-color="#fff" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+            </defs>
+            <rect x="45" y="95" width="110" height="95" rx="8" fill="url(#boxBody)"/>
+            <rect x="38" y="72" width="124" height="32" rx="6" fill="url(#boxLid)"/>
+            <rect x="38" y="72" width="124" height="32" rx="6" fill="none" stroke="#c9184a" stroke-width="1" opacity="0.5"/>
+            <rect x="88" y="72" width="24" height="118" fill="url(#ribbon)"/>
+            <rect x="38" y="95" width="124" height="18" fill="url(#ribbon)"/>
+            <line x1="100" y1="72" x2="100" y2="190" stroke="#c9885a" stroke-width="0.8" opacity="0.4"/>
+            <path d="M100 68 Q 62 20, 52 48 Q 48 72, 100 68 Z" fill="url(#bowGrad)" stroke="#e8a843" stroke-width="1"/>
+            <path d="M100 68 Q 138 20, 148 48 Q 152 72, 100 68 Z" fill="url(#bowGrad)" stroke="#e8a843" stroke-width="1"/>
+            <circle cx="100" cy="68" r="10" fill="url(#ribbon)"/>
+            <circle cx="100" cy="68" r="10" fill="none" stroke="#e8a843" stroke-width="1"/>
+            <path d="M55 100 L85 188" stroke="url(#shine)" stroke-width="6" opacity="0.4"/>
+            </svg>
+            <div class="gift-sparkle s1">✦</div>
+            <div class="gift-sparkle s2">✧</div>
+            <div class="gift-sparkle s3">✦</div>
+            <div class="gift-sparkle s4">✧</div>
+        </div>
+        <p class="gift-hint">Chạm vào hộp quà để mở nhé 🎁</p>
+        </div>
+    </div>
+
+    <!-- STAGE 5: Wheel -->
+    <div class="stage" id="stage5">
+        <div class="wheel-header">
+        <div class="wheel-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+            <rect x="3" y="8" width="18" height="4" rx="1"/>
+            <path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+            <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+            </svg>
+            <span>Vòng quay hộp quà</span>
+        </div>
+        <p class="wheel-sub">Quay đi rồi biết trong hộp có gì 😏</p>
+        </div>
+        <div class="wheel-wrap" id="wheelWrap">
+        <div class="wheel-glow"></div>
+        <div class="wheel-leds" id="wheelLeds"></div>
+        <div class="pointer"></div>
+        <canvas id="wheel"></canvas>
+        <button id="spinBtn" aria-label="Quay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            </svg>
+            <span>QUAY</span>
+        </button>
+        </div>
+        <p class="wheel-hint">Mỗi người chỉ được quay 1 lần</p>
+    </div>
+    </div>
+
+    <div class="hint" id="hint">chạm để tua nhanh</div>
+
+    <div class="modal" id="modal">
+    <div class="modal-card" id="modalCard">
+        <span class="icon" id="resultIcon">🎁</span>
+        <p class="result-prize">Hộp quà của bạn chứa</p>
+        <p class="result-name" id="resultName">Snacks</p>
+        <p class="result-note" id="resultNote">📸 Chụp màn hình gửi Lợi để nhận quà nhé</p>
+        <p class="countdown">Tự động đóng sau <span id="countdownNum">20</span> giây</p>
+        <button class="close-btn" onclick="endExperience()">Đóng</button>
+    </div>
+    </div>
+
+    <div id="end-screen">
+    <div class="end-content">
+        <div class="end-icon">
+        <svg viewBox="0 0 24 24" width="64" height="64" aria-hidden="true">
+            <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ffd60a"/>
+                <stop offset="50%" stop-color="#ff3ea5"/>
+                <stop offset="100%" stop-color="#a020f0"/>
+            </linearGradient>
+            </defs>
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="url(#hg)"/>
+        </svg>
+        </div>
+        <h1>Cảm ơn bạn đã ghé qua</h1>
+        <p>Chúc bạn một ngày 20/10 thật nhẹ nhàng,<br>và luôn gặp nhiều điều tử tế trên đường đời.</p>
+        <div class="end-divider"><span></span>✦<span></span></div>
+        <p class="end-sign">— T Boss · Phúc Lợi</p>
+    </div>
+    </div>
+
+    <script src="script1.js"></script>
+    </body>
+    </html>
