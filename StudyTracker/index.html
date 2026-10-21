@@ -2,50 +2,23 @@
     <html lang="vi" data-theme="light">
     <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <!-- SEO -->
-    <title>Study Tracker — Quản lý thời gian học tập</title>
-    <meta name="description" content="Ứng dụng quản lý học tập cá nhân: Pomodoro, lịch học, ghi chú, mục tiêu, thống kê và Streak Freeze. Hoạt động offline, dữ liệu lưu trên máy.">
-    <meta name="keywords" content="học tập, quản lý thời gian, pomodoro, study tracker, ghi chú, lịch học, streak">
-    <meta name="author" content="Study Tracker">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Study Tracker — Quản lý thời gian học tập">
-    <meta property="og:description" content="Ứng dụng quản lý học tập cá nhân: Pomodoro, lịch học, ghi chú, mục tiêu, thống kê.">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="vi_VN">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Study Tracker — Quản lý thời gian học tập">
-    <meta name="twitter:description" content="Pomodoro, lịch học, ghi chú, mục tiêu và thống kê trong 1 app.">
-
-    <!-- PWA -->
-    <meta name="theme-color" content="#4f46e5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Study Tracker">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjNGY0NmU1Ii8+PHRleHQgeD0iNTAiIHk9IjcyIiBmb250LXNpemU9IjYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn5OGPC90ZXh0Pjwvc3ZnPg==">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjNGY0NmU1Ii8+PHRleHQgeD0iOTAiIHk9IjEyNSIgZm9udC1zaXplPSIxMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfk4Y8L3RleHQ+PC9zdmc+">
-    <link rel="manifest" href="manifest.json">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker</title>
     <link rel="stylesheet" href="style.css">
     </head>
     <body>
 
-    <a href="#mainContent" class="skip-link">⏭ Chuyển đến nội dung chính</a>
-
-    <header class="navbar" role="banner">
+    <header class="navbar">
     <div class="nav-inner">
         <div class="nav-user" id="navUser" title="Đi tới Quản lý">
         <div class="nav-avatar" id="navAvatar">🎓</div>
         <div class="nav-user-info">
             <div class="nav-user-name" id="navUserName">Khách</div>
-            <div class="nav-user-streak" id="navUserStreak">📚 Bắt đầu học</div>
+            <div class="nav-user-streak" id="navUserStreak">🔥 0 ngày</div>
         </div>
         </div>
 
-        <nav class="nav-links" role="navigation" aria-label="Điều hướng chính">
+        <nav class="nav-links">
         <button class="nav-link active" data-page="home"><span>🏠</span><span>Trang chủ</span></button>
         <button class="nav-link" data-page="study"><span>📖</span><span>Học tập</span></button>
         <button class="nav-link" data-page="calendar"><span>📅</span><span>Lịch</span></button>
@@ -58,32 +31,20 @@
         <div class="search-results" id="searchResults"></div>
         </div>
 
-        <button class="theme-toggle" id="themeToggle" title="Sáng / Tối" aria-label="Đổi chế độ Sáng/Tối">
+        <button class="theme-toggle" id="themeToggle" title="Sáng / Tối">
         <span class="theme-icon light">☀️</span>
         <span class="theme-icon dark">🌙</span>
         </button>
     </div>
     </header>
 
-    <main class="container" id="mainContent" role="main">
+    <main class="container">
 
     <!-- HOME -->
     <section class="page active" id="page-home">
         <div class="hero">
         <h1 id="heroGreeting">Xin chào 👋</h1>
         <p class="hero-sub" id="heroDate"></p>
-        <p class="hero-hint" id="heroHint" style="font-size:13px;color:var(--text-mute);margin-top:6px"></p>
-        </div>
-
-        <div class="card freeze-alert" id="freezeAlert" hidden>
-        <div class="freeze-content">
-            <span class="freeze-icon">❄️</span>
-            <div class="freeze-text">
-            <b>Streak sắp mất!</b>
-            <span>Hôm nay bạn chưa học. Dùng Streak Freeze để bảo toàn chuỗi?</span>
-            </div>
-            <button class="btn primary" id="useFreezeBtn">Dùng Freeze</button>
-        </div>
         </div>
 
         <div class="card card-goal" id="goalNotifCard">
@@ -94,23 +55,6 @@
         </div>
         </div>
 
-        <!-- TODO / DEADLINE -->
-        <div class="card">
-        <div class="todo-head">
-            <h2 class="card-title">📝 Việc cần làm &amp; Deadline</h2>
-            <button class="btn soft" id="addTodoBtn">+ Thêm</button>
-        </div>
-        <div class="todo-filters" id="todoFilters">
-            <button class="tf-btn active" data-filter="all">Tất cả</button>
-            <button class="tf-btn" data-filter="pending">Đang chờ</button>
-            <button class="tf-btn" data-filter="today">Hôm nay</button>
-            <button class="tf-btn" data-filter="overdue">Quá hạn</button>
-            <button class="tf-btn" data-filter="done">Đã xong</button>
-        </div>
-        <div class="todo-list" id="todoList"></div>
-        </div>
-
-        <!-- HEATMAP -->
         <div class="card">
         <h2 class="card-title">🔥 Heatmap học tập (365 ngày)</h2>
         <div class="heatmap-wrap">
@@ -158,17 +102,15 @@
     <section class="page" id="page-study">
         <div class="page-header">
         <h1>📖 Học tập</h1>
-        <p class="page-sub">Nhấn vào ngày để xem chi tiết phiên học</p>
+        <p class="page-sub">Pomodoro · Tag môn học · Đánh giá tập trung</p>
         </div>
 
-        <!-- Summary riêng của tab Học tập (Nhóm 5) -->
         <div class="study-summary">
         <div class="sum-pill"><span class="pill-icon">📆</span><span class="pill-num" id="studyTodaySessions">0</span><span class="pill-label">Phiên hôm nay</span></div>
         <div class="sum-pill"><span class="pill-icon">🏆</span><span class="pill-num" id="studyTopSubject">—</span><span class="pill-label">Môn nhiều nhất tuần</span></div>
         <div class="sum-pill"><span class="pill-icon">⚡</span><span class="pill-num" id="studyFocusAvg">—</span><span class="pill-label">Tập trung TB</span></div>
         </div>
 
-        <!-- POMODORO -->
         <div class="card pomodoro-card">
         <div class="pomodoro-head">
             <h2 class="card-title">⏱️ Đồng hồ học</h2>
@@ -190,7 +132,7 @@
             <button class="btn warning" id="pomoPause" hidden>⏸ Tạm dừng</button>
             <button class="btn danger" id="pomoStop" hidden>⏹ Dừng &amp; Lưu</button>
             <button class="btn ghost" id="pomoReset">↺ Reset</button>
-            <button class="btn ghost" id="pomoFull" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+            <button class="btn ghost" id="pomoFull" title="Toàn màn hình">⛶</button>
         </div>
 
         <div class="session-meta">
@@ -211,21 +153,19 @@
         </div>
         </div>
 
-        <!-- Ghi tay -->
         <div class="card">
         <h2 class="card-title">✍️ Ghi giờ học thủ công</h2>
         <div class="input-row">
-            <input type="date" id="studyDateInput" class="input no-future">
+            <input type="date" id="studyDateInput" class="input">
             <button class="btn primary" id="studyAddBtn">+ Ghi giờ học</button>
         </div>
         <p class="hint">Chọn ngày → bấm "Ghi giờ học" để thêm phút + nội dung theo từng khung giờ</p>
         </div>
 
-        <!-- DANH SÁCH PHIÊN HỌC (Nhóm 4) -->
         <div class="card">
         <div class="session-list-head">
             <h2 class="card-title" style="margin-bottom:0">🕐 Phiên học gần đây</h2>
-            <select id="sessionListFilter" class="session-filter" aria-label="Lọc phiên học">
+            <select id="sessionListFilter" class="session-filter">
             <option value="7">7 ngày</option>
             <option value="30" selected>30 ngày</option>
             <option value="90">90 ngày</option>
@@ -242,10 +182,9 @@
     <section class="page" id="page-calendar">
         <div class="page-header">
         <h1>📅 Lịch học</h1>
-        <p class="page-sub">Nhấn vào ngày để ghi giờ học hoặc thêm deadline</p>
+        <p class="page-sub">Nhấn vào ngày để lên lịch học</p>
         </div>
 
-        <!-- Summary riêng của tab Lịch (Nhóm 5) -->
         <div class="study-summary">
         <div class="sum-pill"><span class="pill-icon">📊</span><span class="pill-num" id="calMonthHours">0h</span><span class="pill-label">Tháng này</span></div>
         <div class="sum-pill"><span class="pill-icon">📅</span><span class="pill-num" id="calActiveDays">0</span><span class="pill-label">Ngày có lịch</span></div>
@@ -254,31 +193,20 @@
 
         <div class="card">
         <div class="cal-header">
-            <button class="btn ghost" id="prevMonth" aria-label="Tháng trước">◀</button>
+            <button class="btn ghost" id="prevMonth">◀</button>
             <h2 class="cal-title" id="calTitle"></h2>
-            <button class="btn ghost" id="nextMonth" aria-label="Tháng sau">▶</button>
+            <button class="btn ghost" id="nextMonth">▶</button>
             <button class="btn soft" id="todayBtn">Hôm nay</button>
         </div>
         <div class="cal-weekdays">
             <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div>
             <div class="weekend">T7</div><div class="weekend">CN</div>
         </div>
-
         <div class="cal-legend">
-            <div class="cal-legend-item">
-            <span class="legend-box plan"></span>
-            <span>📅 Kế hoạch (khung giờ)</span>
-            </div>
-            <div class="cal-legend-item">
-            <span class="legend-box actual"></span>
-            <span>✅ Thực tế (phiên đã học)</span>
-            </div>
-            <div class="cal-legend-item">
-            <span class="legend-box deadline"></span>
-            <span>⏰ Deadline Todo</span>
-            </div>
+            <div class="cal-legend-item"><span class="legend-box plan"></span><span>📅 Kế hoạch</span></div>
+            <div class="cal-legend-item"><span class="legend-box actual"></span><span>✅ Thực tế</span></div>
+            <div class="cal-legend-item"><span class="legend-box deadline"></span><span>⏰ Deadline</span></div>
         </div>
-
         <div class="cal-grid" id="calGrid"></div>
         </div>
     </section>
@@ -287,25 +215,13 @@
     <section class="page" id="page-stats">
         <div class="page-header">
         <h1>📊 Thống kê</h1>
-        <p class="page-sub">Xem xu hướng và thói quen học tập của bạn</p>
+        <p class="page-sub">Phân tích thời gian học tập của bạn</p>
         </div>
 
         <div class="study-summary">
-        <div class="sum-pill">
-            <span class="pill-icon">📅</span>
-            <span class="pill-num" id="statsWeek">0h</span>
-            <span class="pill-label">Tuần này (T2→nay)</span>
-        </div>
-        <div class="sum-pill">
-            <span class="pill-icon">📆</span>
-            <span class="pill-num" id="statsMonth">0h</span>
-            <span class="pill-label">Tháng này</span>
-        </div>
-        <div class="sum-pill">
-            <span class="pill-icon">📈</span>
-            <span class="pill-num" id="statsTrend">Chưa đủ dữ liệu</span>
-            <span class="pill-label">So tuần trước</span>
-        </div>
+        <div class="sum-pill"><span class="pill-icon">📅</span><span class="pill-num" id="statsWeek">0h</span><span class="pill-label">Tuần này</span></div>
+        <div class="sum-pill"><span class="pill-icon">📆</span><span class="pill-num" id="statsMonth">0h</span><span class="pill-label">Tháng này</span></div>
+        <div class="sum-pill"><span class="pill-icon">📈</span><span class="pill-num" id="statsTrend">—</span><span class="pill-label">So tuần trước</span></div>
         </div>
 
         <div class="card">
@@ -323,7 +239,6 @@
 
         <div class="card">
         <h2 class="card-title">🕐 Khung giờ học hiệu quả</h2>
-        <p class="card-subtitle">Dựa trên giờ bắt đầu của các phiên học (Pomodoro + ghi tay).</p>
         <div class="hour-bars" id="hourBars"></div>
         </div>
 
@@ -336,7 +251,7 @@
         <h2 class="card-title">📊 Chỉ số phụ</h2>
         <div class="stats-meta-grid">
             <div class="stats-meta-item">
-            <div class="sm-label">📖 Tổng thời gian học</div>
+            <div class="sm-label">📖 Tổng thời gian</div>
             <div class="sm-value" id="statsTotalTime">0h</div>
             </div>
             <div class="stats-meta-item">
@@ -348,11 +263,11 @@
             <div class="sm-value" id="statsAvgPerActive">—</div>
             </div>
             <div class="stats-meta-item">
-            <div class="sm-label">📆 TB / ngày kể từ khi bắt đầu</div>
+            <div class="sm-label">📆 TB / ngày</div>
             <div class="sm-value" id="statsAvgPerDay">—</div>
             </div>
             <div class="stats-meta-item">
-            <div class="sm-label">🔥 Streak hiện tại</div>
+            <div class="sm-label">🔥 Streak</div>
             <div class="sm-value" id="statsStreakVal">0</div>
             </div>
             <div class="stats-meta-item">
@@ -360,16 +275,35 @@
             <div class="sm-value" id="statsGoalDays">0</div>
             </div>
         </div>
-
         <div class="stats-note">
             <b>ℹ️ Quy tắc tính:</b>
             <ul>
-            <li>Một ngày được tính là <b>có học</b> khi có ít nhất <b>5 phút</b> học (Pomodoro hoặc ghi tay).</li>
-            <li><b>Streak</b> tính liên tục từ hôm nay (hoặc hôm qua) trở về trước, cộng thêm ngày dùng Streak Freeze.</li>
-            <li><b>TB / ngày có học</b> = tổng phút ÷ số ngày có học (không tính ngày nghỉ).</li>
-            <li><b>TB / ngày kể từ khi bắt đầu</b> = tổng phút ÷ số ngày từ ngày học đầu tiên đến nay.</li>
+            <li>Ngày <b>có học</b> khi có ít nhất <b>5 phút</b> học.</li>
+            <li><b>Streak</b> = số ngày liên tục tính từ hôm nay trở về trước.</li>
+            <li><b>TB / ngày có học</b> = tổng phút ÷ số ngày có học.</li>
+            <li><b>TB / ngày</b> = tổng phút ÷ số ngày từ ngày đầu tiên có học.</li>
             </ul>
         </div>
+        </div>
+
+        <div class="card">
+        <h2 class="card-title">🗄️ Truy vấn SQL tùy chỉnh</h2>
+        <p class="card-subtitle">Chạy SQL trực tiếp trên dữ liệu của bạn (chỉ SELECT).</p>
+        <textarea id="sqlQueryInput" class="input" rows="4" style="font-family:monospace;font-size:13px;resize:vertical" placeholder="SELECT date, minutes FROM days ORDER BY minutes DESC LIMIT 10;"></textarea>
+        <div class="btn-row" style="margin-top:10px">
+            <button class="btn primary" id="sqlRunBtn">▶ Chạy query</button>
+            <button class="btn ghost" id="sqlClearBtn">✕ Xóa</button>
+            <select id="sqlPresetSelect" class="session-filter" style="margin-left:auto">
+            <option value="">— Query mẫu —</option>
+            <option value="top_days">Top 10 ngày học nhiều nhất</option>
+            <option value="by_subject">Tổng phút theo môn</option>
+            <option value="by_weekday">TB phút theo thứ</option>
+            <option value="monthly">Tổng phút theo tháng</option>
+            <option value="streak_check">Kiểm tra streak</option>
+            <option value="sessions_today">Phiên hôm nay</option>
+            </select>
+        </div>
+        <div id="sqlResult" style="margin-top:14px"></div>
         </div>
     </section>
 
@@ -377,15 +311,14 @@
     <section class="page" id="page-manage">
         <div class="page-header">
         <h1>⚙️ Quản lý</h1>
-        <p class="page-sub">Thiết lập thông tin, mục tiêu và sao lưu dữ liệu</p>
+        <p class="page-sub">Thông tin, mục tiêu, giao diện và dữ liệu</p>
         </div>
 
-        <!-- Profile -->
         <div class="card">
         <h2 class="card-title">👤 Thông tin cá nhân</h2>
         <div class="profile-row">
             <div class="avatar-wrap">
-            <button class="avatar" id="avatarBtn" type="button" aria-label="Đổi ảnh đại diện">🎓</button>
+            <button class="avatar" id="avatarBtn" type="button">🎓</button>
             <div class="avatar-menu" id="avatarMenu">
                 <button data-act="upload">📷 Tải ảnh lên</button>
                 <button data-act="emoji">😀 Chọn emoji</button>
@@ -402,23 +335,20 @@
         <div class="emoji-picker" id="emojiPicker"></div>
         </div>
 
-        <!-- Môn học (Nhóm 1) -->
         <div class="card">
         <h2 class="card-title">📚 Môn học</h2>
         <p class="hint" style="text-align:left;margin-bottom:12px">
-            Quản lý các môn bạn đang học. Mỗi môn có 1 màu riêng để phân loại phiên học.
+            Quản lý các môn bạn đang học. Mỗi môn có 1 màu riêng.
         </p>
         <div class="subject-list" id="subjectList"></div>
-
         <div class="field-label">Thêm môn mới</div>
         <div class="subject-form">
-            <input type="text" id="subjectNameInput" class="input" placeholder="VD: Toán, Lý, Tiếng Anh...">
+            <input type="text" id="subjectNameInput" class="input" placeholder="VD: Toán, Lý...">
             <input type="color" id="subjectColorInput" class="subject-color-picker" value="#4f46e5">
             <button class="btn primary" id="addSubjectBtn">+ Thêm</button>
         </div>
         </div>
 
-        <!-- Goals -->
         <div class="card">
         <h2 class="card-title">🎯 Mục tiêu</h2>
         <label class="field-label">Mục tiêu dài hạn</label>
@@ -428,131 +358,81 @@
             <input class="input" id="dailyGoalInput" type="number" min="0" placeholder="VD: 60">
             <button class="btn primary" id="saveDailyGoalBtn">Lưu</button>
         </div>
-        <p class="hint">Đây là số phút bạn muốn học mỗi ngày. Home sẽ nhắc bạn.</p>
         </div>
 
-        <!-- NOTIFICATION (Nhóm 9) -->
         <div class="card">
         <h2 class="card-title">🔔 Thông báo</h2>
-
-        <div class="notif-limitation" id="notifLimitation">
+        <div class="notif-limitation">
             <span class="nl-icon">ℹ️</span>
             <div class="nl-text">
             <b>Thông báo chỉ hoạt động khi tab đang mở</b>
-            <span>Do chưa dùng Service Worker. Nếu bạn đóng tab, hệ thống sẽ lưu nhắc nhở và hiện lại khi mở tab vào lần sau.</span>
+            <span>Nếu bạn đóng tab, hệ thống lưu nhắc nhở và hiện lại khi mở tab sau.</span>
             </div>
         </div>
-
         <div class="notif-status" id="notifStatus"></div>
-
         <div class="btn-row" style="margin-bottom:14px">
-            <button class="btn primary" id="notifPermBtn">Xin quyền thông báo</button>
-            <button class="btn soft" id="notifTestBtn">🧪 Test thông báo</button>
+            <button class="btn primary" id="notifPermBtn">Xin quyền</button>
+            <button class="btn soft" id="notifTestBtn">🧪 Test</button>
         </div>
-
         <div class="notif-help" id="notifHelp" hidden>
-            <div class="nh-title">📖 Cách mở lại quyền thông báo:</div>
-            <ul class="nh-steps" id="notifHelpSteps">
-            <li>Nhấn vào <b>biểu tượng 🔒 hoặc ⓘ</b> trên thanh địa chỉ</li>
-            <li>Chọn <b>Site settings</b> / <b>Cài đặt trang</b></li>
-            <li>Tìm mục <b>Notifications</b> → đổi thành <b>Allow / Cho phép</b></li>
-            <li>Tải lại trang (F5)</li>
+            <div class="nh-title">📖 Cách mở lại quyền:</div>
+            <ul class="nh-steps">
+            <li>Nhấn 🔒 trên thanh địa chỉ</li>
+            <li>Site settings</li>
+            <li>Notifications → Allow</li>
+            <li>F5</li>
             </ul>
         </div>
-
         <div class="field-label" style="margin-top:14px">Nhắc học mỗi ngày lúc</div>
         <div class="input-row">
             <input type="time" id="notifTime" class="input" value="20:00">
             <button class="btn primary" id="saveNotifTimeBtn">Lưu</button>
         </div>
-        <p class="hint">Trình duyệt sẽ nhắc bạn vào giờ này nếu hôm nay chưa học đủ mục tiêu.</p>
-
         <div class="setting-row" style="margin-top:14px">
-            <div>
-            <div class="setting-label">Nhắc deadline trước 1 ngày</div>
-            <div class="setting-desc">Tự động thông báo cho Todo sắp đến hạn</div>
-            </div>
-            <label class="switch">
-            <input type="checkbox" id="notifDeadline" checked>
-            <span class="slider"></span>
-            </label>
+            <div><div class="setting-label">Nhắc deadline trước 1 ngày</div></div>
+            <label class="switch"><input type="checkbox" id="notifDeadline" checked><span class="slider"></span></label>
         </div>
-
         <div class="setting-row" style="margin-top:14px">
-            <div>
-            <div class="setting-label">Âm thanh thông báo</div>
-            <div class="setting-desc">Phát tiếng "ping" khi có nhắc nhở</div>
-            </div>
-            <label class="switch">
-            <input type="checkbox" id="notifSound" checked>
-            <span class="slider"></span>
-            </label>
+            <div><div class="setting-label">Âm thanh</div></div>
+            <label class="switch"><input type="checkbox" id="notifSound" checked><span class="slider"></span></label>
         </div>
-
         <div class="setting-row" style="margin-top:14px">
-            <div>
-            <div class="setting-label">Hiện thông báo trong trang (in-app)</div>
-            <div class="setting-desc">Nếu trình duyệt chặn, hiện banner thay thế ở góc màn hình</div>
-            </div>
-            <label class="switch">
-            <input type="checkbox" id="notifInApp" checked>
-            <span class="slider"></span>
-            </label>
+            <div><div class="setting-label">Banner in-app</div></div>
+            <label class="switch"><input type="checkbox" id="notifInApp" checked><span class="slider"></span></label>
         </div>
         </div>
 
-        <!-- STREAK FREEZE (Nhóm 8) -->
         <div class="card">
         <h2 class="card-title">❄️ Streak Freeze</h2>
-
         <div class="freeze-status">
             <div class="freeze-big-wrap">
             <span class="freeze-big" id="freezeCount">3</span>
             <span class="freeze-desc">/ 3 lượt</span>
             </div>
-            <div class="freeze-refill" id="freezeRefill">
-            ⏳ Nạp lượt tiếp theo: <b>—</b>
-            </div>
+            <div class="freeze-refill" id="freezeRefill">⏳ Nạp: <b>—</b></div>
         </div>
-
         <p class="hint" style="text-align:left;margin-bottom:14px">
-            Khi bạn bỏ 1 ngày không học, dùng Freeze để bảo toàn chuỗi streak.
-            Mỗi thứ Hai hàng tuần, hệ thống tự nạp thêm 1 lượt (tối đa 3).
-            Nạp lại được kiểm tra <b>khi bạn mở app</b> — không cần online đúng lúc.
+            Mỗi thứ Hai tự nạp 1 lượt (tối đa 3).
         </p>
-
         <div class="setting-row">
             <div>
             <div class="setting-label">Tự động dùng Freeze</div>
-            <div class="setting-desc">Khi mở app phát hiện hôm qua bỏ học → tự dùng 1 lượt để giữ streak</div>
             </div>
-            <label class="switch">
-            <input type="checkbox" id="autoFreeze">
-            <span class="slider"></span>
-            </label>
+            <label class="switch"><input type="checkbox" id="autoFreeze"><span class="slider"></span></label>
         </div>
-
         <div class="setting-row" style="margin-top:14px">
-            <div>
-            <div class="setting-label">Nhắc streak sắp mất</div>
-            <div class="setting-desc">Sau 20h nếu chưa học, hiện cảnh báo trên Home</div>
-            </div>
-            <label class="switch">
-            <input type="checkbox" id="freezeAlertToggle" checked>
-            <span class="slider"></span>
-            </label>
+            <div><div class="setting-label">Nhắc streak sắp mất</div></div>
+            <label class="switch"><input type="checkbox" id="freezeAlertToggle" checked><span class="slider"></span></label>
         </div>
-
-        <div class="field-label" style="margin-top:20px">Lịch sử dùng &amp; nạp</div>
+        <div class="field-label" style="margin-top:20px">Lịch sử</div>
         <div class="freeze-history" id="freezeHistory"></div>
         </div>
 
-        <!-- Background -->
         <div class="card">
         <h2 class="card-title">🖼️ Hình nền</h2>
         <div class="bg-options" id="bgOptions">
             <button class="bg-swatch" data-bg-type="default"><span class="bg-label">Mặc định</span></button>
-            <button class="bg-swatch" data-bg-type="color" data-bg-value="#fef3c7" style="background:#fef3c7"><span class="bg-label">Vàng nhạt</span></button>
+            <button class="bg-swatch" data-bg-type="color" data-bg-value="#fef3c7" style="background:#fef3c7"><span class="bg-label">Vàng</span></button>
             <button class="bg-swatch" data-bg-type="color" data-bg-value="#dbeafe" style="background:#dbeafe"><span class="bg-label">Xanh dương</span></button>
             <button class="bg-swatch" data-bg-type="color" data-bg-value="#dcfce7" style="background:#dcfce7"><span class="bg-label">Xanh lá</span></button>
             <button class="bg-swatch" data-bg-type="color" data-bg-value="#fce7f3" style="background:#fce7f3"><span class="bg-label">Hồng</span></button>
@@ -562,57 +442,52 @@
         </div>
         <div class="input-row" style="margin-top:14px;">
             <input type="color" id="bgColorPicker" class="input color-input" value="#f8fafc">
-            <button class="btn soft" id="bgApplyColorBtn">Áp dụng màu</button>
-            <button class="btn soft" id="bgUploadBtn">📷 Tải ảnh nền</button>
+            <button class="btn soft" id="bgApplyColorBtn">Áp dụng</button>
+            <button class="btn soft" id="bgUploadBtn">📷 Tải ảnh</button>
             <input type="file" id="bgFile" accept="image/*" hidden>
         </div>
         </div>
 
-        <!-- Theme (Nhóm 5: bỏ segment, chỉ hiển thị label) -->
         <div class="card">
         <h2 class="card-title">🎨 Chế độ hiển thị</h2>
         <div class="setting-row">
             <div>
             <div class="setting-label">Sáng / Tối</div>
-            <div class="setting-desc">Dùng nút ☀️/🌙 ở góc phải Navbar để đổi nhanh</div>
+            <div class="setting-desc">Dùng nút ☀️/🌙 ở Navbar</div>
             </div>
-            <div class="theme-info-pill" id="themeInfoPill">
-            <span id="currentThemeLabel">☀️ Sáng</span>
-            </div>
+            <div class="theme-info-pill"><span id="currentThemeLabel">☀️ Sáng</span></div>
         </div>
         </div>
 
-        <!-- Biểu đồ tiến độ → link sang Thống kê (Nhóm 5) -->
         <div class="card">
         <h2 class="card-title">📈 Biểu đồ tiến độ</h2>
         <p style="color:var(--text-mute);font-size:14px;margin-bottom:12px">
-            Biểu đồ chi tiết đã được chuyển sang tab <b>Thống kê</b> để tránh trùng lặp.
+            Xem chi tiết trong tab <b>Thống kê</b>.
         </p>
         <button class="btn soft" id="goToStatsBtn">📊 Mở Thống kê</button>
         </div>
 
-        <!-- Data -->
         <div class="card">
         <h2 class="card-title">💾 Dữ liệu</h2>
 
         <label class="field-label">Xóa dữ liệu 1 ngày</label>
         <div class="input-row">
-            <input type="date" id="deleteDateInput" class="input no-future">
+            <input type="date" id="deleteDateInput" class="input">
             <button class="btn danger" id="deleteDayBtn">🗑 Xóa ngày này</button>
         </div>
 
         <label class="field-label">Xóa dữ liệu theo khoảng</label>
         <div class="input-row">
-            <input type="date" id="deleteFrom" class="input no-future">
+            <input type="date" id="deleteFrom" class="input">
             <span class="unit-label">→</span>
-            <input type="date" id="deleteTo" class="input no-future">
+            <input type="date" id="deleteTo" class="input">
         </div>
         <div class="delete-preview" id="deletePreview" hidden></div>
         <div class="btn-row" style="margin-bottom:12px">
             <button class="btn danger" id="deleteRangeBtn">🗑 Xóa theo khoảng</button>
         </div>
 
-        <label class="field-label">Sao lưu / Khôi phục</label>
+        <label class="field-label">Sao lưu / Khôi phục (JSON)</label>
         <div class="backup-status" id="backupStatus"></div>
         <div class="btn-row">
             <button class="btn soft" id="exportBtn">⬇ Xuất JSON</button>
@@ -620,19 +495,27 @@
             <input type="file" id="importFile" accept=".json" hidden>
         </div>
 
+        <label class="field-label">Database SQLite</label>
+        <div class="btn-row">
+            <button class="btn soft" id="exportSqliteBtn">💾 Xuất .sqlite</button>
+            <button class="btn soft" id="importSqliteBtn">📥 Nhập .sqlite</button>
+            <input type="file" id="importSqliteFile" accept=".sqlite,.db,.sqlite3" hidden>
+            <button class="btn ghost" id="migrateToSqlBtn" title="Chỉ dùng 1 lần">🔀 Chuyển localStorage → SQLite</button>
+        </div>
+
         <label class="field-label">Ứng dụng &amp; Hướng dẫn</label>
         <div class="btn-row">
-            <button class="btn soft" id="rerunOnboardingBtn">👋 Chạy lại hướng dẫn ban đầu</button>
-            <button class="btn primary" id="installPwaBtn" style="display:none">📲 Cài đặt app</button>
-            <button class="btn ghost" id="updatePwaBtn" title="Kiểm tra bản cập nhật">🔄 Cập nhật</button>
+            <button class="btn soft" id="rerunOnboardingBtn">👋 Chạy lại hướng dẫn</button>
+            <button class="btn primary" id="installPwaBtn" style="display:none">📲 Cài app</button>
+            <button class="btn ghost" id="updatePwaBtn">🔄 Cập nhật</button>
         </div>
-        <p class="hint" id="pwaHint">Trên điện thoại, bạn có thể cài Study Tracker như một app thật và dùng offline.</p>
+        <p class="hint" id="pwaHint">Trên điện thoại có thể cài app và dùng offline.</p>
 
         <label class="field-label" style="color:var(--danger)">Vùng nguy hiểm</label>
         <div class="btn-row">
-            <button class="btn danger" id="resetAllBtn">⚠️ Xóa TẤT CẢ dữ liệu</button>
+            <button class="btn danger" id="resetAllBtn">⚠️ Xóa TẤT CẢ</button>
         </div>
-        <p class="hint">Xóa tất cả sẽ tự động tải backup về máy trước khi xóa.</p>
+        <p class="hint">Sẽ tự động tải backup trước khi xóa.</p>
         </div>
     </section>
     </main>
@@ -643,27 +526,21 @@
     <span class="fab-label">Bắt đầu học</span>
     </button>
 
-    <!-- MODAL GHI GIỜ HỌC -->
+    <!-- MODAL GHI GIỜ -->
     <div class="modal" id="hourModal">
     <div class="modal-backdrop" data-close></div>
     <div class="modal-content">
         <h3 class="modal-title" id="modalTitle">Ghi giờ học</h3>
         <p class="modal-sub" id="modalSub"></p>
-
         <label class="field-label">Tổng số phút học ngày này</label>
         <div class="input-row">
         <input type="number" id="modalMinutes" class="input" min="0" placeholder="VD: 120">
         <span class="unit-label">phút</span>
         </div>
-
         <label class="field-label">Môn học</label>
-        <select id="modalSubject">
-        <option value="">— Không chọn —</option>
-        </select>
-
-        <label class="field-label">Chi tiết từng khung giờ (tùy chọn)</label>
+        <select id="modalSubject"><option value="">— Không chọn —</option></select>
+        <label class="field-label">Chi tiết từng khung giờ</label>
         <div class="hour-list" id="hourList"></div>
-
         <div class="modal-actions">
         <button class="btn ghost" data-close>Hủy</button>
         <button class="btn primary" id="modalSave">Lưu</button>
@@ -675,22 +552,19 @@
     <div class="modal" id="todoModal">
     <div class="modal-backdrop" data-close-todo></div>
     <div class="modal-content" style="max-width:520px">
-        <h3 class="modal-title" id="todoModalTitle">Thêm việc cần làm</h3>
-        <p class="modal-sub">Điền thông tin cho Todo</p>
-
+        <h3 class="modal-title" id="todoModalTitle">Thêm việc</h3>
+        <p class="modal-sub">Điền thông tin</p>
         <label class="field-label">Tên việc</label>
-        <input type="text" id="todoTitle" class="input" placeholder="VD: Làm bài tập Toán chương 3">
-
-        <label class="field-label">Mô tả (tùy chọn)</label>
-        <textarea id="todoDesc" class="input" rows="3" placeholder="Ghi chú chi tiết..." style="min-height:60px;resize:vertical;"></textarea>
-
+        <input type="text" id="todoTitle" class="input" placeholder="VD: Làm bài tập Toán">
+        <label class="field-label">Mô tả</label>
+        <textarea id="todoDesc" class="input" rows="3" placeholder="Chi tiết..." style="min-height:60px;resize:vertical"></textarea>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
         <div>
             <label class="field-label">Deadline</label>
             <input type="date" id="todoDeadline" class="input">
         </div>
         <div>
-            <label class="field-label">Độ ưu tiên</label>
+            <label class="field-label">Ưu tiên</label>
             <select id="todoPriority" class="input">
             <option value="low">🟢 Thấp</option>
             <option value="normal" selected>🟡 Bình thường</option>
@@ -698,10 +572,8 @@
             </select>
         </div>
         </div>
-
-        <label class="field-label">Gắn với môn (tùy chọn)</label>
+        <label class="field-label">Gắn với môn</label>
         <div class="tag-picker" id="todoTagPicker"></div>
-
         <div class="modal-actions" style="margin-top:20px;">
         <button class="btn ghost" data-close-todo>Hủy</button>
         <button class="btn danger" id="todoDelete" style="display:none">🗑 Xóa</button>
@@ -710,13 +582,12 @@
     </div>
     </div>
 
-    <!-- MODAL SỬA PHIÊN HỌC (Nhóm 4) -->
+    <!-- MODAL SỬA PHIÊN -->
     <div class="modal" id="sessionModal">
     <div class="modal-backdrop" data-close-session></div>
     <div class="modal-content" style="max-width:520px">
-        <h3 class="modal-title" id="sessionModalTitle">Sửa phiên học</h3>
+        <h3 class="modal-title" id="sessionModalTitle">Sửa phiên</h3>
         <p class="modal-sub" id="sessionModalSub"></p>
-
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
             <label class="field-label">Giờ bắt đầu</label>
@@ -727,15 +598,10 @@
             <input type="number" id="sessionMinutes" class="input" min="1" max="1440" placeholder="25">
         </div>
         </div>
-
         <label class="field-label">Môn học</label>
-        <select id="sessionSubject">
-        <option value="">— Không chọn —</option>
-        </select>
-
-        <label class="field-label">Nội dung / Ghi chú</label>
-        <input type="text" id="sessionText" class="input" placeholder="VD: Học React Hooks...">
-
+        <select id="sessionSubject"><option value="">— Không chọn —</option></select>
+        <label class="field-label">Nội dung</label>
+        <input type="text" id="sessionText" class="input" placeholder="VD: Học React...">
         <label class="field-label">Đánh giá tập trung</label>
         <div class="star-rating" id="sessionStar">
         <button data-star="1" type="button">☆</button>
@@ -744,7 +610,6 @@
         <button data-star="4" type="button">☆</button>
         <button data-star="5" type="button">☆</button>
         </div>
-
         <div class="modal-actions" style="margin-top:20px;">
         <button class="btn ghost" data-close-session>Hủy</button>
         <button class="btn primary" id="sessionSave">Lưu</button>
@@ -752,63 +617,56 @@
     </div>
     </div>
 
-    <!-- MODAL IMPORT (Nhóm 10) -->
+    <!-- MODAL IMPORT -->
     <div class="modal" id="importModal">
     <div class="modal-backdrop" data-close-import></div>
     <div class="modal-content" style="max-width:480px">
         <h3 class="modal-title">📥 Nhập dữ liệu</h3>
-        <p class="modal-sub">Chọn cách xử lý dữ liệu hiện có</p>
-
+        <p class="modal-sub">Chọn cách xử lý</p>
         <div class="import-preview" id="importPreview"></div>
-
         <div class="import-options">
         <label class="import-option">
             <input type="radio" name="importMode" value="merge" checked>
             <div class="io-body">
             <div class="io-title">🔀 Gộp dữ liệu</div>
-            <div class="io-desc">Giữ dữ liệu cũ, thêm ngày mới. Ngày trùng sẽ lấy giá trị mới.</div>
+            <div class="io-desc">Giữ cũ, thêm ngày mới.</div>
             </div>
         </label>
-
         <label class="import-option">
             <input type="radio" name="importMode" value="overwrite">
             <div class="io-body">
             <div class="io-title">⚠️ Ghi đè toàn bộ</div>
-            <div class="io-desc">Xóa dữ liệu hiện tại, thay bằng dữ liệu từ file. Không thể hoàn tác!</div>
+            <div class="io-desc">Xóa data hiện tại, thay bằng file.</div>
             </div>
         </label>
         </div>
-
         <div class="modal-actions" style="margin-top:20px;">
         <button class="btn ghost" data-close-import>Hủy</button>
-        <button class="btn primary" id="importConfirm">Xác nhận nhập</button>
+        <button class="btn primary" id="importConfirm">Xác nhận</button>
         </div>
     </div>
     </div>
 
-    <!-- MODAL ONBOARDING (Nhóm 3) -->
+    <!-- MODAL ONBOARDING -->
     <div class="modal onboarding-modal" id="onboardingModal">
     <div class="modal-backdrop"></div>
     <div class="modal-content onboarding-content">
-
         <div class="ob-progress">
         <span class="ob-step-dot active" data-step="1"></span>
         <span class="ob-step-dot" data-step="2"></span>
         <span class="ob-step-dot" data-step="3"></span>
         </div>
-
         <div class="ob-step active" data-step="1">
         <div class="ob-emoji">👋</div>
-        <h2 class="ob-title">Chào mừng bạn đến Study Tracker!</h2>
-        <p class="ob-desc">Cùng thiết lập vài thứ để bắt đầu hành trình học tập nhé.</p>
+        <h2 class="ob-title">Chào mừng!</h2>
+        <p class="ob-desc">Cùng thiết lập vài thứ.</p>
         <label class="field-label">Bạn tên gì?</label>
-        <input type="text" id="obName" class="input" placeholder="VD: Minh, An, ..." maxlength="30">
+        <input type="text" id="obName" class="input" placeholder="VD: Minh" maxlength="30">
         </div>
-
         <div class="ob-step" data-step="2">
         <div class="ob-emoji">🎯</div>
         <h2 class="ob-title">Mục tiêu mỗi ngày</h2>
-        <p class="ob-desc">Bạn muốn học bao nhiêu phút mỗi ngày?</p>
+        <p class="ob-desc">Bạn muốn học bao nhiêu phút?</p>
         <div class="ob-chips">
             <button class="ob-chip" data-min="30">30 phút</button>
             <button class="ob-chip active" data-min="60">1 giờ</button>
@@ -818,20 +676,18 @@
         <label class="field-label">Hoặc nhập số phút</label>
         <input type="number" id="obGoal" class="input" min="0" max="1440" placeholder="60">
         </div>
-
         <div class="ob-step" data-step="3">
         <div class="ob-emoji">📚</div>
-        <h2 class="ob-title">Thêm môn học đầu tiên</h2>
-        <p class="ob-desc">Môn này sẽ dùng để phân loại các phiên học của bạn.</p>
+        <h2 class="ob-title">Môn đầu tiên</h2>
+        <p class="ob-desc">Dùng để phân loại phiên học.</p>
         <div class="ob-chips">
             <button class="ob-chip-subject" data-name="Toán" style="--c:#3b82f6">Toán</button>
             <button class="ob-chip-subject" data-name="Tiếng Anh" style="--c:#f59e0b">Tiếng Anh</button>
             <button class="ob-chip-subject" data-name="Lập trình" style="--c:#10b981">Lập trình</button>
         </div>
         <label class="field-label">Hoặc nhập môn khác</label>
-        <input type="text" id="obSubject" class="input" placeholder="VD: Vật lý, Hóa học..." maxlength="30">
+        <input type="text" id="obSubject" class="input" placeholder="VD: Vật lý..." maxlength="30">
         </div>
-
         <div class="ob-actions">
         <button class="btn ghost" id="obSkip">Bỏ qua</button>
         <div style="flex:1"></div>
@@ -841,7 +697,7 @@
     </div>
     </div>
 
-    <!-- UNDO TOAST -->
+    <!-- UNDO -->
     <div id="undoToast" class="undo-toast">
     <span id="undoMsg">Đã xóa</span>
     <span id="undoTimer" class="undo-timer"></span>
@@ -849,6 +705,10 @@
     </div>
 
     <div id="toast" class="toast"></div>
+
+    <!-- SQLite -->
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/sql-wasm.js"></script>
+    <script src="db.js"></script>
     <script src="app.js"></script>
     </body>
     </html>

@@ -3,7 +3,7 @@
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Đề cương ôn tập Tiếng Anh — Luyện tập tổng hợp 202 câu</title>
+    <title>Đề cương ôn tập Tiếng Anh — Luyện tập tổng hợp</title>
     <style>
     :root{--bg:#f4f6fb;--card:#fff;--ink:#1b2333;--muted:#5d6879;--line:#e2e7f0;
     --brand:#1e5aa8;--brand-dark:#123c73;--brand-soft:#e9f1fb;
@@ -44,9 +44,6 @@
     .feedback.ok{display:block;background:var(--ok-soft);border:1px solid #b9e0cc;color:var(--ok)}
     .feedback.bad{display:block;background:var(--bad-soft);border:1px solid #f2c4c1;color:var(--bad)}
     .feedback b{font-weight:800}
-    #shield{position:fixed;inset:0;z-index:9999;background:#0e2f5c;color:#fff;display:none;align-items:center;
-    justify-content:center;text-align:center;padding:26px;font-size:17px;line-height:1.7}
-    #shield.on{display:flex}
     #wm{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:.05;overflow:hidden}
     #wm span{position:absolute;white-space:nowrap;font-weight:800;font-size:14px;color:#123c73;transform:rotate(-26deg)}
     #gate2{position:fixed;inset:0;z-index:500;background:var(--bg);overflow:auto;padding:20px 14px 40px}
@@ -59,13 +56,33 @@
     .score{background:linear-gradient(135deg,#1e5aa8,#0e2f5c);color:#fff;border-radius:16px;padding:20px;text-align:center;margin:14px 0}
     .score .big{font-size:46px;font-weight:800;line-height:1.05}
     .score .sm{font-size:13.5px;opacity:.9}
+    /* ---- sổ tay câu sai ---- */
+    #noteBtn{position:fixed;right:14px;bottom:16px;z-index:60;border:0;border-radius:999px;padding:11px 16px;
+    background:var(--brand-dark);color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 18px rgba(18,60,115,.35);display:none}
+    #noteBtn.show{display:block}
+    #notePanel{position:fixed;inset:0;z-index:80;background:rgba(10,25,45,.55);display:none;padding:16px 12px 60px;overflow:auto}
+    #notePanel.on{display:block}
+    #notePanel .np-box{max-width:640px;margin:0 auto;background:#fff;border-radius:16px;padding:16px 15px}
+    #notePanel .np-head{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px}
+    #notePanel .np-head b{font-size:16px;color:var(--brand-dark)}
+    #notePanel .np-close{border:0;background:var(--brand-soft);color:var(--brand-dark);border-radius:10px;
+    padding:8px 14px;font-weight:800;font-size:13.5px;cursor:pointer}
+    .note-item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px;background:#fbfcff}
+    .ni-head{font-size:11.5px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.5px}
+    .ni-q{font-size:14.5px;font-weight:600;margin:3px 0 5px;line-height:1.45}
+    .ni-a{font-size:13px;color:var(--ok)}
+    .ni-m{font-size:12px;color:var(--muted);margin-top:3px}
+    .det{padding:8px 0;border-bottom:1px solid #e2e7f0;font-size:14px}
+    .det-sub{font-size:13px;color:#5d6879}
     </style>
     </head>
     <body>
 
     <div id="gate2"><div class="box">
     <h2>Đề cương ôn tập Tiếng Anh</h2>
-    <div style="color:#5d6879;font-size:13px;margin-top:4px">Luyện tập tổng hợp · 182 câu trắc nghiệm</div>
+    <div id="gateCount" style="color:#5d6879;font-size:13px;margin-top:4px">Luyện tập tổng hợp</div>
     <label>Họ và tên</label>
     <input id="gName" placeholder="Nguyễn Văn A" autocomplete="off">
     <div style="margin-top:16px"><button class="btn" onclick="startExam()">Bắt đầu làm bài</button></div>
@@ -73,7 +90,7 @@
 
     <header style="display:none"><div class="wrap">
     <h1>Đề cương ôn tập Tiếng Anh — Luyện tập tổng hợp</h1>
-    <div class="sub">182 câu · Listening · Grammar · Reading · Units 1-6</div>
+    <div class="sub" id="headSub">Listening · Grammar · Reading · Units 1-6</div>
     </div></header>
 
     <nav class="topbar" id="topbar" style="display:none"><div class="in">
@@ -82,11 +99,17 @@
     </div></nav>
 
     <div id="wm"></div>
-    <div id="shield"><div><div style="font-size:42px;margin-bottom:10px">🔒</div>
-    <b>Nội dung đã được ẩn</b><br>Quay lại cửa sổ bài làm.
-    </div></div>
 
     <div class="wrap" style="display:none" id="mainWrap"><div id="stage"></div><div id="done"></div></div>
+
+    <button id="noteBtn" onclick="toggleNotes()">📝 Câu sai (0)</button>
+
+    <div id="notePanel" onclick="if(event.target.id==='notePanel')toggleNotes()">
+    <div class="np-box">
+        <div class="np-head"><b>📝 Sổ tay câu sai</b><button class="np-close" onclick="toggleNotes()">Đóng</button></div>
+        <div id="noteList"></div>
+    </div>
+    </div>
 
     <script id="data" type="application/json">
     {"items":[
@@ -156,7 +179,6 @@
     {"n":64,"grp":"Part 7 · Advertisement","q":"What is being advertised?","o":["Furniture","Houses","A magazine","Gardening tools"],"k":"C"},
     {"n":65,"grp":"Part 7 · Advertisement","q":"What is emphasized in the advertisement?","o":["Lightness","Durability","The reasonable prices","The easy-to-follow guides"],"k":"D"},
     {"n":66,"grp":"Part 7 · Advertisement","q":"What special offer is being made?","o":["A free lesson","A discount","Sample furniture","Free delivery"],"k":"A"},
-
     {"n":67,"grp":"Part 5 · Word form","q":"The ___ of a new highway will definitely attract more tourists from other parts of the country.","o":["construct","constructing","constructive","construction"],"k":"D"},
     {"n":68,"grp":"Part 5 · Verb tense","q":"The company's new director ___ to lay off more than a hundred employees.","o":["decide","has decided","is decided","to decide"],"k":"B"},
     {"n":69,"grp":"Part 5 · Subject-verb","q":"Conducting a customer survey ___ useful if you want to find out what customers want.","o":["is","are","be","were"],"k":"A"},
@@ -279,9 +301,18 @@
     <script>
     const DATA = JSON.parse(document.getElementById('data').textContent);
     const items = DATA.items;
-    let idx = 0, answers = [], locked = [];
-    let tabHiddenCount = 0;
 
+    /* ===== trạng thái ===== */
+    let set = [];              // chỉ số các câu trong vòng hiện tại
+    let pos = 0;               // vị trí trong vòng
+    let round = 1;             // vòng hiện tại
+    let totalRounds = 1;
+    let answers = {};          // itemIdx -> lựa chọn vòng này
+    let locked  = {};          // itemIdx -> đã chọn chưa
+    let firstAnswer = {};      // itemIdx -> lựa chọn đầu tiên
+    let wrongBook = new Map(); // itemIdx -> {count}  (sổ tay câu sai)
+
+    /* ===== watermark ===== */
     (function(){
     const w = document.getElementById('wm');
     for(let i=0;i<10;i++){
@@ -293,6 +324,11 @@
     }
     })();
 
+    /* ===== text động ===== */
+    document.getElementById('gateCount').textContent = `Luyện tập tổng hợp · ${items.length} câu trắc nghiệm · Phải đúng 100%`;
+    document.getElementById('headSub').textContent  = `${items.length} câu · Listening · Grammar · Reading · Units 1-6`;
+
+    /* ===== bắt đầu ===== */
     function startExam(){
     const name = document.getElementById('gName').value.trim();
     if(!name){ alert('Vui lòng nhập họ tên'); return; }
@@ -301,32 +337,44 @@
     document.getElementById('topbar').style.display='block';
     document.getElementById('mainWrap').style.display='block';
     document.body.style.overflow='auto';
-    answers = items.map(()=>null);
-    locked = items.map(()=>false);
-    idx = 0;
-    document.addEventListener('visibilitychange',onVis);
-    render();
+    document.getElementById('noteBtn').classList.add('show');
+    startRound(items.map((_,i)=>i), 1);
     }
 
-    function onVis(){
-    if(document.hidden){
-        tabHiddenCount++;
-        if(tabHiddenCount>=3){ document.getElementById('shield').classList.add('on'); }
-    }
-    }
-
-    function render(){
-    const it = items[idx];
+    function startRound(indices, roundNo){
+    set = indices.slice();
+    pos = 0;
+    round = roundNo;
+    totalRounds = Math.max(totalRounds, roundNo);
+    answers = {};
+    locked  = {};
     const stage = document.getElementById('stage');
-    document.getElementById('counter').textContent = `Câu ${idx+1}/${items.length}`;
-    document.getElementById('pbarfill').style.width = ((idx)/items.length*100)+'%';
+    const done  = document.getElementById('done');
+    done.style.display = 'none';
+    done.innerHTML = '';
+    stage.style.display = 'block';
+    document.getElementById('topbar').style.display = 'block';
+    document.getElementById('noteBtn').classList.add('show');
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+    }
 
-    const isLocked = locked[idx];
-    const picked = answers[idx];
+    /* ===== render câu hỏi ===== */
+    function render(){
+    const itemIdx = set[pos];
+    const it = items[itemIdx];
+    const stage = document.getElementById('stage');
+
+    document.getElementById('counter').textContent =
+        `Câu ${pos+1}/${set.length}` + (round > 1 ? ` · Vòng ${round}` : '');
+    document.getElementById('pbarfill').style.width = ((pos)/set.length*100)+'%';
+
+    const isLocked = !!locked[itemIdx];
+    const picked = answers[itemIdx];
     const isCorrect = isLocked && picked === it.k;
 
     let h = `<div class="card">
-        <div class="kicker"><b>${it.grp||''}</b></div>
+        <div class="kicker"><b>${it.grp||''}</b>${round>1?' · <span style="color:#c23b3b">Làm lại câu sai</span>':''}</div>
         <div class="qtext">Câu ${it.n}. ${it.q}</div>
         <div class="opts">`;
     it.o.forEach((opt,i)=>{
@@ -335,11 +383,9 @@
         if(isLocked){
         cls += ' locked';
         if(L === picked && L === it.k) cls += ' picked-ok';
-        else if(L === picked && L !== it.k) cls += ' picked-bad';
+        else if(L === picked) cls += ' picked-bad';
         else if(L === it.k) cls += ' show-correct';
         else cls += ' dim';
-        } else if(picked === L){
-        cls += ' sel';
         }
         const onclick = isLocked ? '' : ` onclick="pick('${L}')"`;
         h += `<div class="${cls}"${onclick}><span class="lt">${L}</span><span>${opt}</span></div>`;
@@ -350,53 +396,155 @@
         if(isCorrect){
         h += `<div class="feedback ok"><b>✔ Chính xác!</b> Đáp án đúng là <b>${it.k}</b>.</div>`;
         } else {
-        h += `<div class="feedback bad"><b>✘ Sai rồi boss man.</b> Bạn chọn <b>${picked}</b>. Đáp án đúng là <b>${it.k}</b> — <i>${it.o['ABCD'.indexOf(it.k)]}</i>.</div>`;
+        h += `<div class="feedback bad"><b>✘ Sai rồi.</b> Bạn chọn <b>${picked}</b>. Đáp án đúng là <b>${it.k}</b> — <i>${it.o['ABCD'.indexOf(it.k)]}</i>.<br>
+        📝 Câu này đã được ghi vào sổ tay câu sai, bạn sẽ phải làm lại cho đúng.</div>`;
         }
     }
 
-    const isLast = idx === items.length-1;
-    h += `<div class="next"><button class="btn" ${isLocked?'':'disabled'} onclick="nextQ()">${isLast?'Xem kết quả':'Tiếp theo'}</button></div></div>`;
+    const isLast = pos === set.length-1;
+    h += `<div class="next"><button class="btn" ${isLocked?'':'disabled'} onclick="nextQ()">${isLast?'Kết thúc vòng':'Tiếp theo'}</button></div></div>`;
     stage.innerHTML = h;
     }
 
+    /* ===== chọn đáp án ===== */
     function pick(L){
-    if(locked[idx]) return;
-    answers[idx] = L;
-    locked[idx] = true;
+    const itemIdx = set[pos];
+    if(locked[itemIdx]) return;
+    if(firstAnswer[itemIdx] === undefined) firstAnswer[itemIdx] = L;
+    answers[itemIdx] = L;
+    locked[itemIdx]  = true;
+    if(L !== items[itemIdx].k){
+        const rec = wrongBook.get(itemIdx) || {count:0};
+        rec.count++;
+        wrongBook.set(itemIdx, rec);
+        updateNoteBtn();
+    }
     render();
     }
 
     function nextQ(){
-    if(!locked[idx]) return;
-    if(idx < items.length-1){ idx++; render(); }
-    else { finish(); }
+    const itemIdx = set[pos];
+    if(!locked[itemIdx]) return;
+    if(pos < set.length-1){
+        pos++;
+        render();
+        window.scrollTo({top:0, behavior:'smooth'});
+    } else {
+        endRound();
+    }
     }
 
-    function finish(){
-    document.removeEventListener('visibilitychange',onVis);
-    document.getElementById('topbar').style.display='none';
-    let score = 0;
-    items.forEach((it,i)=>{ if(answers[i] === it.k) score++; });
-    const pct = Math.round(score/items.length*100);
-    const wrap = document.getElementById('mainWrap');
-    wrap.innerHTML = `<div class="score">
-        <div class="big">${score}/${items.length}</div>
-        <div class="sm">Đúng ${pct}% · Sai ${items.length-score} câu</div>
-    </div>
-    <div class="card">
-        <div class="kicker"><b>Chi tiết</b></div>
-        ${items.map((it,i)=>{
-        const your = answers[i] || '—';
-        const ok = your === it.k;
-        const correctText = it.o['ABCD'.indexOf(it.k)];
-        return `<div style="padding:8px 0;border-bottom:1px solid #e2e7f0">
-            <b>Câu ${it.n}:</b> ${ok?'<span style="color:#15774e">✔ Đúng</span>':'<span style="color:#c23b3b">✘ Sai</span>'}
-            <div style="font-size:13px;color:#5d6879">Bạn chọn: <b>${your}</b> — Đáp án: <b>${it.k}</b> (${correctText})</div>
+    /* ===== kết thúc 1 vòng ===== */
+    function endRound(){
+    const wrong = set.filter(i => answers[i] !== items[i].k);
+    if(wrong.length === 0){ finish(); return; }
+
+    const correctCount = set.length - wrong.length;
+    const done = document.getElementById('done');
+    document.getElementById('stage').style.display = 'none';
+
+    let h = `<div class="score">
+        <div class="big">${correctCount}/${set.length}</div>
+        <div class="sm">Vòng ${round} · Đúng ${correctCount} · Còn sai ${wrong.length} câu</div>
+        </div>
+        <div class="card">
+        <div class="kicker"><b>Chưa hoàn thành — còn ${wrong.length} câu sai</b></div>
+        <div style="font-size:14px;color:#5d6879;margin-bottom:12px">
+            Bạn phải làm đúng <b>tất cả</b> các câu dưới đây mới xem được kết quả cuối.
         </div>`;
+
+    wrong.slice().sort((a,b)=>items[a].n-items[b].n).forEach(i=>{
+        const it = items[i];
+        h += `<div class="det">
+            <div><b>Câu ${it.n}:</b> <span style="color:#c23b3b">✘ Bạn chọn ${answers[i]}</span> — Đáp án đúng: <b style="color:#15774e">${it.k}</b></div>
+            <div class="det-sub">${it.o['ABCD'.indexOf(it.k)]}</div>
+        </div>`;
+    });
+
+    h += `<div class="next"><button class="btn" onclick="startRound(${JSON.stringify(wrong)}, ${round+1})">
+            🔁 Làm lại ${wrong.length} câu sai</button></div>
+        </div>
+        <div class="card">
+        <button class="btn" style="background:#5d6879" onclick="toggleNotes()">📝 Xem sổ tay câu sai (${wrongBook.size})</button>
+        </div>`;
+
+    done.innerHTML = h;
+    done.style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    /* ===== hoàn thành 100% ===== */
+    function finish(){
+    const done = document.getElementById('done');
+    document.getElementById('stage').style.display = 'none';
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('noteBtn').classList.remove('show');
+    document.getElementById('pbarfill').style.width = '100%';
+
+    const total   = items.length;
+    const firstTry = items.reduce((s,it,i)=> s + (firstAnswer[i]===it.k ? 1 : 0), 0);
+    const noted    = wrongBook.size;
+
+    let h = `<div class="score">
+        <div class="big">${total}/${total}</div>
+        <div class="sm">🎉 Hoàn thành · Tất cả ${total} câu đã đúng 100%</div>
+        </div>
+        <div class="card">
+        <div class="kicker"><b>Tổng kết</b></div>
+        <div style="font-size:14.5px;line-height:1.9">
+            • Số vòng đã làm: <b>${totalRounds}</b><br>
+            • Đúng ngay lần đầu: <b>${firstTry}/${total}</b><br>
+            • Số câu từng sai (đã ghi chú): <b>${noted}</b>
+        </div>
+        </div>
+        <div class="card">
+        <div class="kicker"><b>Chi tiết từng câu</b></div>
+        ${items.map((it,i)=>{
+            const first = firstAnswer[i];
+            const okFirst = first === it.k;
+            const cnt = (wrongBook.get(i)||{count:0}).count;
+            return `<div class="det">
+            <div><b>Câu ${it.n}:</b> ${okFirst
+                ? '<span style="color:#15774e">✔ Đúng ngay lần đầu</span>'
+                : `<span style="color:#c23b3b">↻ Sai lần đầu (chọn ${first}) — đã sửa đúng</span>`}</div>
+            <div class="det-sub">Đáp án: <b>${it.k}</b> — ${it.o['ABCD'.indexOf(it.k)]}${okFirst?'':` · Sai ${cnt} lần`}</div>
+            </div>`;
         }).join('')}
-    </div>
-    <div class="card"><button class="btn" onclick="location.reload()">Làm lại</button></div>`;
-    document.getElementById('done').style.display='block';
+        </div>
+        <div class="card"><button class="btn" onclick="location.reload()">Làm lại từ đầu</button></div>`;
+
+    done.innerHTML = h;
+    done.style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    /* ===== sổ tay câu sai ===== */
+    function updateNoteBtn(){
+    document.getElementById('noteBtn').textContent = `📝 Câu sai (${wrongBook.size})`;
+    }
+
+    function toggleNotes(){
+    const p = document.getElementById('notePanel');
+    p.classList.toggle('on');
+    if(p.classList.contains('on')) renderNotes();
+    }
+
+    function renderNotes(){
+    const list = document.getElementById('noteList');
+    if(wrongBook.size === 0){
+        list.innerHTML = '<div style="color:#5d6879;font-size:14px">Chưa có câu sai nào. Cố gắng nhé!</div>';
+        return;
+    }
+    const arr = [...wrongBook.entries()].sort((a,b)=> items[a[0]].n - items[b[0]].n);
+    list.innerHTML = arr.map(([i,info])=>{
+        const it = items[i];
+        return `<div class="note-item">
+        <div class="ni-head">Câu ${it.n} · ${it.grp||''}</div>
+        <div class="ni-q">${it.q}</div>
+        <div class="ni-a">✔ Đáp án đúng: <b>${it.k}</b> — ${it.o['ABCD'.indexOf(it.k)]}</div>
+        <div class="ni-m">Đã sai ${info.count} lần</div>
+        </div>`;
+    }).join('');
     }
     </script>
     </body>

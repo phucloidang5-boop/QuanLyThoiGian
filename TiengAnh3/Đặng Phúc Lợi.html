@@ -1,0 +1,955 @@
+    <!doctype html>
+    <html lang="vi">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>English 3 - Ôn Tập Toàn Diện (U1-U12)</title>
+    <style>
+    :root{
+        --bg:#f4f7fb;--card:#fff;--ink:#192238;--muted:#6b7a90;
+        --blue:#2c4fdb;--green:#149c58;--red:#d1382d;--border:#e1e7f1
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.6}
+    header{background:linear-gradient(135deg,#1c2b59,#2c4fdb);color:#fff;padding:24px 16px 30px}
+    header .wrap,main{max-width:860px;margin:auto}
+    h1{margin:0 0 6px;font-size:clamp(22px,5vw,32px)}
+    header p{margin:0;opacity:.85;font-size:14px}
+    main{padding:16px 16px 40px}
+    .panel,.card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 4px 18px #1d31500d;border:1px solid var(--border)}
+
+    .main-tabs,.sub-tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .main-tab{flex:1;min-width:120px;padding:14px;text-align:center;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:800;font-size:16px;cursor:pointer;transition:.2s}
+    .main-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .sub-tab{flex:1;min-width:100px;padding:10px;text-align:center;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:700;cursor:pointer;transition:.2s}
+    .sub-tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    select,button{font:inherit;border-radius:10px;padding:10px 14px;border:1px solid var(--border);background:#fff;color:var(--ink)}
+    select{flex:1;min-width:140px}
+    button{cursor:pointer;font-weight:700}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    button:disabled{opacity:.4;cursor:not-allowed}
+
+    .stats{display:flex;gap:10px;margin-bottom:16px}
+    .stat{background:#eef2fa;border-radius:10px;padding:10px;flex:1;text-align:center}
+    .stat small{display:block;color:var(--muted);font-size:12px}
+    .stat strong{font-size:18px}
+
+    .progress{height:6px;background:#e1e7f1;border-radius:9px;overflow:hidden;margin-bottom:16px}
+    .progress span{display:block;height:100%;background:var(--blue);width:0;transition:width .3s}
+
+    .media-layout{display:flex;gap:16px;margin-bottom:16px;align-items:flex-start}
+    .image-box{
+        flex:0 0 45%;background:#eef2f6;border-radius:10px;overflow:hidden;
+        display:flex;justify-content:center;align-items:center;border:1px solid var(--border);
+        aspect-ratio:4/3;max-height:320px;contain:layout paint
+    }
+    .image-box img{width:100%;height:100%;object-fit:contain;display:block}
+    .text-content{flex:1;min-width:0}
+
+    .context{
+        background:#f7f9fe;border-left:4px solid #8ea5f8;padding:12px;border-radius:8px;
+        margin-bottom:12px;font-size:14px;white-space:pre-wrap;max-height:200px;overflow-y:auto;color:#38445c
+    }
+    .question{font-size:18px;font-weight:750;margin:0 0 16px}
+
+    @media(max-width:650px){
+        .media-layout{flex-direction:column}
+        .image-box{flex:0 0 auto;width:100%;aspect-ratio:16/9;max-height:250px}
+    }
+
+    .options{display:grid;gap:10px}
+    .opt{
+        text-align:left;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;
+        border:1px solid var(--border);border-radius:10px;line-height:1.4;background:#fff;transition:.2s
+    }
+    .opt .letter{font-weight:900;color:var(--blue);min-width:20px}
+    .opt:hover:not(:disabled){border-color:#aab9e8}
+    .opt.correct{border-color:var(--green);background:#ecfbf2}
+    .opt.correct .letter{color:var(--green)}
+    .opt.wrong{border-color:var(--red);background:#fef0ef}
+    .opt.wrong .letter{color:var(--red)}
+
+    .feedback{margin-top:14px;padding:12px;border-radius:10px;font-weight:700}
+    .feedback.good{background:#ecfbf2;color:var(--green)}
+    .feedback.bad{background:#fef0ef;color:var(--red)}
+
+    .actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .actions .right{display:flex;gap:10px}
+    .hidden{display:none!important}
+
+    #result{text-align:center}
+    .big-score{font-size:46px;font-weight:900;color:var(--blue);margin:12px 0}
+
+    .grammar-item{margin-bottom:24px;padding-bottom:20px;border-bottom:1px dashed var(--border)}
+    .grammar-item:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+    .grammar-title{font-size:18px;font-weight:850;color:var(--blue);margin-bottom:8px}
+    .grammar-desc{font-size:15px;color:#38445c;margin-bottom:12px;line-height:1.6}
+    .grammar-ex{background:#f0f4fb;padding:10px 14px;border-radius:8px;border-left:3px solid #6889f0;font-family:monospace;font-size:14px;color:#192238;margin-bottom:6px}
+    .grammar-ex small{color:var(--muted);font-family:sans-serif;font-style:italic;display:block;margin-top:4px}
+
+    .unit-title{font-size:22px;font-weight:900;color:var(--ink);margin:24px 0 16px;border-bottom:2px solid var(--blue);display:inline-block;padding-bottom:4px}
+    .unit-block{margin-bottom:30px;padding:15px;background:#fafbfc;border-radius:10px;border:1px solid #eef2f6}
+
+    .unit-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+    .unit-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:#fff;font-weight:700;cursor:pointer;font-size:14px;transition:.2s}
+    .unit-btn:hover{background:#eef2fa}
+    .unit-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+    header .wrap.header-layout{max-width:1080px;display:flex;align-items:center;justify-content:space-between;gap:28px}
+    .header-title{min-width:0}
+    .owner-info{
+        flex:0 0 auto;min-width:245px;padding:13px 17px;border-radius:14px;
+        background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);
+        box-shadow:0 6px 18px rgba(8,24,67,.16);line-height:1.55;text-align:left;font-size:13px;backdrop-filter:blur(4px)
+    }
+    .owner-name{font-size:17px;font-weight:800;letter-spacing:.1px;margin-bottom:1px}
+    .owner-contact{margin-top:2px;opacity:.94}
+    @media(max-width:760px){
+        header .wrap.header-layout{display:block}
+        .owner-info{margin-top:16px;min-width:0;width:100%;text-align:center}
+        .header-title{text-align:center}
+    }
+    </style>
+    </head>
+    <body>
+    <header>
+    <div class="wrap header-layout">
+        <div class="header-title">
+        <h1>📘 English 3 - Ôn Tập Toàn Diện (U1-U12)</h1>
+        <p>Trắc nghiệm Toàn tập & Điểm Ngữ Pháp (Việt hóa, chuẩn thứ tự Unit)</p>
+        </div>
+        <div class="owner-info" aria-label="Thông tin người thực hiện">
+        <div class="owner-name">Đặng Phúc Lợi</div>
+        <div>Software Engineering</div>
+        <div class="owner-contact">Thông tin liên hệ: 0971032382</div>
+        </div>
+    </div>
+    </header>
+
+    <main>
+    <div class="main-tabs">
+        <div class="main-tab active" data-view="practice">🎯 Luyện Tập</div>
+        <div class="main-tab" data-view="grammar">📖 Ngữ Pháp</div>
+    </div>
+
+    <div id="view-practice">
+        <section id="setup" class="panel">
+        <div class="sub-tabs" id="subTabs">
+            <div class="sub-tab active" data-mode="both">⚡ Cả hai</div>
+            <div class="sub-tab" data-mode="listen">🎧 Nghe</div>
+            <div class="sub-tab" data-mode="read">📖 Đọc</div>
+        </div>
+        <div class="controls">
+            <select id="filter">
+            <option value="all">Theo thứ tự Unit</option>
+            <option value="shuffle">Trộn ngẫu nhiên</option>
+            </select>
+            <button class="primary" id="start">Bắt đầu</button>
+            <button id="resume" class="hidden">▶ Tiếp tục</button>
+        </div>
+        <div class="stats">
+            <div class="stat"><small>Tổng số câu</small><strong id="totalStat">0</strong></div>
+            <div class="stat"><small>Đã làm</small><strong id="doneStat">0</strong></div>
+            <div class="stat"><small>Đúng</small><strong id="scoreStat">0</strong></div>
+        </div>
+        </section>
+
+        <section id="game" class="card hidden">
+        <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:8px">
+            <span id="counter">Câu 1/0</span>
+            <span id="percent">0%</span>
+        </div>
+        <div class="progress"><span id="progressBar"></span></div>
+
+        <div class="media-layout">
+            <div class="image-box" id="imageBox" style="display:none;">
+            <img id="qImage" alt="Hình ảnh minh họa" decoding="async">
+            </div>
+            <div class="text-content">
+            <div id="context" class="context hidden"></div>
+            <p id="qText" class="question"></p>
+            </div>
+        </div>
+
+        <div id="opts" class="options"></div>
+        <div id="feedback"></div>
+        <div class="actions">
+            <button id="quit">Thoát</button>
+            <div class="right">
+            <button id="skip">Bỏ qua</button>
+            <button class="primary" id="next" disabled>Câu tiếp →</button>
+            </div>
+        </div>
+        </section>
+
+        <section id="result" class="panel hidden">
+        <h2 style="margin:0">🏁 Kết thúc!</h2>
+        <div class="big-score" id="finalScore">0/0</div>
+        <p id="summary" style="color:var(--muted)"></p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="primary" id="retry">Làm lại</button>
+            <button id="review">Xem câu sai</button>
+        </div>
+        </section>
+
+        <section id="reviewPanel" class="panel hidden">
+        <h3 style="margin-top:0">🔍 Câu làm sai</h3>
+        <div id="wrongList"></div>
+        <button class="primary" id="backToResult" style="margin-top:14px">Quay lại</button>
+        </section>
+    </div>
+
+    <div id="view-grammar" class="panel hidden">
+        <div class="sub-tabs" id="grammarTabs">
+        <div class="sub-tab active" data-gtype="listen">🎧 Nghe (Listening)</div>
+        <div class="sub-tab" data-gtype="read">📖 Đọc (Reading)</div>
+        </div>
+        <div class="unit-nav" id="unitNav"></div>
+        <div id="grammar-content-area"></div>
+    </div>
+    </main>
+
+    <script defer>
+    /* =========================================================================
+    GRAMMAR_DATA — giữ nguyên từ file gốc
+    ========================================================================= */
+    const GRAMMAR_DATA = {
+    listen: {
+        1: `<div class="unit-block">
+            <div class="unit-title">Unit 01: Photos of One Person</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mô tả hành động của một người (Photo Description)</div>
+                <div class="grammar-desc"><b>Công thức:</b> Thường dùng thì <b>Hiện tại tiếp diễn (S + is/are + V-ing)</b> để mô tả hành động đang diễn ra trong tranh.<br>
+                <b>Dấu hiệu nhận biết:</b> Các động từ hành động cụ thể như: holding, moving, carrying, pointing, picking up, walking, running, looking at, inspecting...</div>
+                <div class="grammar-ex">The woman <b>is picking up</b> some documents.<small>(Người phụ nữ đang nhặt tài liệu)</small></div>
+                <div class="grammar-ex">He <b>is inspecting</b> a machine.<small>(Anh ta đang kiểm tra máy móc)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mô tả trang phục & phụ kiện</div>
+                <div class="grammar-desc"><b>Công thức:</b> S + is/are + wearing + (a/an) + N (trang phục).<br>
+                <b>Dấu hiệu:</b> wearing a pantsuit, wearing a coat, wearing glasses...</div>
+                <div class="grammar-ex">She <b>is wearing</b> a pantsuit.<small>(Cô ấy đang mặc bộ vest)</small></div>
+            </div>
+            </div>`,
+        2: `<div class="unit-block">
+            <div class="unit-title">Unit 02: Information Questions (Who, What, Which)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu hỏi thông tin (Wh-questions)</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                - Hỏi chủ ngữ: <b>Who/What/Which + V...?</b><br>
+                - Hỏi tân ngữ: <b>Who/What/Which + Aux (do/does/did/is/are) + S + V...?</b><br>
+                <b>Dấu hiệu:</b> Câu trả lời thường là một danh từ riêng, một vật, hoặc một người cụ thể.</div>
+                <div class="grammar-ex">Q: <b>Who</b> booked the flight? - A: Mr. Smith did.<small>(Hỏi ai đã đặt vé -> Trả lời tên người)</small></div>
+                <div class="grammar-ex">Q: <b>What</b> do you think of the new software? - A: It is better than the old one.<small>(Hỏi ý kiến về phần mềm mới)</small></div>
+                <div class="grammar-ex">Q: <b>Which</b> restaurant did you book? - A: Ruth Dining downtown.<small>(Hỏi sự lựa chọn -> Trả lời tên nhà hàng)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu hỏi Yes/No với Be</div>
+                <div class="grammar-desc"><b>Công thức:</b> <b>Is/Are/Was/Were + S...?</b> hoặc <b>Is/Are there...?</b><br>
+                <b>Dấu hiệu:</b> Câu trả lời bắt đầu bằng Yes/No hoặc một câu khẳng định/phủ định gián tiếp.</div>
+                <div class="grammar-ex">Q: <b>Is</b> Dr. Yang in today? - A: Yes, she's in her office.<small>(Hỏi hiện tại với Be)</small></div>
+                <div class="grammar-ex">Q: <b>Are</b> you working on the agenda? - A: Yes, it's almost done.<small>(Hỏi hiện tại tiếp diễn)</small></div>
+            </div>
+            </div>`,
+        3: `<div class="unit-block">
+            <div class="unit-title">Unit 03: Photos of Two People & Personnel Issues</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mô tả hành động của hai người (Photo Description)</div>
+                <div class="grammar-desc"><b>Công thức:</b> S (số nhiều) + <b>are + V-ing</b> / <b>are being + V3/ed</b>.<br>
+                <b>Dấu hiệu:</b> Các động từ mô tả sự tương tác: shaking hands, looking at, studying, writing...</div>
+                <div class="grammar-ex">The women <b>are shaking</b> hands.<small>(Hai người phụ nữ đang bắt tay)</small></div>
+                <div class="grammar-ex">An interview <b>is being conducted</b>.<small>(Một cuộc phỏng vấn đang được tiến hành)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Personnel Issues (Vấn đề nhân sự)</div>
+                <div class="grammar-desc"><b>Từ vựng trọng tâm:</b> job opening, apply for a position, resume, cover letter, interview, qualifications, take a day off, sick leave, overtime, promotion, resignation.</div>
+                <div class="grammar-ex">I'm calling to find out if the <b>position</b> is still <b>available</b>.<small>(Tôi gọi để hỏi xem vị trí đó còn trống không)</small></div>
+            </div>
+            </div>`,
+        4: `<div class="unit-block">
+            <div class="unit-title">Unit 04: Information Questions (When, Where) & Public Announcements</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu hỏi thông tin (When, Where)</div>
+                <div class="grammar-desc"><b>Công thức:</b> <b>When/Where + be/aux + S + V...?</b><br>
+                <b>Dấu hiệu:</b><br>
+                - <b>When:</b> Trả lời bằng cụm thời gian (At 9 A.M, on Friday, next week, in 30 minutes...).<br>
+                - <b>Where:</b> Trả lời bằng cụm địa điểm/hướng đi (In the lobby, on the first floor, go straight...).</div>
+                <div class="grammar-ex">Q: <b>When</b> is the presentation? - A: In 30 minutes.<small>(Hỏi thời gian)</small></div>
+                <div class="grammar-ex">Q: <b>Where</b> should I meet you at the hotel? - A: In the lobby.<small>(Hỏi địa điểm)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Public Announcements (Thông báo công cộng)</div>
+                <div class="grammar-desc">Thường xuất hiện ở sân bay, nhà ga, trung tâm thương mại. Cần chú ý đến các cụm từ chỉ thời gian, sự chậm trễ, địa điểm.</div>
+                <div class="grammar-ex">The flight <b>is expected to</b> take off in 10 minutes.<small>(Chuyến bay dự kiến cất cánh trong 10 phút)</small></div>
+            </div>
+            </div>`,
+        5: `<div class="unit-block">
+            <div class="unit-title">Unit 05: Photos of More than Two People & Office Equipment</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mô tả nhóm người (Photo Description)</div>
+                <div class="grammar-desc"><b>Công thức:</b> Dùng <b>Hiện tại tiếp diễn</b> hoặc <b>Hiện tại tiếp diễn bị động</b> (is/are being + V3/ed).<br>
+                <b>Dấu hiệu:</b> gathered around, seated around the table, being cleared, being arranged, being conducted.</div>
+                <div class="grammar-ex">People <b>are gathered</b> around the fountain.<small>(Mọi người đang tụ tập quanh đài phun nước)</small></div>
+                <div class="grammar-ex">A computer <b>is being used</b>.<small>(Một chiếc máy tính đang được sử dụng)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Objects & Office Equipment (Thiết bị văn phòng)</div>
+                <div class="grammar-desc"><b>Từ vựng trọng tâm:</b> photocopier (máy photo), printer cartridges (hộp mực in), maintenance (bảo trì), out of stock (hết hàng), malfunction (trục trặc).</div>
+                <div class="grammar-ex">This <b>photocopier</b> is broken again.<small>(Máy photo lại hỏng rồi)</small></div>
+            </div>
+            </div>`,
+        6: `<div class="unit-block">
+            <div class="unit-title">Unit 06: Information Questions (How, Why)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu hỏi với How & Why</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                - <b>How + adj/adv...?</b> (How much, How many, How often, How long).<br>
+                - <b>Why + be/aux + S + V...?</b> -> Trả lời bằng <b>Because + S + V</b>, <b>Because of + N</b>, <b>For + N</b>, hoặc <b>To-V</b>.<br>
+                <b>Dấu hiệu:</b> "Why don't you/we...?" là câu gợi ý, không phải hỏi lý do.</div>
+                <div class="grammar-ex">Q: <b>How</b> much did the trip cost? - A: Approximately 1,000 dollars.<small>(Hỏi giá cả)</small></div>
+                <div class="grammar-ex">Q: <b>Why</b> were you late? - A: <b>Because</b> traffic was bad.<small>(Hỏi lý do)</small></div>
+                <div class="grammar-ex">Q: <b>Why</b> is the road closed? - A: <b>For</b> road construction.<small>(Hỏi mục đích/lý do)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Commercial Broadcasts (Quảng cáo)</div>
+                <div class="grammar-desc">Thường nghe về sản phẩm mới, khuyến mãi, dịch vụ. Chú ý các từ: sale, discount, feature, guarantee, trial period, subscribe.</div>
+                <div class="grammar-ex">Visit our website to find out more about this <b>special offer</b>.<small>(Truy cập web để biết thêm về ưu đãi đặc biệt)</small></div>
+            </div>
+            </div>`,
+        7: `<div class="unit-block">
+            <div class="unit-title">Unit 07: Photos of Objects/Scenes & Business Events</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mô tả đồ vật / Bối cảnh (Photo Description)</div>
+                <div class="grammar-desc"><b>Công thức:</b> Dùng <b>Hiện tại đơn bị động</b> (is/are + V3/ed), <b>Hiện tại hoàn thành bị động</b> (have/has been + V3/ed), hoặc cấu trúc <b>There is/are</b>.<br>
+                <b>Dấu hiệu:</b> is covered with, are stored on, have been planted, is under construction.</div>
+                <div class="grammar-ex">The road <b>is under construction</b>.<small>(Con đường đang được xây dựng)</small></div>
+                <div class="grammar-ex">The boxes <b>are stored</b> on the shelves.<small>(Các thùng hàng được cất trên kệ)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Business Events (Sự kiện kinh doanh)</div>
+                <div class="grammar-desc"><b>Từ vựng trọng tâm:</b> workshop, seminar, conference, sign up for, registration, caterer, availability, booking sheet.</div>
+                <div class="grammar-ex">I'm calling to <b>check on the availability</b> of a room for our workshop.<small>(Tôi gọi để kiểm tra phòng có trống cho buổi hội thảo không)</small></div>
+            </div>
+            </div>`,
+        8: `<div class="unit-block">
+            <div class="unit-title">Unit 08: Yes/No Questions (Auxiliary/Modal Verbs)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu hỏi Yes/No với Trợ động từ / Khuyết thiếu</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                - <b>Do/Does/Did + S + V...?</b> (Hỏi hành động/thói quen).<br>
+                - <b>Have/Has + S + V3/ed...?</b> (Hỏi trải nghiệm/sự hoàn thành).<br>
+                - <b>May/Can/Could/Should + S + V...?</b> (Xin phép, xin lời khuyên).<br>
+                <b>Dấu hiệu:</b> Câu trả lời Yes/No hoặc thông tin gián tiếp.</div>
+                <div class="grammar-ex">Q: <b>Have</b> you finished the report? - A: I am still working on it.<small>(Hỏi sự hoàn thành)</small></div>
+                <div class="grammar-ex">Q: <b>Should</b> I leave the window open? - A: Yes, please.<small>(Xin lời khuyên)</small></div>
+            </div>
+            </div>`,
+        9: `<div class="unit-block">
+            <div class="unit-title">Unit 09: Travel/Business Trips & 'Or' Questions</div>
+            <div class="grammar-item">
+                <div class="grammar-title">'Or' Questions (Câu hỏi lựa chọn)</div>
+                <div class="grammar-desc"><b>Công thức:</b> Câu hỏi có chứa "or" đưa ra 2 lựa chọn.<br>
+                <b>Dấu hiệu:</b> Trả lời có thể chọn 1 trong 2, hoặc "Neither" nếu không chọn cái nào.</div>
+                <div class="grammar-ex">Q: Would you like to walk <b>or</b> take a taxi? - A: I'd rather walk.<small>(Chọn 1 trong 2)</small></div>
+                <div class="grammar-ex">Q: Which do you prefer, sales <b>or</b> marketing? - A: Neither. I like accounting.<small>(Phủ định cả 2)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Travel / Business Trips (Du lịch/Công tác)</div>
+                <div class="grammar-desc"><b>Từ vựng trọng tâm:</b> book a flight, round trip, one-way, connecting flight, itinerary, accommodations, travel agency, be away, go on vacation.</div>
+                <div class="grammar-ex">I'd like to <b>book a flight</b> from Seattle to Los Angeles.<small>(Tôi muốn đặt chuyến bay từ Seattle đến LA)</small></div>
+            </div>
+            </div>`,
+        10: `<div class="unit-block">
+            <div class="unit-title">Unit 10: Negative Questions & Tag Questions</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Negative Questions (Câu hỏi phủ định)</div>
+                <div class="grammar-desc"><b>Công thức:</b> Bắt đầu bằng dạng phủ định của Be/Trợ động từ/Khuyết thiếu (Aren't, Didn't, Hasn't...).<br>
+                <b>Dấu hiệu:</b> Dùng để bày tỏ sự ngạc nhiên hoặc xác nhận thông tin.<br>
+                <b>Lưu ý:</b> Trả lời Yes nghĩa là đồng ý với hành động (khẳng định), No là phủ định hành động.</div>
+                <div class="grammar-ex">Q: <b>Aren't</b> you supposed to lead the seminar? - A: No, Ian will do it.<small>(Hỏi xác nhận, trả lời phủ định)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Tag Questions (Câu hỏi đuôi)</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                - Mệnh đề khẳng định, đuôi phủ định? (You are a student, <b>aren't you?</b>)<br>
+                - Mệnh đề phủ định, đuôi khẳng định? (You didn't come, <b>did you?</b>)<br>
+                <b>Dấu hiệu:</b> Dùng để xác nhận lại thông tin.</div>
+                <div class="grammar-ex">Q: You sent an e-mail to Mr. Dean, <b>didn't you?</b> - A: No, I didn't send it yet.<small>(Hỏi xác nhận)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Business Meetings (Cuộc họp kinh doanh)</div>
+                <div class="grammar-desc"><b>Từ vựng trọng tâm:</b> board of directors, agenda, quarterly report, sales goals, bonus, overtime, renovation, shift.</div>
+            </div>
+            </div>`,
+        11: `<div class="unit-block">
+            <div class="unit-title">Unit 11: Statements & Indirect Questions</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Indirect Questions (Câu hỏi gián tiếp)</div>
+                <div class="grammar-desc"><b>Công thức:</b> <b>Do you know/think + Wh-word/If + S + V...?</b> hoặc <b>Can you tell me + Wh-word + S + V...?</b><br>
+                <b>Dấu hiệu:</b> Mệnh đề sau Wh-word dùng trật tự từ của câu trần thuật (S + V), không đảo ngữ.</div>
+                <div class="grammar-ex">Q: <b>Do you know where</b> the bus stop <b>is</b>? - A: It's right around the corner.<small>(Không dùng "is the bus stop")</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">Statements (Câu trần thuật)</div>
+                <div class="grammar-desc">Không phải câu hỏi. Cần nghe hiểu ý nghĩa (đưa ra ý kiến, lời khuyên, vấn đề) để chọn câu trả lời phù hợp (đồng tình, phản đối, đưa ra giải pháp).</div>
+                <div class="grammar-ex">The 3D printer is not working properly. - We might have to replace it.<small>(Chỉ ra vấn đề -> Đưa ra giải pháp)</small></div>
+            </div>
+            </div>`,
+        12: `<div class="unit-block">
+            <div class="unit-title">Unit 12: Speeches & Presentations (Review)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Tổng hợp kỹ năng nghe hiểu bài nói</div>
+                <div class="grammar-desc">Phần này không có ngữ pháp mới, chủ yếu là nghe các bài phát biểu, giới thiệu nhân viên mới, lễ trao giải, lời cảm ơn, lời chúc mừng.<br>
+                <b>Dấu hiệu nhận biết:</b> Các từ khóa: I'd like to thank, congratulations, on behalf of, express our gratitude, retire, anniversary, award, contribution.</div>
+                <div class="grammar-ex">I would like to <b>express our gratitude</b> to Professor Lavens.<small>(Tôi muốn bày tỏ lòng biết ơn đến Giáo sư Lavens)</small></div>
+            </div>
+            </div>`
+    },
+    read: {
+        1: `<div class="unit-block">
+            <div class="unit-title">Unit 01: Words Functioning as Subjects</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Các từ loại làm chủ ngữ</div>
+                <div class="grammar-desc"><b>Công thức:</b> Chủ ngữ có thể là:<br>
+                1. <b>Danh từ / Cụm danh từ / Đại từ:</b> Applications, The people in the lobby, They...<br>
+                2. <b>To-V (Động từ nguyên mẫu có To):</b> To promote a new line of shoes...<br>
+                3. <b>V-ing (Danh động từ):</b> Dealing with customer complaints...<br>
+                4. <b>Mệnh đề danh từ (What/That + S + V):</b> What you said...<br>
+                <b>Dấu hiệu:</b> Khi To-V, V-ing, hoặc mệnh đề danh từ làm chủ ngữ, động từ chính <b>luôn chia số ít</b>.</div>
+                <div class="grammar-ex"><b>Dealing</b> with customer complaints <b>is</b> my main duty.<small>(V-ing làm chủ ngữ -> to be số ít)</small></div>
+                <div class="grammar-ex"><b>What</b> we discussed at the sales meeting <b>will be</b> passed onto the board.<small>(Mệnh đề danh từ làm chủ ngữ)</small></div>
+            </div>
+            </div>`,
+        2: `<div class="unit-block">
+            <div class="unit-title">Unit 02: Subject-Verb Agreement (Sự hòa hợp Chủ-Vị)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Quy tắc hòa hợp</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                1. <b>Hòa hợp về số:</b> Số ít + V số ít; Số nhiều + V số nhiều. (Lưu ý: Động từ chia theo chủ ngữ chính, không chia theo danh từ trong cụm giới từ đi kèm).<br>
+                2. <b>Hòa hợp về thể:</b> Chủ động (S + V) hoặc Bị động (S + be + V3/ed).<br>
+                3. <b>Hòa hợp về thì:</b> Động từ chia theo trạng từ chỉ thời gian trong câu.</div>
+                <div class="grammar-ex">The <b>proposal</b> of the manager <b>is</b> going to be discussed.<small>(Chủ ngữ chính là "proposal" số ít)</small></div>
+                <div class="grammar-ex">Technicians <b>are</b> scheduled to take a look.<small>(Chủ ngữ số nhiều)</small></div>
+            </div>
+            </div>`,
+        3: `<div class="unit-block">
+            <div class="unit-title">Unit 03: Simple Tenses & Continuous Tenses</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Các thì cơ bản</div>
+                <div class="grammar-desc"><b>Công thức & Dấu hiệu:</b><br>
+                - <b>Hiện tại đơn:</b> S + V(s/es). Dấu hiệu: always, usually, every day, general truths.<br>
+                - <b>Quá khứ đơn:</b> S + V2/ed. Dấu hiệu: yesterday, last month, ago, in 2010.<br>
+                - <b>Tương lai đơn:</b> S + will + V. Dấu hiệu: tomorrow, next week, in the future.<br>
+                - <b>Hiện tại tiếp diễn:</b> S + am/is/are + V-ing. Dấu hiệu: now, at the moment, currently.<br>
+                - <b>Quá khứ tiếp diễn:</b> S + was/were + V-ing. Dấu hiệu: at 3 P.M yesterday.<br>
+                - <b>Tương lai tiếp diễn:</b> S + will be + V-ing. Dấu hiệu: at 10 P.M tonight.<br>
+                <b>Lưu ý:</b> Động từ chỉ cảm xúc, trạng thái (love, know, have) không chia tiếp diễn.</div>
+                <div class="grammar-ex">The annual conference <b>takes</b> place in New York every year.<small>(Hiện tại đơn - thói quen)</small></div>
+                <div class="grammar-ex">Construction workers <b>are building</b> a new factory at the moment.<small>(Hiện tại tiếp diễn - đang xảy ra)</small></div>
+            </div>
+            </div>`,
+        4: `<div class="unit-block">
+            <div class="unit-title">Unit 04: Perfect Tenses (Các thì hoàn thành)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Công thức & Dấu hiệu</div>
+                <div class="grammar-desc">- <b>Hiện tại hoàn thành:</b> S + have/has + V3/ed. Dấu hiệu: for, since, ever, never, already, just, yet, recently.<br>
+                - <b>Hiện tại hoàn thành tiếp diễn:</b> S + have/has been + V-ing. Nhấn mạnh sự liên tục.<br>
+                - <b>Quá khứ hoàn thành:</b> S + had + V3/ed. Dấu hiệu: before, after, by the time (trong quá khứ).<br>
+                - <b>Tương lai hoàn thành:</b> S + will have + V3/ed. Dấu hiệu: by the time + mốc tương lai, by the end of this year.</div>
+                <div class="grammar-ex">The results of the survey <b>have just come</b> out.<small>(Hiện tại hoàn thành - vừa mới xảy ra)</small></div>
+                <div class="grammar-ex">By the time Mr. Rogers arrives, his flight <b>will have already taken</b> off.<small>(Tương lai hoàn thành)</small></div>
+            </div>
+            </div>`,
+        5: `<div class="unit-block">
+            <div class="unit-title">Unit 05: Passive Voice (Câu bị động)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Công thức chung & Các thì</div>
+                <div class="grammar-desc"><b>Công thức:</b> <b>Be + V3/ed</b>.<br>
+                - Hiện tại đơn: am/is/are + V3/ed.<br>
+                - Quá khứ đơn: was/were + V3/ed.<br>
+                - Hiện tại tiếp diễn: am/is/are being + V3/ed.<br>
+                - Hiện tại hoàn thành: have/has been + V3/ed.<br>
+                - Tương lai đơn: will be + V3/ed.<br>
+                - Động từ khuyết thiếu: must/can/should + be + V3/ed.<br>
+                <b>Lưu ý:</b> Động từ nội động (happen, occur, appear, disappear) KHÔNG có dạng bị động.</div>
+                <div class="grammar-ex">Some revisions <b>have been made</b> to the design.<small>(Bị động hiện tại hoàn thành)</small></div>
+                <div class="grammar-ex">The meeting <b>will be held</b> in Room 40B.<small>(Bị động tương lai đơn)</small></div>
+            </div>
+            </div>`,
+        6: `<div class="unit-block">
+            <div class="unit-title">Unit 06: Nouns, Pronouns & Possessive Adjectives</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Danh từ & Đại từ</div>
+                <div class="grammar-desc">- <b>Danh từ:</b> Có thể đếm được (Countable) hoặc không đếm được (Uncountable - information, advice, luggage, equipment...).<br>
+                - <b>Đại từ:</b> Nhân xưng (I, you, he, she...), Phản thân (myself, yourself...), Bất định (some, most, both, each, neither...).<br>
+                - <b>Tính từ sở hữu:</b> my, your, his, her, its, our, their + Noun.</div>
+                <div class="grammar-ex"><b>Some</b> of the participants were not satisfied.<small>(Đại từ bất định + V số nhiều)</small></div>
+                <div class="grammar-ex">The company announced <b>its</b> grand opening.<small>(Tính từ sở hữu đứng trước danh từ)</small></div>
+            </div>
+            </div>`,
+        7: `<div class="unit-block">
+            <div class="unit-title">Unit 07: To-infinitives & Gerunds</div>
+            <div class="grammar-item">
+                <div class="grammar-title">To-V (Động từ nguyên mẫu có To)</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                1. Làm chủ ngữ: <b>To-V + V (số ít)</b>.<br>
+                2. Làm tân ngữ: Sau các động từ như: want, decide, plan, agree, offer, expect, fail, manage...<br>
+                3. Làm bổ ngữ: Sau tính từ: be eager to, be willing to, be supposed to, be likely to, be able to...<br>
+                4. Chỉ mục đích: In order to / To + V.</div>
+                <div class="grammar-ex">The company <b>decided to hire</b> more employees.<small>(decide + to-V)</small></div>
+                <div class="grammar-ex">Mr. Brown <b>reminded</b> all employees <b>to attend</b> the meeting.<small>(remind O + to-V)</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">V-ing (Danh động từ)</div>
+                <div class="grammar-desc"><b>Công thức:</b><br>
+                1. Làm chủ ngữ: <b>V-ing + V (số ít)</b>.<br>
+                2. Làm tân ngữ: Sau giới từ (in, on, at, of, about, for...) hoặc sau các động từ đặc biệt (enjoy, recommend, avoid, consider, suggest, mind, finish, practice...).<br>
+                3. Làm bổ ngữ: Sau động từ liên kết (is, seem...).</div>
+                <div class="grammar-ex">Mr. Jackson suggested <b>having</b> a meeting this week.<small>(suggest + V-ing)</small></div>
+                <div class="grammar-ex">We succeeded in <b>solving</b> the difficult problem.<small>(sau giới từ "in" + V-ing)</small></div>
+            </div>
+            </div>`,
+        8: `<div class="unit-block">
+            <div class="unit-title">Unit 08: Participles & Participial Phrases</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Hiện tại phân từ (V-ing) & Quá khứ phân từ (V3/ed)</div>
+                <div class="grammar-desc">- <b>V-ing:</b> Dùng như tính từ mang nghĩa chủ động (gây ra cảm xúc) hoặc rút gọn mệnh đề chủ động.<br>
+                - <b>V3/ed:</b> Dùng như tính từ mang nghĩa bị động (bị tác động) hoặc rút gọn mệnh đề bị động.</div>
+                <div class="grammar-ex">The news is <b>disappointing</b>.<small>(Tin tức gây thất vọng - V-ing)</small></div>
+                <div class="grammar-ex">I was <b>disappointed</b> to hear the news.<small>(Tôi cảm thấy thất vọng - V3/ed)</small></div>
+                <div class="grammar-ex"><b>Feeling</b> tired, Ms. Hudson refused to work late.<small>(Rút gọn mệnh đề Because she felt tired)</small></div>
+            </div>
+            </div>`,
+        9: `<div class="unit-block">
+            <div class="unit-title">Unit 09: Adjectives & Adverbs, Comparisons</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Tính từ & Trạng từ</div>
+                <div class="grammar-desc">- <b>Tính từ:</b> Bổ nghĩa cho danh từ, đứng sau động từ liên kết (be, seem, look, find...).<br>
+                - <b>Trạng từ:</b> Bổ nghĩa cho động từ, tính từ, trạng từ khác hoặc cả câu. Thường có đuôi -ly.</div>
+                <div class="grammar-ex">The proposal was so <b>innovative</b>.<small>(Tính từ đứng sau "was")</small></div>
+                <div class="grammar-ex">Demand for this product is <b>steadily</b> increasing.<small>(Trạng từ bổ nghĩa cho động từ "increasing")</small></div>
+            </div>
+            <div class="grammar-item">
+                <div class="grammar-title">So sánh (Comparisons)</div>
+                <div class="grammar-desc">- <b>So sánh bằng:</b> as + adj/adv + as.<br>
+                - <b>So sánh hơn:</b> adj/adv + -er + than (ngắn) hoặc more/less + adj/adv + than (dài).<br>
+                - <b>So sánh nhất:</b> the + adj/adv + -est hoặc the most/least + adj/adv.<br>
+                <b>Lưu ý:</b> Có thể thêm "much, far, a lot, even" trước so sánh hơn để nhấn mạnh.</div>
+                <div class="grammar-ex">Your job experience is <b>as important as</b> your academic background.<small>(So sánh bằng)</small></div>
+                <div class="grammar-ex">The goods were <b>far more expensive</b> than we had thought.<small>(So sánh hơn có nhấn mạnh)</small></div>
+            </div>
+            </div>`,
+        10: `<div class="unit-block">
+            <div class="unit-title">Unit 10: Conjunctions (Liên từ)</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Liên từ & Giới từ</div>
+                <div class="grammar-desc">- <b>Liên từ (Conjunctions):</b> Đi với mệnh đề (S + V). Gồm: because, although, though, even though, while, if, unless, when, before, after, as soon as, once, so, but, or.<br>
+                - <b>Giới từ (Prepositions):</b> Đi với danh từ / V-ing. Gồm: because of, due to, despite, in spite of, during, for.<br>
+                - <b>Liên từ tương quan:</b> Both... and..., Not only... but also..., Either... or..., Neither... nor...<br>
+                <b>Lưu ý:</b> Với "Neither... nor" hoặc "Either... or", động từ chia theo chủ ngữ gần nhất.</div>
+                <div class="grammar-ex"><b>Because</b> the price of oil is increasing, flight tickets are expected to cost more.<small>(Because + Clause)</small></div>
+                <div class="grammar-ex"><b>Because of</b> the increase in the price of oil, flight tickets are expected to cost more.<small>(Because of + Noun phrase)</small></div>
+                <div class="grammar-ex"><b>Neither</b> the manager <b>nor</b> the staff members <b>were</b> allowed to access.<small>(Động từ chia theo "staff members" số nhiều)</small></div>
+            </div>
+            </div>`,
+        11: `<div class="unit-block">
+            <div class="unit-title">Unit 11: Relative Clauses & Relative Adverbs</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Mệnh đề quan hệ</div>
+                <div class="grammar-desc"><b>Đại từ quan hệ:</b><br>
+                - <b>Who:</b> Thay cho người (làm chủ ngữ).<br>
+                - <b>Whom:</b> Thay cho người (làm tân ngữ).<br>
+                - <b>Which:</b> Thay cho vật.<br>
+                - <b>Whose:</b> Chỉ sở hữu (của ai/ cái gì).<br>
+                - <b>That:</b> Thay cho who/which trong mệnh đề xác định.<br>
+                <b>Trạng từ quan hệ:</b><br>
+                - <b>Where:</b> Thay cho nơi chốn (in/at which).<br>
+                - <b>When:</b> Thay cho thời gian (in/on which).<br>
+                - <b>Why:</b> Thay cho lý do (for which).</div>
+                <div class="grammar-ex">The employee <b>who</b> just started should be trained.<small>(Who làm chủ ngữ)</small></div>
+                <div class="grammar-ex">Mr. Chang, <b>whose</b> column appeared yesterday, is our advisor.<small>(Whose chỉ sở hữu)</small></div>
+                <div class="grammar-ex">This is the building <b>where</b> the conference will be held.<small>(Where thay cho nơi chốn)</small></div>
+            </div>
+            </div>`,
+        12: `<div class="unit-block">
+            <div class="unit-title">Unit 12: Subjunctive Mood & Inversion</div>
+            <div class="grammar-item">
+                <div class="grammar-title">Câu điều kiện & Đảo ngữ</div>
+                <div class="grammar-desc"><b>Câu điều kiện:</b><br>
+                - <b>Loại 1:</b> If + S + V(s/es), S + will + V (có thật ở hiện tại/tương lai).<br>
+                - <b>Loại 2:</b> If + S + V2/ed (were), S + would + V (không có thật ở hiện tại).<br>
+                - <b>Loại 3:</b> If + S + had + V3/ed, S + would have + V3/ed (không có thật trong quá khứ).<br>
+                <b>Đảo ngữ (bỏ If):</b><br>
+                - <b>Were + S + ...</b> (thay If I were you...).<br>
+                - <b>Had + S + V3/ed + ...</b> (thay If I had known...).<br>
+                - <b>Should + S + V + ...</b> (thay If you should need...).</div>
+                <div class="grammar-ex"><b>If</b> the meeting <b>is</b> canceled, everyone <b>will leave</b> early.<small>(Câu điều kiện loại 1)</small></div>
+                <div class="grammar-ex"><b>Were</b> I interested in books, I would join the book club.<small>(Đảo ngữ câu điều kiện loại 2)</small></div>
+                <div class="grammar-ex"><b>Had</b> I attended the conference, I would have met some partners.<small>(Đảo ngữ câu điều kiện loại 3)</small></div>
+            </div>
+            </div>`
+    }
+    };
+
+    /* =========================================================================
+    ===== DÁN TOÀN BỘ MẢNG BANK TỪ FILE GỐC VÀO ĐÂY =====
+    - Giữ nguyên định dạng: { id, image?, type, passage, question, options, answer }
+    - Chỉ cần paste đè lên mảng BANK mẫu bên dưới.
+    ========================================================================= */
+    const BANK = [
+    // ===== SAMPLE — chỉ để test giao diện =====
+    { id: "S1", type: "read", passage: "",
+        question: "The company's new director _______ to lay off more than a hundred employees.",
+        options: [
+        {letter:"A",text:"decide"},{letter:"B",text:"has decided"},
+        {letter:"C",text:"is decided"},{letter:"D",text:"to decide"}
+        ], answer: "B" },
+    { id: "S2", type: "read", passage: "",
+        question: "_______ clients like about this product are its quality and low price.",
+        options: [
+        {letter:"A",text:"That"},{letter:"B",text:"Which"},
+        {letter:"C",text:"What"},{letter:"D",text:"Where"}
+        ], answer: "C" },
+    { id: "S3", type: "listen", passage: "Transcript:\nW: How can I help you?\nM: I'd like to send this parcel to Japan.",
+        question: "Where is the conversation most likely taking place?",
+        options: [
+        {letter:"A",text:"At a post office"},{letter:"B",text:"At a bank"},
+        {letter:"C",text:"At a travel agency"},{letter:"D",text:"At a hotel"}
+        ], answer: "A" }
+    ];
+
+    /* =========================================================================
+    STATE + PERSISTENCE
+    ========================================================================= */
+    const STORAGE_KEY = 'eng3_quiz_state_v1';
+    let quiz = [], idx = 0, answers = {}, wrongIds = [], currentMode = "both";
+
+    /* Cache DOM refs (reuse, không query lại nhiều lần) */
+    const $ = id => document.getElementById(id);
+    const els = {
+    setup:       $('setup'),
+    game:        $('game'),
+    result:      $('result'),
+    review:      $('reviewPanel'),
+    counter:     $('counter'),
+    percent:     $('percent'),
+    progressBar: $('progressBar'),
+    qText:       $('qText'),
+    context:     $('context'),
+    imageBox:    $('imageBox'),
+    qImage:      $('qImage'),
+    opts:        $('opts'),
+    feedback:    $('feedback'),
+    next:        $('next'),
+    skip:        $('skip'),
+    quit:        $('quit'),
+    wrongList:   $('wrongList'),
+    finalScore:  $('finalScore'),
+    summary:     $('summary'),
+    totalStat:   $('totalStat'),
+    doneStat:    $('doneStat'),
+    scoreStat:   $('scoreStat'),
+    resumeBtn:   $('resume'),
+    startBtn:    $('start'),
+    retryBtn:    $('retry'),
+    reviewBtn:   $('review'),
+    backBtn:     $('backToResult'),
+    unitNav:     $('unitNav'),
+    grammarArea: $('grammar-content-area'),
+    filter:      $('filter')
+    };
+
+    /* Cache 4 option buttons — reuse, không tạo lại mỗi câu */
+    const optButtons = [];
+    for (let i = 0; i < 4; i++) {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<span class="letter"></span><span class="text"></span>';
+    b.addEventListener('click', () => choose(b.dataset.letter), {passive:true});
+    optButtons.push(b);
+    els.opts.appendChild(b);
+    }
+
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    function filterBank(){ return BANK.filter(q => currentMode === "both" || q.type === currentMode); }
+
+    /* ---------- localStorage ---------- */
+    function saveState(){
+    try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        quizIds: quiz.map(q => q.id),
+        idx, answers, wrongIds, currentMode, ts: Date.now()
+        }));
+    }catch(e){}
+    }
+    function loadState(){
+    try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        return JSON.parse(raw);
+    }catch(e){ return null; }
+    }
+    function clearState(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
+
+    /* ---------- Start / Resume ---------- */
+    function begin(){
+    clearState();
+    let list = filterBank();
+    if(els.filter.value === 'shuffle') shuffle(list);
+    quiz = list; idx = 0; answers = {}; wrongIds = [];
+    els.setup.classList.add('hidden');
+    els.game.classList.remove('hidden');
+    els.result.classList.add('hidden');
+    els.review.classList.add('hidden');
+    els.totalStat.textContent = quiz.length;
+    render();
+    saveState();
+    }
+
+    function resume(){
+    const s = loadState();
+    if(!s) return;
+    currentMode = s.currentMode || 'both';
+    const idSet = new Set(s.quizIds);
+    const map = new Map(BANK.map(q => [q.id, q]));
+    quiz = s.quizIds.map(id => map.get(id)).filter(Boolean);
+    if(!quiz.length){ clearState(); return; }
+    idx = s.idx || 0;
+    answers = s.answers || {};
+    wrongIds = s.wrongIds || [];
+    els.setup.classList.add('hidden');
+    els.game.classList.remove('hidden');
+    els.result.classList.add('hidden');
+    els.review.classList.add('hidden');
+    els.totalStat.textContent = quiz.length;
+    render();
+    }
+
+    /* Check xem có tiến trình cũ để hiện nút Resume */
+    (function checkResume(){
+    const s = loadState();
+    if(s && s.quizIds && s.quizIds.length){
+        els.resumeBtn.classList.remove('hidden');
+    }
+    })();
+    els.resumeBtn.addEventListener('click', resume, {passive:true});
+
+    /* ---------- Render câu hỏi ---------- */
+    function render(){
+    const q = quiz[idx]; if(!q) return finish();
+    els.counter.textContent = `Câu ${idx+1}/${quiz.length}`;
+    requestAnimationFrame(() => {
+        els.percent.textContent = `${Math.round(idx/quiz.length*100)}%`;
+        els.progressBar.style.width = (idx/quiz.length*100) + '%';
+    });
+
+    els.qText.textContent = q.question;
+
+    /* Image lazy load: chỉ set src khi cần */
+    if(q.image){
+        els.imageBox.style.display = 'flex';
+        if(els.qImage.dataset.src !== q.image){
+        els.qImage.dataset.src = q.image;
+        els.qImage.src = q.image;
+        }
+        els.qImage.onerror = () => { els.qImage.src = 'https://placehold.co/600x400?text=No+Image'; };
+        /* Preload ảnh câu kế tiếp */
+        const nq = quiz[idx+1];
+        if(nq && nq.image){
+        const pre = new Image();
+        pre.src = nq.image;
+        }
+    } else if(q.passage && (q.passage.includes('Hình') || q.passage.includes('Bức ảnh'))){
+        els.imageBox.style.display = 'flex';
+        els.qImage.src = 'https://placehold.co/600x400?text=Photo+Placeholder';
+        els.qImage.alt = "Vui lòng chèn link ảnh thực tế vào thuộc tính 'image'";
+    } else {
+        els.imageBox.style.display = 'none';
+    }
+
+    if(q.passage){
+        els.context.classList.remove('hidden');
+        els.context.textContent = q.passage;
+    } else {
+        els.context.classList.add('hidden');
+    }
+
+    /* Update 4 nút option có sẵn (reuse) */
+    for(let i = 0; i < 4; i++){
+        const b = optButtons[i];
+        const o = q.options[i];
+        if(!o){ b.style.display = 'none'; continue; }
+        b.style.display = '';
+        b.dataset.letter = o.letter;
+        b.classList.remove('correct','wrong');
+        b.disabled = false;
+        b.children[0].textContent = o.letter + '.';
+        b.children[1].textContent = o.text;
+    }
+
+    els.feedback.innerHTML = '';
+    els.next.disabled = true;
+    els.next.textContent = idx === quiz.length-1 ? 'Xem kết quả' : 'Câu tiếp →';
+    els.skip.disabled = false;
+
+    if(answers[q.id]) showAnswer(answers[q.id]);
+    updateStats();
+    }
+
+    /* ---------- Chọn đáp án ---------- */
+    function choose(letter){
+    const q = quiz[idx]; if(!q || answers[q.id]) return;
+    answers[q.id] = letter;
+    showAnswer(letter);
+    updateStats();
+    saveState();
+    }
+
+    function showAnswer(letter){
+    const q = quiz[idx];
+    for(let i = 0; i < 4; i++){
+        const b = optButtons[i];
+        const o = q.options[i];
+        if(!o) continue;
+        b.disabled = true;
+        if(o.letter === q.answer) b.classList.add('correct');
+        else if(o.letter === letter) b.classList.add('wrong');
+    }
+    const ok = letter === q.answer;
+    els.feedback.innerHTML = `<div class="feedback ${ok?'good':'bad'}">${ok?'✅ Chính xác!':'❌ Sai rồi.'} Đáp án: ${q.answer}.</div>`;
+    els.next.disabled = false;
+    els.skip.disabled = true;
+    }
+
+    function updateStats(){
+    const done = Object.keys(answers).length;
+    const score = quiz.reduce((s,q) => s + (answers[q.id] === q.answer ? 1 : 0), 0);
+    requestAnimationFrame(() => {
+        els.doneStat.textContent = done;
+        els.scoreStat.textContent = score;
+    });
+    }
+
+    function next(){
+    if(idx < quiz.length-1){ idx++; render(); saveState(); }
+    else finish();
+    }
+
+    function finish(){
+    const done = quiz.filter(q => answers[q.id]).length;
+    const score = quiz.reduce((s,q) => s + (answers[q.id] === q.answer ? 1 : 0), 0);
+    wrongIds = quiz.filter(q => answers[q.id] !== q.answer).map(q => q.id);
+    els.game.classList.add('hidden');
+    els.result.classList.remove('hidden');
+    els.finalScore.textContent = `${score}/${quiz.length}`;
+    els.summary.textContent = `Bạn đã trả lời ${done}/${quiz.length} câu. Độ chính xác: ${quiz.length ? Math.round(score/quiz.length*100) : 0}%.`;
+    saveState();
+    }
+
+    /* ---------- Review câu sai (dùng DocumentFragment) ---------- */
+    function showReview(){
+    const wrong = quiz.filter(q => wrongIds.includes(q.id));
+    const frag = document.createDocumentFragment();
+    if(!wrong.length){
+        const p = document.createElement('p');
+        p.textContent = '🎉 Không có câu sai nào!';
+        frag.appendChild(p);
+    } else {
+        wrong.forEach((q,i) => {
+        const d = document.createElement('div');
+        d.style.cssText = 'padding:12px 0;border-bottom:1px solid #e5e9f2';
+        d.innerHTML = `<strong>${i+1}. ${q.question}</strong>
+            <p style="margin:6px 0;font-size:14px;color:#6b7a90">Bạn chọn: ${answers[q.id]||'Chưa trả lời'} · Đáp án đúng: <strong style="color:#149c58">${q.answer}</strong></p>`;
+        frag.appendChild(d);
+        });
+    }
+    els.wrongList.replaceChildren(frag);
+    els.result.classList.add('hidden');
+    els.review.classList.remove('hidden');
+    }
+
+    /* ---------- Grammar ---------- */
+    let currentGType = 'listen';
+    let currentUnit = 1;
+
+    function renderUnitNav(){
+    const frag = document.createDocumentFragment();
+    for(let i=1; i<=12; i++){
+        const btn = document.createElement('button');
+        btn.className = 'unit-btn' + (i === currentUnit ? ' active' : '');
+        btn.textContent = `Unit ${i < 10 ? '0'+i : i}`;
+        btn.addEventListener('click', () => {
+        currentUnit = i;
+        renderUnitNav();
+        renderGrammar();
+        }, {passive:true});
+        frag.appendChild(btn);
+    }
+    els.unitNav.replaceChildren(frag);
+    }
+
+    function renderGrammar(){
+    const data = GRAMMAR_DATA[currentGType];
+    if(data && data[currentUnit]){
+        els.grammarArea.innerHTML = data[currentUnit];
+    } else {
+        els.grammarArea.innerHTML = `<p style="color:var(--muted);font-style:italic;">Đang cập nhật lý thuyết cho Unit này...</p>`;
+    }
+    }
+
+    /* ---------- Tabs ---------- */
+    document.querySelectorAll('.main-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const view = tab.dataset.view;
+        if(view === 'practice'){
+        $('view-practice').classList.remove('hidden');
+        $('view-grammar').classList.add('hidden');
+        } else {
+        $('view-practice').classList.add('hidden');
+        $('view-grammar').classList.remove('hidden');
+        renderUnitNav();
+        renderGrammar();
+        }
+    }, {passive:true});
+    });
+
+    document.querySelectorAll('#subTabs .sub-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('#subTabs .sub-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentMode = tab.dataset.mode;
+    }, {passive:true});
+    });
+
+    document.querySelectorAll('#grammarTabs .sub-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('#grammarTabs .sub-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentGType = tab.dataset.gtype;
+        renderUnitNav();
+        renderGrammar();
+    }, {passive:true});
+    });
+
+    /* ---------- Event bindings ---------- */
+    els.startBtn.addEventListener('click', begin, {passive:true});
+    els.next.addEventListener('click', next, {passive:true});
+    els.skip.addEventListener('click', next, {passive:true});
+    els.quit.addEventListener('click', finish, {passive:true});
+    els.retryBtn.addEventListener('click', () => {
+    els.result.classList.add('hidden');
+    els.setup.classList.remove('hidden');
+    clearState();
+    }, {passive:true});
+    els.reviewBtn.addEventListener('click', showReview, {passive:true});
+    els.backBtn.addEventListener('click', () => {
+    els.review.classList.add('hidden');
+    els.result.classList.remove('hidden');
+    }, {passive:true});
+    </script>
+    </body>
+    </html>

@@ -1,0 +1,41 @@
+    {
+    "name": "Study Tracker — Quản lý học tập",
+    "short_name": "Study Tracker",
+    "description": "Ứng dụng quản lý thời gian học tập cá nhân: Pomodoro, lịch học, ghi chú, mục tiêu, thống kê, SQLite trên browser.",
+    "lang": "vi",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#f8fafc",
+    "theme_color": "#4f46e5",
+    "categories": ["education", "productivity"],
+    "icons": [
+        {
+        "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwMCIgZmlsbD0iIzRmNDZlNSIvPjx0ZXh0IHg9IjI1NiIgeT0iMzQwIiBmb250LXNpemU9IjI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+ThjwvdGV4dD48L3N2Zz4=",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+        "name": "Bắt đầu Pomodoro",
+        "short_name": "Pomodoro",
+        "url": "./index.html#study",
+        "description": "Mở nhanh đồng hồ Pomodoro"
+        },
+        {
+        "name": "Xem Thống kê",
+        "short_name": "Thống kê",
+        "url": "./index.html#stats",
+        "description": "Xem tiến độ học tập"
+        },
+        {
+        "name": "Lịch học",
+        "short_name": "Lịch",
+        "url": "./index.html#calendar",
+        "description": "Xem lịch tháng"
+        }
+    ]
+    }
