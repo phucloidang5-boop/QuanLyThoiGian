@@ -1,4 +1,4 @@
-    /* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — app.js
     Bản v5 + SQLite integration
     ═══════════════════════════════════════════════════════════ */
@@ -1294,15 +1294,23 @@
         cell.appendChild(num);
         const chips = document.createElement('div');
         chips.className = 'chips';
+        
+        // [ĐÃ SỬA] Lấy màu của môn học được gán cho ngày hôm đó (nếu có)
+        const daySubjectColor = (data && data.subject && typeof SubjectManager !== 'undefined')
+            ? SubjectManager.getColor(data.subject)
+            : 'var(--accent)';
+
         const planSlots = (data && data.slots) ? data.slots : [];
         if (planSlots.length > 0) {
             chips.insertAdjacentHTML('beforeend',
-            `<div class="chip plan" title="${planSlots.length} khung giờ dự định">📅 ${planSlots.length} KH</div>`);
+            // [ĐÃ SỬA] Áp dụng màu môn học cho khối Kế hoạch
+            `<div class="chip plan" style="border-color:${daySubjectColor}; color:${daySubjectColor};" title="${planSlots.length} khung giờ dự định">📅 ${planSlots.length} KH</div>`);
         }
         const actualMinutes = (data && data.minutes) || 0;
         if (actualMinutes > 0) {
             chips.insertAdjacentHTML('beforeend',
-            `<div class="chip actual" title="${actualMinutes} phút đã học">✅ ${fmtMinutes(actualMinutes)}</div>`);
+            // [ĐÃ SỬA] Áp dụng màu môn học cho khối Thực tế
+            `<div class="chip actual" style="background:${daySubjectColor}; border-color:${daySubjectColor};" title="${actualMinutes} phút đã học">✅ ${fmtMinutes(actualMinutes)}</div>`);
         }
         if (typeof TodoManager !== 'undefined') {
             const todos = TodoManager.todos.filter(t => t.deadline === k && !t.done);
@@ -1310,8 +1318,15 @@
             const isSoon = k >= State.today;
             todos.slice(0, 2).forEach(t => {
                 const safeTitle = escapeHtml(t.title).slice(0, 40);
+                
+                // [ĐÃ SỬA] Lấy màu từ Tag môn học của Todo. Nếu không có Tag mới dùng màu đỏ.
+                const todoColor = (t.tag && typeof SubjectManager !== 'undefined')
+                    ? SubjectManager.getColor(t.tag) 
+                    : (isSoon ? 'var(--danger)' : 'var(--text-mute)');
+                
                 chips.insertAdjacentHTML('beforeend',
-                `<div class="chip deadline ${isSoon ? '' : 'overdue'}" data-todo-id="${t.id}" title="⏰ ${safeTitle}">⏰ ${safeTitle.slice(0, 12)}${safeTitle.length > 12 ? '…' : ''}</div>`);
+                // [ĐÃ SỬA] Áp dụng màu cho khối Deadline
+                `<div class="chip deadline ${isSoon ? '' : 'overdue'}" style="background:${todoColor}; border-color:${todoColor}; color: #fff;" data-todo-id="${t.id}" title="⏰ ${safeTitle}">⏰ ${safeTitle.slice(0, 12)}${safeTitle.length > 12 ? '…' : ''}</div>`);
             });
             if (todos.length > 2) {
                 chips.insertAdjacentHTML('beforeend',
@@ -1321,10 +1336,12 @@
         }
         if (chips.children.length === 0 && data) {
             if ((data.minutes || 0) > 0) {
-            chips.insertAdjacentHTML('beforeend', `<div class="chip t">⏱️ ${fmtMinutes(data.minutes)}</div>`);
+            // [ĐÃ SỬA] Áp dụng màu cho khối thời gian (fallback)
+            chips.insertAdjacentHTML('beforeend', `<div class="chip t" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${fmtMinutes(data.minutes)}">⏱️ ${fmtMinutes(data.minutes)}</div>`);
             }
             if (data.slots && data.slots.length) {
-            chips.insertAdjacentHTML('beforeend', `<div class="chip n">🕐 ${data.slots.length} giờ</div>`);
+            // [ĐÃ SỬA] Áp dụng màu cho khối số giờ (fallback)
+            chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
             }
         }
         if (chips.children.length > 0) cell.appendChild(chips);
@@ -1922,6 +1939,7 @@
     selectedStar: 0,
 
     init() {
+        // Đổi mode Pomodoro / Nghỉ ngắn / Nghỉ dài / Tùy chỉnh
         $$('#pomodoroModes .pmode').forEach(btn => {
         btn.addEventListener('click', () => {
             if (this.state.running) { toast('⏸ Dừng trước khi đổi chế độ'); return; }
@@ -1931,6 +1949,8 @@
             this.setDuration(this.modes[this.state.mode].min);
         });
         });
+
+        // Nút điều khiển
         const startBtn = $('#pomoStart');
         const pauseBtn = $('#pomoPause');
         const stopBtn = $('#pomoStop');
@@ -1941,9 +1961,16 @@
         if (stopBtn) stopBtn.addEventListener('click', () => this.stopAndSave());
         if (resetBtn) resetBtn.addEventListener('click', () => this.reset());
         if (fullBtn) fullBtn.addEventListener('click', () => this.fullscreen());
+
+        // Ô nhập số phút trực tiếp
+        this.initCustomTime();
+
         this.initStarRating();
         if (typeof SubjectManager !== 'undefined') SubjectManager.renderTagPicker();
         this.restore();
+        this.syncMinutesInput();
+        this.syncCustomTimeDisabled();
+
         window.addEventListener('beforeunload', (e) => {
         if (this.state.running || this.state.paused) {
             const msg = 'Đang có phiên Pomodoro. Bạn có chắc muốn rời đi?';
@@ -1954,6 +1981,67 @@
         });
         this.render();
         this.renderButtons();
+    },
+
+    initCustomTime() {
+        const input = $('#pomoMinutesInput');
+        const minusBtn = $('#pomoMinus');
+        const plusBtn = $('#pomoPlus');
+        const applyBtn = $('#pomoApplyTime');
+        if (!input) return;
+
+        const apply = () => {
+            if (this.state.running || this.state.paused) {
+                toast('⏸ Dừng phiên hiện tại trước khi đổi thời gian');
+                return;
+            }
+            const mins = parseInt(input.value, 10);
+            if (!mins || mins < 1 || mins > 999) {
+                toast('⚠️ Số phút phải từ 1 đến 999');
+                input.value = this.modes[this.state.mode].min;
+                return;
+            }
+            this.modes[this.state.mode].min = mins;
+            this.setDuration(mins);
+            toast(`✅ Đã đặt ${mins} phút`);
+        };
+
+        if (applyBtn) applyBtn.addEventListener('click', apply);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); apply(); }
+        });
+        if (minusBtn) minusBtn.addEventListener('click', () => {
+            const cur = parseInt(input.value, 10) || 25;
+            input.value = Math.max(1, cur - 5);
+        });
+        if (plusBtn) plusBtn.addEventListener('click', () => {
+            const cur = parseInt(input.value, 10) || 25;
+            input.value = Math.min(999, cur + 5);
+        });
+    },
+
+    buildLabel(mode, mins) {
+        const labels = {
+            pomodoro: 'Pomodoro · Tập trung',
+            short:    'Nghỉ ngắn',
+            long:     'Nghỉ dài',
+            custom:   'Tùy chỉnh',
+        };
+        return `${labels[mode] || 'Học'} · ${mins} phút`;
+    },
+
+    syncMinutesInput() {
+        const input = $('#pomoMinutesInput');
+        const label = $('#pomoLabel');
+        if (input) input.value = this.modes[this.state.mode].min;
+        this.modes[this.state.mode].label = this.buildLabel(this.state.mode, this.modes[this.state.mode].min);
+        if (label) label.textContent = this.modes[this.state.mode].label;
+    },
+
+    syncCustomTimeDisabled() {
+        const box = $('#pomoCustomTime');
+        if (!box) return;
+        box.classList.toggle('disabled', this.state.running || this.state.paused);
     },
 
     initStarRating() {
@@ -1980,6 +2068,7 @@
         this.state.endAt = 0;
         this.render();
         this.saveState();
+        this.syncMinutesInput();
     },
 
     fmt(sec) {
@@ -2005,6 +2094,7 @@
         this.renderButtons();
         this.render();
         this.saveState();
+        this.syncCustomTimeDisabled();
         const card = $('.pomodoro-card');
         if (card) {
         card.classList.toggle('running', this.modes[this.state.mode].kind === 'work');
@@ -2028,6 +2118,7 @@
         }
         this.renderButtons();
         this.saveState();
+        this.syncCustomTimeDisabled();
         this.renderFullscreenButtons();
         toast('⏸ Đã tạm dừng');
     },
@@ -2056,6 +2147,7 @@
         if (card) card.classList.remove('running', 'break', 'paused');
         this.renderButtons();
         this.clearSavedState();
+        this.syncCustomTimeDisabled();
         this.renderFullscreenButtons();
     },
 
@@ -2149,6 +2241,7 @@
         }
         this.state.sessionStartAt = 0;
         this.clearSavedState();
+        this.syncCustomTimeDisabled();
         this.closeFullscreen();
     },
 
@@ -2344,7 +2437,6 @@
         }
     },
     };
-
     /* ═══════ 16. ONBOARDING ═══════ */
     const Onboarding = {
     currentStep: 1,
@@ -3282,21 +3374,30 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         toast('🗑 Đã xóa');
     },
-    deadlineStatus(todo) {
-        if (!todo.deadline) return { cls: '', text: '' };
-        if (todo.done) return { cls: 'done-tag', text: '✅ Đã xong' };
+        deadlineStatus(todo) {
+        if (!todo.deadline) return { cls: '', text: '', color: '#94a3b8' };
+        if (todo.done) return { cls: 'done-tag', text: '✅ Đã xong', color: '#10b981' };
+
         const now = new Date();
         const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const dl = parseKey(todo.deadline);
         const dlMid = new Date(dl.getFullYear(), dl.getMonth(), dl.getDate());
         const diffDays = Math.round((dlMid - todayMid) / 86400000);
-        if (diffDays < 0) return { cls: 'overdue', text: `⚠️ Quá hạn ${Math.abs(diffDays)} ngày` };
-        if (diffDays === 0) return { cls: 'today', text: `🔥 Hôm nay` };
-        if (diffDays === 1) return { cls: 'soon', text: `⏰ Còn 1 ngày` };
-        if (diffDays <= 3) return { cls: 'soon', text: `⏰ Còn ${diffDays} ngày` };
-        if (diffDays <= 7) return { cls: '', text: `📅 Còn ${diffDays} ngày` };
-        return { cls: '', text: `📅 ${todo.deadline}` };
-    },
+
+        // ⭐ LẤY MÀU TỪ MÔN HỌC (tag)
+        const color = (todo.tag && typeof SubjectManager !== 'undefined')
+            ? SubjectManager.getColor(todo.tag)
+            : '#64748b';
+
+        // Text theo độ khẩn cấp — màu theo MÔN
+        if (diffDays < 0)   return { cls: 'overdue', text: `⚠️ Quá hạn ${Math.abs(diffDays)} ngày`, color };
+        if (diffDays === 0) return { cls: 'today',   text: `🔥 Hôm nay`,                              color };
+        if (diffDays === 1) return { cls: 'soon',    text: `⏰ Còn 1 ngày`,                            color };
+        if (diffDays <= 3)  return { cls: 'soon',    text: `⏰ Còn ${diffDays} ngày`,                  color };
+        if (diffDays <= 7)  return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
+        if (diffDays <= 30) return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
+        return { cls: '', text: `📅 ${todo.deadline}`, color };
+        },
     filteredTodos() {
         const now = new Date();
         const today = dateKey(now);
@@ -3357,7 +3458,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
             <div class="todo-title">${escapeHtml(todo.title)}</div>
             ${todo.desc ? `<div class="todo-desc">${escapeHtml(todo.desc)}</div>` : ''}
             <div class="todo-meta">
-            ${todo.deadline ? `<span class="deadline ${dl.cls}">${dl.text}</span>` : ''}
+${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color}18;color:${dl.color};border:1.5px solid ${dl.color}50;font-weight:700">${dl.text}</span>` : ''}
     ${todo.tag ? (() => {
     const tagColor = (typeof SubjectManager !== 'undefined')
         ? SubjectManager.getColor(todo.tag) : '#4f46e5';

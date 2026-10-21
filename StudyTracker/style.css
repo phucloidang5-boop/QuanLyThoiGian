@@ -967,18 +967,20 @@
     margin-top: 6px; align-items: center;
   }
   .todo-meta .deadline {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 4px;
-    background: var(--surface); font-weight: 600;
-  }
-  .todo-meta .deadline.soon { background: #fef3c7; color: #92400e; }
-  .todo-meta .deadline.today { background: #fed7aa; color: #9a3412; }
-  .todo-meta .deadline.overdue { background: #fee2e2; color: #991b1b; }
-  .todo-meta .deadline.done-tag { background: #d1fae5; color: #065f46; }
-  [data-theme="dark"] .todo-meta .deadline.soon { background: #4a3418; color: #f0c674; }
-  [data-theme="dark"] .todo-meta .deadline.today { background: #4a2518; color: #f0a674; }
-  [data-theme="dark"] .todo-meta .deadline.overdue { background: #4a1a1a; color: #f0a0a0; }
-  [data-theme="dark"] .todo-meta .deadline.done-tag { background: #1f3d2a; color: #9ee6a8; }
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.todo-meta .deadline:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
 /* ─── TAG MÔN HỌC (nâng cấp) ─── */
 .todo-meta .tag-mini {
   display: inline-flex;
@@ -1538,3 +1540,71 @@
     .nav-link { padding: 6px; }
     .container { padding: 14px 10px 60px; }
   }
+  /* ═══════ POMODORO CUSTOM TIME ═══════ */
+.pomodoro-custom-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    margin: 12px auto 0;
+    max-width: 420px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+    transition: opacity var(--t-fast);
+}
+.pomodoro-custom-time.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+.pct-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+}
+.pct-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--t-fast), color var(--t-fast);
+}
+.pct-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pct-btn:active { transform: scale(0.92); }
+.pct-input {
+    width: 72px;
+    height: 32px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.pct-input:focus {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* Ẩn mũi tên mặc định của input number */
+.pct-input::-webkit-outer-spin-button,
+.pct-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.pct-input[type=number] { -moz-appearance: textfield; }
+.pct-apply {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+}
