@@ -1,4 +1,4 @@
-    /* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — Service Worker
     Chiến lược:
     - HTML: network-first (bản mới nhất khi online)
@@ -21,9 +21,13 @@
     self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-        return cache.addAll(OFFLINE_URLS).catch((err) => {
-            console.warn('[SW] Không cache được một số file:', err);
-        });
+        return Promise.all(
+            OFFLINE_URLS.map((url) =>
+            cache.add(url).catch((err) => {
+                console.warn('[SW] Bỏ qua không cache được:', url, '—', err.message);
+            })
+            )
+        );
         }).then(() => self.skipWaiting())
     );
     });

@@ -691,7 +691,7 @@
         toast('📦 Đã xuất file JSON');
     },
 
-    resetAll() {
+    async resetAll() {
         const ans = prompt(
         '⚠️ Sẽ XÓA TẤT CẢ dữ liệu\n' +
         '(bao gồm profile, lộ trình, background, todo, SQLite)\n\n' +
@@ -718,7 +718,7 @@
         }
 
         if (window.DB && window.DB.ready) {
-        try { window.DB.reset(); } catch (e) {}
+        try { await window.DB.reset(); } catch (e) {}
         }
 
         Background.apply(); Background.sync();
@@ -1197,16 +1197,6 @@
         if (prev)  prev.addEventListener('click', () => this.change(-1));
         if (next)  next.addEventListener('click', () => this.change(1));
         if (today) today.addEventListener('click', () => this.goToday());
-
-        // ⭐ Bộ lọc môn học
-        const filterSel = $('#calSubjectFilter');
-        if (filterSel) {
-            filterSel.addEventListener('change', () => {
-                this.filterSubject = filterSel.value;
-                this.render();
-            });
-        }
-        
         const grid = $('#calGrid');
         if (grid) {
         grid.addEventListener('click', e => {
@@ -1231,25 +1221,18 @@
         });
         const saveBtn = $('#modalSave');
         if (saveBtn) saveBtn.addEventListener('click', () => this.saveModal());
+
+        const filterSel = $('#calSubjectFilter');
+        if (filterSel) {
+        filterSel.addEventListener('change', () => {
+            this.filterSubject = filterSel.value;
+            this.render();
+        });
+        }
     },
 
     render() {
         this.renderSummary();
-        
-        // Đổ danh sách môn vào dropdown
-        const filterSel = $('#calSubjectFilter');
-        if (filterSel && typeof SubjectManager !== 'undefined') {
-            const cur = this.filterSubject;
-            filterSel.innerHTML = '<option value="">— Tất cả môn —</option>';
-            SubjectManager.subjects.forEach(sub => {
-                const opt = document.createElement('option');
-                opt.value = sub.name;
-                opt.textContent = sub.name;
-                filterSel.appendChild(opt);
-            });
-            filterSel.value = cur;
-        }
-
         this.renderGrid();
     },
 
@@ -1279,11 +1262,13 @@
         const grid = $('#calGrid');
         if (!grid) return;
         grid.innerHTML = '';
+        const activeFilter = this.filterSubject || '';
         const first = new Date(State.viewYear, State.viewMonth, 1);
         const startWeekday = (first.getDay() + 6) % 7;
         const daysInMonth  = new Date(State.viewYear, State.viewMonth + 1, 0).getDate();
         const daysPrev     = new Date(State.viewYear, State.viewMonth, 0).getDate();
         const frag = document.createDocumentFragment();
+        
         for (let i = 0; i < 42; i++) {
         const idx = i - startWeekday;
         let cellDate, other = false;
@@ -1308,63 +1293,93 @@
         num.className = 'num';
         num.textContent = cellDate.getDate();
         cell.appendChild(num);
+        
         const chips = document.createElement('div');
         chips.className = 'chips';
-        
-        // Lấy màu của môn học
-        const daySubjectColor = (data && data.subject && typeof SubjectManager !== 'undefined')
-            ? SubjectManager.getColor(data.subject)
-            : 'var(--accent)';
+        // Cho phép cuộn nếu có quá nhiều deadline
+        chips.style.cssText = 'max-height: 90px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;';
 
-        // Lọc theo môn
-        const matchDay = !this.filterSubject || (data && data.subject === this.filterSubject);
-        const planSlots = (matchDay && data && data.slots) ? data.slots : [];
+        const daySubject = (data && data.subject) || '';
+        const sessions = (data && data.sessions) ? data.sessions : [];
+        const planSlots = (data && data.slots) ? data.slots : [];
+
+        // Plan chip
+        const showPlan = planSlots.length > 0 && (!activeFilter || daySubject === activeFilter);
+        if (showPlan) {
+            const planColor = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
+            const planText = daySubject ? `📚 ${escapeHtml(daySubject)}` : `📅 ${planSlots.length} KH`;
+            chips.insertAdjacentHTML('beforeend',
+            `<div class="chip plan" style="border-color:${planColor}; color:${planColor};" title="${planSlots.length} khung giờ dự định">${planText}</div>`);
+        }
+
+        // Actual study chips
+        const subjectStats = {};
+        sessions.forEach(s => {
+            const tag = s.tag || 'Khác';
+            if (activeFilter && tag !== activeFilter) return;
+            if (!subjectStats[tag]) subjectStats[tag] = 0;
+            subjectStats[tag] += (s.minutes || 0);
+        });
+        if (daySubject && sessions.length === 0 && (!activeFilter || daySubject === activeFilter)) {
+            subjectStats[daySubject] = (subjectStats[daySubject] || 0) + (data.minutes || 0);
+        }
         
-        if (planSlots.length > 0) {
+        let totalActualMins = 0;
+        Object.entries(subjectStats).forEach(([tag, mins]) => {
+            if (mins <= 0) return;
+            totalActualMins += mins;
+            const color = SubjectManager.getColor(tag);
             chips.insertAdjacentHTML('beforeend',
-            `<div class="chip plan" style="border-color:${daySubjectColor}; color:${daySubjectColor};" title="${planSlots.length} khung giờ dự định">📅 ${planSlots.length} KH</div>`);
-        }
-        const actualMinutes = (matchDay && data && data.minutes) || 0;
-        if (actualMinutes > 0) {
-            chips.insertAdjacentHTML('beforeend',
-            `<div class="chip actual" style="background:${daySubjectColor}; border-color:${daySubjectColor};" title="${actualMinutes} phút đã học">✅ ${fmtMinutes(actualMinutes)}</div>`);
-        }
+            `<div class="chip actual" style="background:${color}; border-color:${color};" title="${mins} phút đã học">✅ ${escapeHtml(tag)} (${fmtMinutes(mins)})</div>`);
+        });
+
+        // Todos - HIỂN THỊ TẤT CẢ (Bỏ t.done)
         if (typeof TodoManager !== 'undefined') {
-            const todos = TodoManager.todos.filter(t => 
-                t.deadline === k && !t.done &&
-                (!this.filterSubject || t.tag === this.filterSubject)
-            );
-            if (todos.length > 0) {
-            const isSoon = k >= State.today;
-            todos.slice(0, 2).forEach(t => {
-                const safeTitle = escapeHtml(t.title).slice(0, 40);
-                const tagName = t.tag || 'Chưa rõ';
-                
-                // Màu nền (nếu không có tag thì mặc định màu xanh giống ảnh)
-                const todoColor = (t.tag && typeof SubjectManager !== 'undefined')
-                    ? SubjectManager.getColor(t.tag) 
-                    : '#4f46e5';
-                
-                chips.insertAdjacentHTML('beforeend',
-                // Hiển thị thẳng tên môn học với thiết kế giống ảnh (nền màu, viền trắng, chữ trắng, bo tròn)
-                `<div class="chip deadline" style="background:${todoColor} !important; border: 2px solid #ffffff !important; color: #ffffff !important; border-radius: 999px; padding: 3px 8px; font-weight: 700; text-align: center; font-size: 11px; display: block; width: fit-content; margin: 2px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" data-todo-id="${t.id}" title="⏰ Công việc: ${safeTitle}">${escapeHtml(tagName)}</div>`);
+            const todos = TodoManager.todos.filter(t => {
+                if (t.deadline !== k) return false;
+                if (activeFilter && t.tag !== activeFilter) return false;
+                return true; // BỎ t.done Ở ĐÂY
             });
-            if (todos.length > 2) {
-                chips.insertAdjacentHTML('beforeend',
-                `<div class="chip deadline" title="${todos.length - 2} deadline khác">+${todos.length - 2}</div>`);
-            }
+            
+            // Sắp xếp: Chưa xong lên trước, đã xong xuống dưới
+            todos.sort((a, b) => {
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                const pA = a.priority === 'high' ? 0 : (a.priority === 'normal' ? 1 : 2);
+                const pB = b.priority === 'high' ? 0 : (b.priority === 'normal' ? 1 : 2);
+                return pA - pB;
+            });
+
+            if (todos.length > 0) {
+                const isSoon = k >= State.today;
+                todos.forEach(t => {
+                    const safeTitle = escapeHtml(t.title).slice(0, 40);
+                    const tagName = t.tag || '';
+                    let todoColor = (typeof SubjectManager !== 'undefined')
+                        ? SubjectManager.getColor(tagName)
+                        : (isSoon ? 'var(--accent)' : 'var(--danger)');
+                    
+                    const icon = t.done ? '✅' : '⏰';
+                    const label = tagName ? `${icon} ${escapeHtml(tagName)}` : `${icon} ${safeTitle.slice(0, 10)}...`;
+                    const opacity = t.done ? 'opacity: 0.6; text-decoration: line-through;' : '';
+                    
+                    chips.insertAdjacentHTML('beforeend',
+                    `<div class="chip deadline ${isSoon ? '' : 'overdue'}" style="background:${todoColor}; border-color:${todoColor}; color: #fff; ${opacity}" data-todo-id="${t.id}" title="${t.done ? 'Đã xong' : 'Chưa xong'}: ${safeTitle}">${label}</div>`);
+                });
             }
         }
-        if (chips.children.length === 0 && data) {
+        
+        if (chips.children.length === 0 && data && !activeFilter) {
             if ((data.minutes || 0) > 0) {
-            chips.insertAdjacentHTML('beforeend', `<div class="chip t" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${fmtMinutes(data.minutes)}">⏱️ ${fmtMinutes(data.minutes)}</div>`);
+            const c = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
+            chips.insertAdjacentHTML('beforeend', `<div class="chip t" style="background:${c}22; color:${c};" title="${fmtMinutes(data.minutes)}">⏱️ ${fmtMinutes(data.minutes)}</div>`);
             }
             if (data.slots && data.slots.length) {
-            chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
+            const c = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
+            chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${c}22; color:${c};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
             }
         }
         if (chips.children.length > 0) cell.appendChild(chips);
-        if (planSlots.length > 0 && actualMinutes > 0) cell.classList.add('has-both');
+        if (planSlots.length > 0 && totalActualMins > 0) cell.classList.add('has-both');
         frag.appendChild(cell);
         }
         grid.appendChild(frag);
@@ -1697,7 +1712,7 @@
         });
         }
         this.render();
-        this.renderTagPicker();     
+        this.renderTagPicker();
         this.renderModalSelect();
     },
 
@@ -1732,23 +1747,54 @@
         Storage.saveSubjects(this.subjects);
     },
 
+    getRandomColor() {
+        // Tạo màu ngẫu nhiên dạng HSL (độ sáng vừa phải để chữ trắng dễ đọc)
+        const h = Math.floor(Math.random() * 360);
+        const s = Math.floor(Math.random() * 20) + 70; // 70-90%
+        const l = Math.floor(Math.random() * 15) + 45; // 45-60%
+        
+        // Chuyển HSL sang HEX
+        l /= 100;
+        const a = s * Math.min(l, 1 - l) / 100;
+        const f = n => {
+            const k = (n + h / 30) % 12;
+            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+    },
+
     add() {
         const nameInput = $('#subjectNameInput');
         const colorInput = $('#subjectColorInput');
         if (!nameInput) return;
         const name = nameInput.value.trim();
-        const color = (colorInput && colorInput.value) || this.DEFAULT_COLORS[0];
+        
+        // Nếu user không tự chọn màu, hoặc màu đó bị trùng, tự động sinh màu mới
+        let color = (colorInput && colorInput.value) ? colorInput.value : this.getRandomColor();
+        
+        // Nếu phát hiện màu này đã có môn khác xài rồi, tự đổi sang màu random khác
+        let attempts = 0;
+        while (this.subjects.some(s => s.color === color) && attempts < 20) {
+            color = this.getRandomColor();
+            attempts++;
+        }
+
         if (!name) { toast('⚠️ Nhập tên môn'); return; }
         if (this.subjects.some(s => s.name.toLowerCase() === name.toLowerCase())) {
-        toast('⚠️ Môn này đã có'); return;
+            toast('⚠️ Môn này đã có'); return;
         }
+        
         this.subjects.push({
-        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-        name: name, color: color, createdAt: new Date().toISOString(),
+            id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+            name: name, color: color, createdAt: new Date().toISOString(),
         });
+        
         this.save();
         nameInput.value = '';
-        if (colorInput) colorInput.value = this.DEFAULT_COLORS[this.subjects.length % this.DEFAULT_COLORS.length];
+        // Tự động gợi ý một màu mới tinh cho lần thêm tiếp theo
+        if (colorInput) colorInput.value = this.getRandomColor();
+        
         this.render();
         this.renderTagPicker();
         this.renderModalSelect();
@@ -1780,37 +1826,9 @@
         this.save();
         this.render();
         this.renderTagPicker();
-        this.renderModalSelect();
-
-        // ⭐ QUÉT TOÀN BỘ LỊCH SỬ ĐỂ ĐỔI MÀU CÁC BUỔI HỌC CŨ
-        let sessionCount = 0;
-        Object.keys(State.days).forEach(k => {
-            const day = State.days[k];
-            if (day.sessions) {
-                day.sessions.forEach(s => {
-                    if (s.tag === sub.name) {
-                        s.tagColor = newColor;
-                        sessionCount++;
-                    }
-                });
-            }
-        });
-
-        if (sessionCount > 0) {
-            Storage.saveDays();
-        }
-
-        // Cập nhật lại toàn bộ giao diện (Lịch, Deadline, Thống kê...)
-        if (typeof Study !== 'undefined') Study.render();
-        if (typeof Calendar !== 'undefined') Calendar.render();
-        if (typeof StatsPage !== 'undefined') StatsPage.render();
-        if (typeof Home !== 'undefined') Home.render();
-        if (typeof TodoManager !== 'undefined') {
-            TodoManager.render();
-        }
-
-        toast(`🎨 Đã đổi màu môn ${sub.name}`);
+        toast('🎨 Đã đổi màu');
     },
+
     remove(id) {
         const idx = this.subjects.findIndex(s => s.id === id);
         if (idx < 0) return;
@@ -1897,8 +1915,7 @@
         });
         list.appendChild(frag);
     },
-    
-    assignToTodos(sub) {
+        assignToTodos(sub) {
         if (typeof TodoManager === 'undefined' || !TodoManager.todos.length) { toast('ℹ️ Chưa có Todo nào'); return; }
         const total = TodoManager.todos.length;
         const untagged = TodoManager.todos.filter(t => !t.tag).length;
@@ -1930,8 +1947,9 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'tag';
-        b.style.background = sub.color + '22';
-        b.style.color = sub.color;
+        b.style.background = sub.color;
+        b.style.color = '#fff';
+        b.style.border = '2px solid transparent';
         b.textContent = sub.name;
         b.dataset.subjectId = sub.id;
         b.addEventListener('click', () => {
@@ -1941,14 +1959,18 @@
             const sid = x.dataset.subjectId;
             const s = this.subjects.find(z => z.id === sid);
             if (s) {
-                x.style.background = s.color + '22';
-                x.style.color = s.color;
+                x.style.background = s.color;
+                x.style.color = '#fff';
+                x.style.border = '2px solid transparent';
+                x.style.boxShadow = 'none';
             }
             });
             if (!wasActive) {
             b.classList.add('active');
             b.style.background = sub.color;
             b.style.color = '#fff';
+            b.style.border = '2px solid #fff';
+            b.style.boxShadow = '0 0 0 2px ' + sub.color;
             if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = sub.name;
             } else {
             if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = null;
@@ -1982,11 +2004,45 @@
         });
         if (sVal) sSel.value = sVal;
         }
+
+        const calFilter = $('#calSubjectFilter');
+        if (calFilter) {
+        const cVal = calFilter.value;
+        calFilter.innerHTML = '<option value="">— Tất cả môn —</option>';
+        this.subjects.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub.name;
+            opt.textContent = sub.name;
+            calFilter.appendChild(opt);
+        });
+        if (cVal && this.subjects.some(s => s.name === cVal)) {
+            calFilter.value = cVal;
+        }
+        }
     },
 
     getColor(name) {
+        if (!name) return '#64748b';
         const sub = this.subjects.find(s => s.name === name);
-        return sub ? sub.color : '#64748b';
+        if (sub) return sub.color;
+        
+        // Fallback: Băm tên môn ra một màu cố định nếu bị xóa
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const h = Math.abs(hash) % 360;
+        
+        // Convert HSL to Hex
+        const s = 70, l = 55;
+        const lDecimal = l / 100;
+        const a = s * Math.min(lDecimal, 1 - lDecimal) / 100;
+        const f = n => {
+            const k = (n + h / 30) % 12;
+            const color = lDecimal - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
     },
     };
 
@@ -2028,7 +2084,6 @@
         if (fullBtn) fullBtn.addEventListener('click', () => this.fullscreen());
 
         this.initCustomTime();
-
         this.initStarRating();
         if (typeof SubjectManager !== 'undefined') SubjectManager.renderTagPicker();
         this.restore();
@@ -2414,6 +2469,7 @@
         }
         localStorage.setItem(STORE.POMODORO, JSON.stringify({
             mode: this.state.mode,
+            modes: this.modes,
             remaining: this.state.remaining,
             running: this.state.running,
             paused: this.state.paused,
@@ -2435,6 +2491,15 @@
         if (!raw) return;
         const d = JSON.parse(raw);
         if (!d) return;
+
+        if (d.modes && typeof d.modes === 'object') {
+            Object.keys(d.modes).forEach(k => {
+            if (this.modes[k] && d.modes[k] && typeof d.modes[k].min === 'number') {
+                this.modes[k].min = d.modes[k].min;
+            }
+            });
+        }
+
         if (d.mode) {
             this.state.mode = d.mode;
             $$('#pomodoroModes .pmode').forEach(b => {
@@ -2451,6 +2516,8 @@
                 if (sub) {
                 tagBtn.style.background = sub.color;
                 tagBtn.style.color = '#fff';
+                tagBtn.style.border = '2px solid #fff';
+                tagBtn.style.boxShadow = '0 0 0 2px ' + sub.color;
                 }
             }
             }
@@ -2501,7 +2568,6 @@
         }
     },
     };
-
     /* ═══════ 16. ONBOARDING ═══════ */
     const Onboarding = {
     currentStep: 1,
@@ -3111,6 +3177,8 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         const svg = $('#pieChart');
         const legend = $('#pieLegend');
         if (!svg) return;
+        const wrap = svg.closest('.pie-wrap');
+        
         const tagMin = {};
         Object.keys(State.days).forEach(k => {
         const day = State.days[k];
@@ -3120,11 +3188,15 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         });
         const total = Object.values(tagMin).reduce((a, b) => a + b, 0);
+        
         if (total === 0) {
+        if (wrap) wrap.classList.add('is-empty');
         svg.innerHTML = '';
         if (legend) legend.innerHTML = '<div class="empty-state"><span class="es-icon">🥧</span><div class="es-title">Chưa có dữ liệu môn</div><div class="es-desc">Chọn môn khi dùng Pomodoro để xem phân bổ</div></div>';
         return;
         }
+        
+        if (wrap) wrap.classList.remove('is-empty');
         const colors = { 'Toán': '#3b82f6', 'Lý': '#10b981', 'Hóa': '#ef4444',
         'Anh': '#f59e0b', 'Văn': '#8b5cf6', 'Sử': '#ec4899', 'Khác': '#64748b' };
         const entries = Object.entries(tagMin).sort((a, b) => b[1] - a[1]);
@@ -3140,7 +3212,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         const y2 = cy + r * Math.sin(endAngle);
         const largeArc = angle > Math.PI ? 1 : 0;
         const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(tag) : (colors[tag] || '#64748b');
-        paths += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${color}" opacity="0.85"/>`;
+        paths += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${color}" opacity="0.9" stroke="var(--surface)" stroke-width="2" stroke-linejoin="round"/>`;
         startAngle = endAngle;
         });
         svg.innerHTML = paths;
@@ -3296,8 +3368,9 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         b.type = 'button';
         b.className = 'tag';
         const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(tag) : '#64748b';
-        b.style.background = color + '22';
-        b.style.color = color;
+        b.style.background = color;
+        b.style.color = '#fff';
+        b.style.border = '2px solid transparent';
         b.textContent = tag;
         b.addEventListener('click', () => {
             const was = b.classList.contains('active');
@@ -3305,11 +3378,21 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
             x.classList.remove('active');
             const t = x.textContent;
             const c = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(t) : '#64748b';
-            x.style.background = c + '22';
-            x.style.color = c;
+            x.style.background = c;
+            x.style.color = '#fff';
+            x.style.border = '2px solid transparent';
+            x.style.boxShadow = 'none';
             });
-            if (!was) { b.classList.add('active'); b.style.background = color; b.style.color = '#fff'; this.selectedTag = tag; }
-            else this.selectedTag = '';
+            if (!was) { 
+                b.classList.add('active'); 
+                b.style.background = color; 
+                b.style.color = '#fff'; 
+                b.style.border = '2px solid #fff';
+                b.style.boxShadow = '0 0 0 2px ' + color;
+                this.selectedTag = tag; 
+            } else {
+                this.selectedTag = '';
+            }
         });
         picker.appendChild(b);
         });
@@ -3327,8 +3410,10 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         $$('#todoTagPicker .tag').forEach(t => {
         t.classList.remove('active');
         const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(t.textContent) : '#64748b';
-        t.style.background = color + '22';
-        t.style.color = color;
+        t.style.background = color;
+        t.style.color = '#fff';
+        t.style.border = '2px solid transparent';
+        t.style.boxShadow = 'none';
         });
         if (id) {
         const todo = this.todos.find(t => t.id === id);
@@ -3346,6 +3431,8 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
                 const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(todo.tag) : '#64748b';
                 tagBtn.style.background = color;
                 tagBtn.style.color = '#fff';
+                tagBtn.style.border = '2px solid #fff';
+                tagBtn.style.boxShadow = '0 0 0 2px ' + color;
             }
             }
         }
@@ -3375,6 +3462,8 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
             const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(this.lastUsedTag) : '#64748b';
             tagBtn.style.background = color;
             tagBtn.style.color = '#fff';
+            tagBtn.style.border = '2px solid #fff';
+            tagBtn.style.boxShadow = '0 0 0 2px ' + color;
             }
         }
         }
@@ -3421,7 +3510,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         toast('✅ Đã thêm việc');
         }
-        
         try {
         localStorage.setItem('st_last_todo_tag', this.selectedTag || '');
         this.lastUsedTag = this.selectedTag || '';
@@ -3437,11 +3525,25 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
     toggleDone(id) {
         const todo = this.todos.find(t => t.id === id);
         if (!todo) return;
+        
+        const oldDone = todo.done;
+        const oldCompletedAt = todo.completedAt;
+        
         todo.done = !todo.done;
         todo.completedAt = todo.done ? new Date().toISOString() : null;
         this.save();
         this.render();
         Calendar.render();
+        
+        // Hiện thông báo Hoàn tác dưới góc màn hình
+        const msg = todo.done ? `Đã xong: "${todo.title}"` : `Đã khôi phục: "${todo.title}"`;
+        Undo.push(msg, () => {
+            todo.done = oldDone;
+            todo.completedAt = oldCompletedAt;
+            this.save();
+            this.render();
+            Calendar.render();
+        });
     },
     removeTodo(id) {
         const idx = this.todos.findIndex(t => t.id === id);
@@ -3460,7 +3562,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         toast('🗑 Đã xóa');
     },
-    deadlineStatus(todo) {
+        deadlineStatus(todo) {
         if (!todo.deadline) return { cls: '', text: '', color: '#94a3b8' };
         if (todo.done) return { cls: 'done-tag', text: '✅ Đã xong', color: '#10b981' };
 
@@ -3481,7 +3583,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         if (diffDays <= 7)  return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
         if (diffDays <= 30) return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
         return { cls: '', text: `📅 ${todo.deadline}`, color };
-    },
+        },
     filteredTodos() {
         const now = new Date();
         const today = dateKey(now);
@@ -3536,27 +3638,49 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         item.className = `todo-item priority-${todo.priority || 'normal'}`;
         if (todo.done) item.classList.add('done');
         if (isOverdue) item.classList.add('overdue');
+        
+        let tagHtml = '';
+        if (todo.tag) {
+            const tagColor = (typeof SubjectManager !== 'undefined')
+                ? SubjectManager.getColor(todo.tag) : '#ef4444';
+            tagHtml = `<span style="background:${tagColor}; color:#ffffff; border: 2px solid #ffffff; outline: 1px solid ${tagColor}; padding: 4px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; display: inline-block; margin-left: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">${escapeHtml(todo.tag)}</span>`;
+        }
+
+        let restoreBtn = '';
+        if (todo.done) {
+            restoreBtn = `<button class="restore" title="Khôi phục" aria-label="Khôi phục">🔄</button>`;
+        }
+
         item.innerHTML = `
         <input type="checkbox" class="todo-check" ${todo.done ? 'checked' : ''}>
         <div class="todo-body">
-            <div class="todo-title">${escapeHtml(todo.title)}</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; width:100%;">
+                <div class="todo-title" style="flex:1;">${escapeHtml(todo.title)}</div>
+                ${tagHtml}
+            </div>
             ${todo.desc ? `<div class="todo-desc">${escapeHtml(todo.desc)}</div>` : ''}
             <div class="todo-meta">
-${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color}18;color:${dl.color};border:1.5px solid ${dl.color}50;font-weight:700">${dl.text}</span>` : ''}
-    ${todo.tag ? (() => {
-    const tagColor = (typeof SubjectManager !== 'undefined')
-        ? SubjectManager.getColor(todo.tag) : '#4f46e5';
-    return `<span class="tag-mini" style="background:${tagColor}15;color:${tagColor};border-color:${tagColor}40">${escapeHtml(todo.tag)}</span>`;
-})() : ''}
-            ${todo.priority === 'high' ? '<span>🔴 Cao</span>' : ''}
+                ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color}18;color:${dl.color};border:1.5px solid ${dl.color}50;font-weight:700">${dl.text}</span>` : ''}
+                ${todo.priority === 'high' ? '<span>🔴 Cao</span>' : ''}
             </div>
         </div>
         <div class="todo-actions">
+            ${restoreBtn}
             <button class="edit" title="Sửa" aria-label="Sửa">✏️</button>
             <button class="del" title="Xóa" aria-label="Xóa">🗑</button>
         </div>
         `;
+        
         item.querySelector('.todo-check').addEventListener('change', () => this.toggleDone(todo.id));
+        
+        // Nếu có nút Khôi phục thì gắn sự kiện
+        if (todo.done) {
+            item.querySelector('.restore').addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                this.toggleDone(todo.id); 
+            });
+        }
+        
         item.querySelector('.edit').addEventListener('click', (e) => { e.stopPropagation(); this.openModal(todo.id); });
         item.querySelector('.del').addEventListener('click', (e) => { e.stopPropagation(); this.removeTodo(todo.id); });
         frag.appendChild(item);
@@ -4416,7 +4540,7 @@ ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color
         '✏️': 'Sửa', '🗑': 'Xóa', '🗑️': 'Xóa', '➕': 'Thêm',
         '✕': 'Đóng', '✖': 'Đóng', '🎨': 'Đổi màu', '📷': 'Tải ảnh lên',
         '🔍': 'Tìm kiếm', '⛶': 'Toàn màn hình', '↺': 'Đặt lại',
-        '▶': 'Bắt đầu', '⏸': 'Tạm dừng', '⏹': 'Dừng', '❄️': 'Streak Freeze',
+        '⏸': 'Tạm dừng', '⏹': 'Dừng', '❄️': 'Streak Freeze',
         '🔔': 'Thông báo', '❄': 'Streak Freeze', '☀️': 'Chế độ sáng',
         '🌙': 'Chế độ tối', '⭐': 'Đánh giá', '★': 'Đánh giá sao',
         '☆': 'Chưa đánh giá', '🔀': 'Trộn', '📅': 'Lịch', '📊': 'Thống kê',
@@ -4734,5 +4858,3 @@ ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color
     }
 
     })();
-    window.TodoManager = TodoManager;
-    window.SubjectManager = SubjectManager;

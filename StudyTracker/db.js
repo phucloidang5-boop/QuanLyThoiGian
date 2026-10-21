@@ -1,4 +1,4 @@
-    /* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — db.js
     SQLite (sql.js) + IndexedDB + Migration + SQL Runner
     ═══════════════════════════════════════════════════════════ */
@@ -80,6 +80,7 @@
         if (saved && saved.byteLength > 0) {
             try {
             this.db = new this.sql.Database(new Uint8Array(saved));
+            this.createSchema();
             } catch (e) {
             console.warn('[DB] Load failed, tạo DB mới:', e);
             this.db = new this.sql.Database();
@@ -257,7 +258,6 @@
         const buf = await file.arrayBuffer();
         if (this.db) this.db.close();
         this.db = new this.sql.Database(new Uint8Array(buf));
-        // Đảm bảo schema đầy đủ
         try { this.createSchema(); } catch (e) {}
         await this.saveNow();
         },
@@ -287,7 +287,6 @@
         const keys = Object.keys(days || {});
         const sessionIds = new Set();
 
-        // Upsert từng day + session
         keys.forEach(k => {
             const d = days[k] || {};
             const goals = Array.isArray(d.goals) ? d.goals : [];
@@ -331,7 +330,6 @@
             });
         });
 
-        // Xoá days không còn
         if (keys.length > 0) {
             const ph = keys.map(() => '?').join(',');
             this.run(`DELETE FROM days WHERE date NOT IN (${ph})`, keys);
@@ -339,7 +337,6 @@
             this.run('DELETE FROM days');
         }
 
-        // Xoá sessions không còn
         const ids = Array.from(sessionIds);
         if (ids.length > 0) {
             const ph = ids.map(() => '?').join(',');

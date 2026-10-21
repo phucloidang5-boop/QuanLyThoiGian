@@ -1,4 +1,4 @@
-  /* ═══════ RESET & THEME ═══════ */
+/* ═══════ RESET & THEME ═══════ */
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -458,14 +458,11 @@
     cursor: pointer; 
     transition: transform var(--t-fast), box-shadow var(--t-fast); 
     position: relative;
-    /* Đã xóa background đỏ đặc trưng, giờ nó sẽ lấy màu từ inline-style ở app.js */
   }
   .chip.deadline:hover { 
     transform: translateY(-1px); 
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
-  /* Xóa cái này đi để không bị đè màu cảnh báo */
-  /* .chip.deadline.soon { background: var(--warning); color: #fff; } */
   .cell.has-both {
     border-color: var(--success);
     background: linear-gradient(135deg, var(--surface) 50%, #d1fae5 50%);
@@ -696,7 +693,12 @@
     transition: all var(--t-fast);
   }
   .tag:hover { transform: scale(1.05); }
-  .tag.active { border-color: currentColor; color: #fff !important; }
+  .tag.active { 
+    border-color: #fff !important; 
+    box-shadow: 0 0 0 2px var(--border), 0 4px 6px rgba(0,0,0,0.15); 
+    color: #fff !important; 
+    transform: scale(1.05);
+}
   .tag[data-color="blue"]   { background: #dbeafe; color: #1e40af; }
   .tag[data-color="green"]  { background: #dcfce7; color: #166534; }
   .tag[data-color="red"]    { background: #fee2e2; color: #991b1b; }
@@ -770,13 +772,99 @@
   }
 
   /* ═══════ PIE CHART + HOUR BARS ═══════ */
-  .pie-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
-  .pie-chart { width: 200px; height: 200px; flex-shrink: 0; }
-  .pie-legend { display: flex; flex-direction: column; gap: 8px; font-size: 13px; min-width: 180px; }
-  .pie-legend-item { display: flex; align-items: center; gap: 8px; }
-  .pie-legend-item .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-  .pie-legend-item .lbl { flex: 1; color: var(--text-2); }
-  .pie-legend-item .val { font-weight: 600; color: var(--text); }
+  .pie-wrap {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+    justify-items: center;
+  }
+  .pie-chart {
+    width: 220px;
+    height: 220px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.08));
+  }
+  .pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    width: 100%;
+    max-width: 100%;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 6px;
+    scrollbar-width: thin;
+  }
+  .pie-legend::-webkit-scrollbar { width: 6px; }
+  .pie-legend::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .pie-legend-item {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 1px dashed var(--border);
+    transition: background var(--t-fast);
+  }
+  .pie-legend-item:last-child { border-bottom: none; }
+  .pie-legend-item:hover { background: var(--surface-2); border-radius: 6px; }
+  .pie-legend-item .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  }
+  .pie-legend-item .lbl {
+    color: var(--text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .pie-legend-item .val {
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-size: 12px;
+    text-align: right;
+  }
+
+  /* ⭐ Fix lệch khi Pie Chart chưa có data */
+  .pie-wrap.is-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 220px;
+  }
+  .pie-wrap.is-empty .pie-chart {
+    display: none;
+  }
+  .pie-wrap.is-empty .pie-legend {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .pie-wrap.is-empty .empty-state {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .pie-wrap {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .pie-chart { width: 180px; height: 180px; }
+    .pie-legend { max-height: none; overflow-y: visible; }
+  }
   .hour-bars { display: flex; flex-direction: column; gap: 8px; }
   .hour-bar-row {
     display: grid; grid-template-columns: 60px 1fr 60px;
@@ -1546,90 +1634,8 @@
     .nav-link { padding: 6px; }
     .container { padding: 14px 10px 60px; }
   }
-  /* ═══════ POMODORO CUSTOM TIME ═══════ */
-.pomodoro-custom-time {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    padding: 12px 16px;
-    margin: 12px auto 0;
-    max-width: 420px;
-    background: var(--surface-2);
-    border-radius: var(--radius-sm);
-    border: 1px dashed var(--border);
-    transition: opacity var(--t-fast);
-}
-.pomodoro-custom-time.disabled {
-    opacity: 0.45;
-    pointer-events: none;
-}
-.pct-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-2);
-}
-.pct-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--t-fast), color var(--t-fast);
-}
-.pct-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-.pct-btn:active { transform: scale(0.92); }
-.pct-input {
-    width: 72px;
-    height: 32px;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--accent);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    outline: none;
-    transition: border-color var(--t-fast), box-shadow var(--t-fast);
-}
-.pct-input:focus {
-    border-color: var(--accent-2);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-}
-/* Ẩn mũi tên mặc định của input number */
-.pct-input::-webkit-outer-spin-button,
-.pct-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.pct-input[type=number] { -moz-appearance: textfield; }
-.pct-apply {
-    padding: 6px 12px !important;
-    font-size: 13px !important;
-}
-.cal-filter-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    padding: 10px 12px;
-    margin-bottom: 12px;
-    background: var(--surface-2);
-    border-radius: var(--radius-sm);
-}
-.cal-filter-row .session-filter {
-    flex: 1;
-    min-width: 180px;
-    max-width: 300px;
-}
-/* ═══════ 1. Ô NHẬP SỐ PHÚT POMODORO ═══════ */
+
+/* ═══════ POMODORO CUSTOM TIME ═══════ */
 .pomodoro-custom-time {
     display: flex;
     align-items: center;
@@ -1644,15 +1650,8 @@
     border: 1px dashed var(--border);
     transition: opacity var(--t-fast);
 }
-.pomodoro-custom-time.disabled {
-    opacity: 0.45;
-    pointer-events: none;
-}
-.pct-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-2);
-}
+.pomodoro-custom-time.disabled { opacity: 0.45; pointer-events: none; }
+.pct-label { font-size: 13px; font-weight: 600; color: var(--text-2); }
 .pct-btn {
     width: 32px;
     height: 32px;
@@ -1687,7 +1686,6 @@
     border-color: var(--accent-2);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
-/* Ẩn mũi tên mặc định của input number */
 .pct-input::-webkit-outer-spin-button,
 .pct-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -1699,7 +1697,7 @@
     font-size: 13px !important;
 }
 
-/* ═══════ 2. BỘ LỌC MÔN HỌC TRÊN LỊCH ═══════ */
+/* ═══════ BỘ LỌC MÔN HỌC TRÊN LỊCH ═══════ */
 .cal-filter-row {
     display: flex;
     align-items: center;
@@ -1729,12 +1727,57 @@
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* ═══════ 3. NÚT GÁN MÔN (📌) TRONG TAB QUẢN LÝ ═══════ */
+/* ═══════ NÚT GÁN MÔN (📌) TRONG TAB QUẢN LÝ ═══════ */
 .subject-actions .assign-btn:hover {
-    background: #fef3c7 !important; /* Màu vàng nhạt */
-    color: #d97706 !important;      /* Icon màu cam đậm */
+    background: #fef3c7 !important;
+    color: #d97706 !important;
 }
 [data-theme="dark"] .subject-actions .assign-btn:hover {
     background: #4a3418 !important;
     color: #f0c674 !important;
+}
+/* Fix tag picker bị tràn/ép kích thước */
+.tag-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.tag-picker .tag {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Fix label và picker nằm ngang hàng */
+.todo-modal-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+.todo-modal-tag-row .field-label {
+    margin: 0;
+    white-space: nowrap;
+}
+/* Nút môn học mặc định đã có màu đậm, viền trong suốt */
+.tag {
+    border: 2px solid transparent !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Khi được chọn (Active) thì viền trắng dày, bóng đổ (y hệt ảnh) */
+.tag.active { 
+    border: 2px solid #ffffff !important; 
+    box-shadow: 0 0 0 2px currentColor, 0 2px 6px rgba(0,0,0,0.25) !important; 
+    transform: scale(1.05);
+}
+/* Nút khôi phục */
+.todo-actions button.restore {
+    color: var(--accent) !important;
+    font-size: 15px;
+}
+.todo-actions button.restore:hover {
+    background: var(--accent-soft) !important;
 }
