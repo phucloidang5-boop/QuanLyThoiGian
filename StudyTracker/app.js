@@ -81,7 +81,6 @@
 
     /* ═══════ 3. STORAGE — local + SQLite mirror ═══════ */
     const Storage = {
-    // Config: nếu DB ready thì ưu tiên SQLite, nếu không thì localStorage
     _useSQL() {
         return typeof window.DB !== 'undefined' && window.DB && window.DB.ready;
     },
@@ -95,12 +94,10 @@
     },
 
     loadAll() {
-        // Days
         if (this._useSQL()) {
         const dbDays = this._loadDaysFromSQL();
         if (dbDays && Object.keys(dbDays).length > 0) {
             State.days = dbDays;
-            // Mirror lại localStorage
             this.set(STORE.DAYS, State.days);
         } else {
             State.days = this.get(STORE.DAYS, {}) || {};
@@ -109,7 +106,6 @@
         State.days = this.get(STORE.DAYS, {}) || {};
         }
 
-        // Roadmap
         if (this._useSQL()) {
         const dbRoadmap = this._loadRoadmapFromSQL();
         if (dbRoadmap && dbRoadmap.length > 0) {
@@ -122,7 +118,6 @@
         State.roadmap = this.get(STORE.ROADMAP, []) || [];
         }
 
-        // Profile
         let profile = null;
         if (this._useSQL() && window.DB.getMeta) {
         profile = window.DB.getMeta('profile', null);
@@ -138,7 +133,6 @@
         avatarImage: (profile && profile.avatarImage) || '',
         };
 
-        // Theme
         let theme = null;
         if (this._useSQL() && window.DB.getMeta) {
         theme = window.DB.getMeta('theme', null);
@@ -146,7 +140,6 @@
         if (!theme) theme = this.get(STORE.THEME, null);
         State.theme = (theme === 'dark' || theme === 'auto') ? theme : 'light';
 
-        // Bg
         let bg = null;
         if (this._useSQL() && window.DB.getMeta) {
         bg = window.DB.getMeta('bg', null);
@@ -245,7 +238,6 @@
         }
     },
 
-    // Expose helpers cho module khác
     saveSubjects(subjects) {
         this.set(STORE.SUBJECTS, subjects);
         if (this._useSQL() && window.DB.syncSubjects) {
@@ -594,7 +586,6 @@
         if (typeof Onboarding !== 'undefined') Onboarding.reset();
         });
 
-        // SQLite buttons
         const exportSqliteBtn = $('#exportSqliteBtn');
         if (exportSqliteBtn) exportSqliteBtn.addEventListener('click', () => {
         if (window.DB && window.DB.ready) {
@@ -726,7 +717,6 @@
         Storage.saveFreeze({ freezes: 3, history: [], autoMode: false });
         }
 
-        // Xoá SQLite
         if (window.DB && window.DB.ready) {
         try { window.DB.reset(); } catch (e) {}
         }
@@ -1199,6 +1189,7 @@
 
     /* ═══════ 10. CALENDAR ═══════ */
     const Calendar = {
+    filterSubject: '',
     init() {
         const prev = $('#prevMonth');
         const next = $('#nextMonth');
@@ -1206,6 +1197,16 @@
         if (prev)  prev.addEventListener('click', () => this.change(-1));
         if (next)  next.addEventListener('click', () => this.change(1));
         if (today) today.addEventListener('click', () => this.goToday());
+
+        // ⭐ Bộ lọc môn học
+        const filterSel = $('#calSubjectFilter');
+        if (filterSel) {
+            filterSel.addEventListener('change', () => {
+                this.filterSubject = filterSel.value;
+                this.render();
+            });
+        }
+        
         const grid = $('#calGrid');
         if (grid) {
         grid.addEventListener('click', e => {
@@ -1234,6 +1235,21 @@
 
     render() {
         this.renderSummary();
+        
+        // Đổ danh sách môn vào dropdown
+        const filterSel = $('#calSubjectFilter');
+        if (filterSel && typeof SubjectManager !== 'undefined') {
+            const cur = this.filterSubject;
+            filterSel.innerHTML = '<option value="">— Tất cả môn —</option>';
+            SubjectManager.subjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub.name;
+                opt.textContent = sub.name;
+                filterSel.appendChild(opt);
+            });
+            filterSel.value = cur;
+        }
+
         this.renderGrid();
     },
 
@@ -1295,38 +1311,43 @@
         const chips = document.createElement('div');
         chips.className = 'chips';
         
-        // [ĐÃ SỬA] Lấy màu của môn học được gán cho ngày hôm đó (nếu có)
+        // Lấy màu của môn học
         const daySubjectColor = (data && data.subject && typeof SubjectManager !== 'undefined')
             ? SubjectManager.getColor(data.subject)
             : 'var(--accent)';
 
-        const planSlots = (data && data.slots) ? data.slots : [];
+        // Lọc theo môn
+        const matchDay = !this.filterSubject || (data && data.subject === this.filterSubject);
+        const planSlots = (matchDay && data && data.slots) ? data.slots : [];
+        
         if (planSlots.length > 0) {
             chips.insertAdjacentHTML('beforeend',
-            // [ĐÃ SỬA] Áp dụng màu môn học cho khối Kế hoạch
             `<div class="chip plan" style="border-color:${daySubjectColor}; color:${daySubjectColor};" title="${planSlots.length} khung giờ dự định">📅 ${planSlots.length} KH</div>`);
         }
-        const actualMinutes = (data && data.minutes) || 0;
+        const actualMinutes = (matchDay && data && data.minutes) || 0;
         if (actualMinutes > 0) {
             chips.insertAdjacentHTML('beforeend',
-            // [ĐÃ SỬA] Áp dụng màu môn học cho khối Thực tế
             `<div class="chip actual" style="background:${daySubjectColor}; border-color:${daySubjectColor};" title="${actualMinutes} phút đã học">✅ ${fmtMinutes(actualMinutes)}</div>`);
         }
         if (typeof TodoManager !== 'undefined') {
-            const todos = TodoManager.todos.filter(t => t.deadline === k && !t.done);
+            const todos = TodoManager.todos.filter(t => 
+                t.deadline === k && !t.done &&
+                (!this.filterSubject || t.tag === this.filterSubject)
+            );
             if (todos.length > 0) {
             const isSoon = k >= State.today;
             todos.slice(0, 2).forEach(t => {
                 const safeTitle = escapeHtml(t.title).slice(0, 40);
+                const tagName = t.tag || 'Chưa rõ';
                 
-                // [ĐÃ SỬA] Lấy màu từ Tag môn học của Todo. Nếu không có Tag mới dùng màu đỏ.
+                // Màu nền (nếu không có tag thì mặc định màu xanh giống ảnh)
                 const todoColor = (t.tag && typeof SubjectManager !== 'undefined')
                     ? SubjectManager.getColor(t.tag) 
-                    : (isSoon ? 'var(--danger)' : 'var(--text-mute)');
+                    : '#4f46e5';
                 
                 chips.insertAdjacentHTML('beforeend',
-                // [ĐÃ SỬA] Áp dụng màu cho khối Deadline
-                `<div class="chip deadline ${isSoon ? '' : 'overdue'}" style="background:${todoColor}; border-color:${todoColor}; color: #fff;" data-todo-id="${t.id}" title="⏰ ${safeTitle}">⏰ ${safeTitle.slice(0, 12)}${safeTitle.length > 12 ? '…' : ''}</div>`);
+                // Hiển thị thẳng tên môn học với thiết kế giống ảnh (nền màu, viền trắng, chữ trắng, bo tròn)
+                `<div class="chip deadline" style="background:${todoColor} !important; border: 2px solid #ffffff !important; color: #ffffff !important; border-radius: 999px; padding: 3px 8px; font-weight: 700; text-align: center; font-size: 11px; display: block; width: fit-content; margin: 2px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" data-todo-id="${t.id}" title="⏰ Công việc: ${safeTitle}">${escapeHtml(tagName)}</div>`);
             });
             if (todos.length > 2) {
                 chips.insertAdjacentHTML('beforeend',
@@ -1336,11 +1357,9 @@
         }
         if (chips.children.length === 0 && data) {
             if ((data.minutes || 0) > 0) {
-            // [ĐÃ SỬA] Áp dụng màu cho khối thời gian (fallback)
             chips.insertAdjacentHTML('beforeend', `<div class="chip t" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${fmtMinutes(data.minutes)}">⏱️ ${fmtMinutes(data.minutes)}</div>`);
             }
             if (data.slots && data.slots.length) {
-            // [ĐÃ SỬA] Áp dụng màu cho khối số giờ (fallback)
             chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${daySubjectColor}22; color:${daySubjectColor};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
             }
         }
@@ -1678,13 +1697,12 @@
         });
         }
         this.render();
-        this.renderTagPicker();
+        this.renderTagPicker();     
         this.renderModalSelect();
     },
 
     load() {
         try {
-        // Ưu tiên SQLite
         if (window.DB && window.DB.ready) {
             const rows = window.DB.query('SELECT * FROM subjects ORDER BY created_at ASC');
             if (rows.length > 0) {
@@ -1762,9 +1780,37 @@
         this.save();
         this.render();
         this.renderTagPicker();
-        toast('🎨 Đã đổi màu');
-    },
+        this.renderModalSelect();
 
+        // ⭐ QUÉT TOÀN BỘ LỊCH SỬ ĐỂ ĐỔI MÀU CÁC BUỔI HỌC CŨ
+        let sessionCount = 0;
+        Object.keys(State.days).forEach(k => {
+            const day = State.days[k];
+            if (day.sessions) {
+                day.sessions.forEach(s => {
+                    if (s.tag === sub.name) {
+                        s.tagColor = newColor;
+                        sessionCount++;
+                    }
+                });
+            }
+        });
+
+        if (sessionCount > 0) {
+            Storage.saveDays();
+        }
+
+        // Cập nhật lại toàn bộ giao diện (Lịch, Deadline, Thống kê...)
+        if (typeof Study !== 'undefined') Study.render();
+        if (typeof Calendar !== 'undefined') Calendar.render();
+        if (typeof StatsPage !== 'undefined') StatsPage.render();
+        if (typeof Home !== 'undefined') Home.render();
+        if (typeof TodoManager !== 'undefined') {
+            TodoManager.render();
+        }
+
+        toast(`🎨 Đã đổi màu môn ${sub.name}`);
+    },
     remove(id) {
         const idx = this.subjects.findIndex(s => s.id === id);
         if (idx < 0) return;
@@ -1820,6 +1866,7 @@
             <span class="subject-count">${count} phiên</span>
             <div class="subject-actions">
             <button class="color-btn" title="Đổi màu" aria-label="Đổi màu">🎨</button>
+            <button class="assign-btn" title="Gán môn này cho Todos" aria-label="Gán môn cho Todos">📌</button>
             <button class="edit-btn" title="Sửa tên" aria-label="Sửa tên">✏️</button>
             <button class="del" title="Xóa" aria-label="Xóa">🗑</button>
             </div>
@@ -1843,11 +1890,31 @@
             });
             colorInput.click();
         });
+        item.querySelector('.assign-btn').addEventListener('click', () => this.assignToTodos(sub));
         item.querySelector('.edit-btn').addEventListener('click', () => this.edit(sub.id));
         item.querySelector('.del').addEventListener('click', () => this.remove(sub.id));
         frag.appendChild(item);
         });
         list.appendChild(frag);
+    },
+    
+    assignToTodos(sub) {
+        if (typeof TodoManager === 'undefined' || !TodoManager.todos.length) { toast('ℹ️ Chưa có Todo nào'); return; }
+        const total = TodoManager.todos.length;
+        const untagged = TodoManager.todos.filter(t => !t.tag).length;
+        const choice = prompt(`Gán môn "${sub.name}" cho Todos:\n\n1. Chỉ Todos CHƯA có môn (${untagged} cái)\n2. TẤT CẢ Todos (${total} cái)\n\nNhập 1 hoặc 2:`, '1');
+        if (!choice || !['1', '2'].includes(choice)) return;
+        let count = 0;
+        TodoManager.todos.forEach(t => {
+            if (choice === '1' && t.tag) return;
+            t.tag = sub.name;
+            count++;
+        });
+        if (count === 0) { toast('ℹ️ Không có Todo nào cần gán'); return; }
+        TodoManager.save();
+        TodoManager.render();
+        if (typeof Calendar !== 'undefined') Calendar.render();
+        toast(`✅ Đã gán "${sub.name}" cho ${count} Todos`);
     },
 
     renderTagPicker() {
@@ -1939,7 +2006,6 @@
     selectedStar: 0,
 
     init() {
-        // Đổi mode Pomodoro / Nghỉ ngắn / Nghỉ dài / Tùy chỉnh
         $$('#pomodoroModes .pmode').forEach(btn => {
         btn.addEventListener('click', () => {
             if (this.state.running) { toast('⏸ Dừng trước khi đổi chế độ'); return; }
@@ -1950,7 +2016,6 @@
         });
         });
 
-        // Nút điều khiển
         const startBtn = $('#pomoStart');
         const pauseBtn = $('#pomoPause');
         const stopBtn = $('#pomoStop');
@@ -1962,7 +2027,6 @@
         if (resetBtn) resetBtn.addEventListener('click', () => this.reset());
         if (fullBtn) fullBtn.addEventListener('click', () => this.fullscreen());
 
-        // Ô nhập số phút trực tiếp
         this.initCustomTime();
 
         this.initStarRating();
@@ -2437,6 +2501,7 @@
         }
     },
     };
+
     /* ═══════ 16. ONBOARDING ═══════ */
     const Onboarding = {
     currentStep: 1,
@@ -3148,6 +3213,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
     filter: 'all',
     editingId: null,
     selectedTag: '',
+    lastUsedTag: '',
     _midnightTimer: null,
     init() {
         this.load();
@@ -3173,6 +3239,9 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
             if (e.key === 'Enter') this.saveModal();
         });
         }
+        try { this.lastUsedTag = localStorage.getItem('st_last_todo_tag') || ''; }
+        catch (e) { this.lastUsedTag = ''; }
+
         this.render();
         this.syncMidnight();
     },
@@ -3297,6 +3366,17 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         if (title) title.textContent = 'Thêm việc cần làm';
         const delBtn = $('#todoDelete');
         if (delBtn) delBtn.style.display = 'none';
+
+        if (this.lastUsedTag) {
+            const tagBtn = $$('#todoTagPicker .tag').find(t => t.textContent === this.lastUsedTag);
+            if (tagBtn) {
+            this.selectedTag = this.lastUsedTag;
+            tagBtn.classList.add('active');
+            const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(this.lastUsedTag) : '#64748b';
+            tagBtn.style.background = color;
+            tagBtn.style.color = '#fff';
+            }
+        }
         }
         modal.classList.add('show');
         setTimeout(() => $('#todoTitle')?.focus(), 100);
@@ -3341,6 +3421,12 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         toast('✅ Đã thêm việc');
         }
+        
+        try {
+        localStorage.setItem('st_last_todo_tag', this.selectedTag || '');
+        this.lastUsedTag = this.selectedTag || '';
+        } catch (e) {}
+
         this.save();
         this.closeModal();
         this.render();
@@ -3374,7 +3460,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         toast('🗑 Đã xóa');
     },
-        deadlineStatus(todo) {
+    deadlineStatus(todo) {
         if (!todo.deadline) return { cls: '', text: '', color: '#94a3b8' };
         if (todo.done) return { cls: 'done-tag', text: '✅ Đã xong', color: '#10b981' };
 
@@ -3384,12 +3470,10 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         const dlMid = new Date(dl.getFullYear(), dl.getMonth(), dl.getDate());
         const diffDays = Math.round((dlMid - todayMid) / 86400000);
 
-        // ⭐ LẤY MÀU TỪ MÔN HỌC (tag)
         const color = (todo.tag && typeof SubjectManager !== 'undefined')
             ? SubjectManager.getColor(todo.tag)
             : '#64748b';
 
-        // Text theo độ khẩn cấp — màu theo MÔN
         if (diffDays < 0)   return { cls: 'overdue', text: `⚠️ Quá hạn ${Math.abs(diffDays)} ngày`, color };
         if (diffDays === 0) return { cls: 'today',   text: `🔥 Hôm nay`,                              color };
         if (diffDays === 1) return { cls: 'soon',    text: `⏰ Còn 1 ngày`,                            color };
@@ -3397,7 +3481,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         if (diffDays <= 7)  return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
         if (diffDays <= 30) return { cls: '',        text: `📅 Còn ${diffDays} ngày`,                  color };
         return { cls: '', text: `📅 ${todo.deadline}`, color };
-        },
+    },
     filteredTodos() {
         const now = new Date();
         const today = dateKey(now);
@@ -4571,10 +4655,8 @@ ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color
     State.viewYear = now.getFullYear();
     State.viewMonth = now.getMonth();
 
-    // Load dữ liệu (SQLite nếu có, fallback localStorage)
     Storage.loadAll();
 
-    // Khởi tạo UI modules
     Theme.init();
     Background.init();
     Profile.init();
@@ -4609,7 +4691,6 @@ ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color
 
     Modules.refreshAll();
 
-    // Nếu DB ready sau đó → reload data + refresh UI
     if (window.DB && window.DB.onReady) {
         window.DB.onReady(() => {
         console.log('[App] DB ready — reload data');
@@ -4653,3 +4734,5 @@ ${todo.deadline ? `<span class="deadline ${dl.cls}" style="background:${dl.color
     }
 
     })();
+    window.TodoManager = TodoManager;
+    window.SubjectManager = SubjectManager;

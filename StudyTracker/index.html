@@ -207,6 +207,20 @@
             <button class="btn ghost" id="nextMonth">▶</button>
             <button class="btn soft" id="todayBtn">Hôm nay</button>
         </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; background: var(--surface-2); padding: 10px; border-radius: 8px;">
+            <label style="font-size: 14px; font-weight: bold; color: var(--text-2);">🔍 Lọc môn:</label>
+            <select id="calSubjectFilter" class="session-filter" style="flex: 1; max-width: 250px; padding: 6px; border-radius: 6px;">
+                <option value="">— Tất cả môn —</option>
+            </select>
+        </div>
+<div class="cal-filter-row">
+    <label class="field-label" style="margin:0">🔍 Lọc theo môn:</label>
+    <select id="calSubjectFilter" class="session-filter">
+        <option value="">— Tất cả môn —</option>
+    </select>
+    <button class="btn ghost" id="calClearFilter" style="display:none">✕ Bỏ lọc</button>
+</div>
         <div class="cal-weekdays">
             <div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div>
             <div class="weekend">T7</div><div class="weekend">CN</div>

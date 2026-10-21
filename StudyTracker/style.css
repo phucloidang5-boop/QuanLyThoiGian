@@ -455,11 +455,17 @@
     color: #fff; font-weight: 600;
   }
   .chip.deadline {
-    background: var(--danger); color: #fff; font-weight: 600;
-    cursor: pointer; transition: transform var(--t-fast); position: relative;
+    cursor: pointer; 
+    transition: transform var(--t-fast), box-shadow var(--t-fast); 
+    position: relative;
+    /* Đã xóa background đỏ đặc trưng, giờ nó sẽ lấy màu từ inline-style ở app.js */
   }
-  .chip.deadline:hover { transform: scale(1.05); }
-  .chip.deadline.soon { background: var(--warning); color: #fff; }
+  .chip.deadline:hover { 
+    transform: translateY(-1px); 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  /* Xóa cái này đi để không bị đè màu cảnh báo */
+  /* .chip.deadline.soon { background: var(--warning); color: #fff; } */
   .cell.has-both {
     border-color: var(--success);
     background: linear-gradient(135deg, var(--surface) 50%, #d1fae5 50%);
@@ -1607,4 +1613,128 @@
 .pct-apply {
     padding: 6px 12px !important;
     font-size: 13px !important;
+}
+.cal-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+}
+.cal-filter-row .session-filter {
+    flex: 1;
+    min-width: 180px;
+    max-width: 300px;
+}
+/* ═══════ 1. Ô NHẬP SỐ PHÚT POMODORO ═══════ */
+.pomodoro-custom-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    margin: 12px auto 0;
+    max-width: 420px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--border);
+    transition: opacity var(--t-fast);
+}
+.pomodoro-custom-time.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+.pct-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+}
+.pct-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--t-fast), color var(--t-fast);
+    cursor: pointer;
+}
+.pct-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pct-btn:active { transform: scale(0.92); }
+.pct-input {
+    width: 72px;
+    height: 32px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.pct-input:focus {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* Ẩn mũi tên mặc định của input number */
+.pct-input::-webkit-outer-spin-button,
+.pct-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.pct-input[type=number] { -moz-appearance: textfield; }
+.pct-apply {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+}
+
+/* ═══════ 2. BỘ LỌC MÔN HỌC TRÊN LỊCH ═══════ */
+.cal-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+.cal-filter-row .session-filter {
+    flex: 1;
+    min-width: 180px;
+    max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+.cal-filter-row .session-filter:focus {
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ═══════ 3. NÚT GÁN MÔN (📌) TRONG TAB QUẢN LÝ ═══════ */
+.subject-actions .assign-btn:hover {
+    background: #fef3c7 !important; /* Màu vàng nhạt */
+    color: #d97706 !important;      /* Icon màu cam đậm */
+}
+[data-theme="dark"] .subject-actions .assign-btn:hover {
+    background: #4a3418 !important;
+    color: #f0c674 !important;
 }
