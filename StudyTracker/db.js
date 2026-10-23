@@ -125,6 +125,7 @@
             frozen INTEGER DEFAULT 0,
             goals_json TEXT DEFAULT '[]',
             slots_json TEXT DEFAULT '[]',
+            work_json TEXT DEFAULT '{}',
             updated_at TEXT
             );
 
@@ -161,14 +162,14 @@
             );
             CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline);
 
-CREATE TABLE IF NOT EXISTS roadmaps (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    total_sessions INTEGER NOT NULL,
-    completed_sessions INTEGER DEFAULT 0,
-    completed_dates_json TEXT DEFAULT '[]',
-    created_at TEXT
-);
+            CREATE TABLE IF NOT EXISTS roadmaps (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            total_sessions INTEGER NOT NULL,
+            completed_sessions INTEGER DEFAULT 0,
+            completed_dates_json TEXT DEFAULT '[]',
+            created_at TEXT
+            );
 
             CREATE TABLE IF NOT EXISTS meta (
             key TEXT PRIMARY KEY,
@@ -186,8 +187,18 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             }
         } catch (e) { console.warn('[DB] Migration column failed:', e); }
 
+        // Migration: thêm cột work_json cho days (nếu DB cũ chưa có)
+        try {
+            const cols = this.query('PRAGMA table_info(days)');
+            if (cols.length > 0 && !cols.some(c => c.name === 'work_json')) {
+                this.db.run("ALTER TABLE days ADD COLUMN work_json TEXT DEFAULT '{}'");
+                console.log('[DB] Migrated: added work_json column');
+            }
+        } catch (e) { console.warn('[DB] Migration work_json failed:', e); }
+
         this.save();
         },
+
         run(sql, params = []) {
         if (!this.db) return;
         try {
@@ -283,7 +294,6 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             [key, JSON.stringify(value)]);
         },
 
-        // ✅ FIX: Guard — không wipe DB nếu State.days rỗng đột ngột
         syncDays(days) {
         if (!this.db) return;
         const keys = Object.keys(days || {});
@@ -293,11 +303,12 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             const d = days[k] || {};
             const goals = Array.isArray(d.goals) ? d.goals : [];
             const slots = Array.isArray(d.slots) ? d.slots : [];
+            const work = (d.work && typeof d.work === 'object') ? d.work : {};
 
             this.run(
             `INSERT OR REPLACE INTO days
-            (date, minutes, notes, subject, frozen, goals_json, slots_json, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            (date, minutes, notes, subject, frozen, goals_json, slots_json, work_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 k,
                 d.minutes || 0,
@@ -306,6 +317,7 @@ CREATE TABLE IF NOT EXISTS roadmaps (
                 d.frozen ? 1 : 0,
                 JSON.stringify(goals),
                 JSON.stringify(slots),
+                JSON.stringify(work),
                 new Date().toISOString(),
             ]
             );
@@ -343,7 +355,6 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             this.run('DELETE FROM sessions');
             }
         } else {
-            // ⚠️ Safety: nếu State.days rỗng nhưng localStorage CÒN data → có thể load fail, KHÔNG xoá DB
             let lsEmpty = true;
             try {
             const raw = localStorage.getItem('st_days_v3');
@@ -427,10 +438,11 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             const d = days[date] || {};
             const goals = Array.isArray(d.goals) ? d.goals : [];
             const slots = Array.isArray(d.slots) ? d.slots : [];
+            const work = (d.work && typeof d.work === 'object') ? d.work : {};
             this.run(
             `INSERT OR REPLACE INTO days
-            (date, minutes, notes, subject, frozen, goals_json, slots_json, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            (date, minutes, notes, subject, frozen, goals_json, slots_json, work_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 date,
                 d.minutes || 0,
@@ -439,6 +451,7 @@ CREATE TABLE IF NOT EXISTS roadmaps (
                 d.frozen ? 1 : 0,
                 JSON.stringify(goals),
                 JSON.stringify(slots),
+                JSON.stringify(work),
                 new Date().toISOString(),
             ]
             );
@@ -502,7 +515,6 @@ CREATE TABLE IF NOT EXISTS roadmaps (
             });
         }
 
-        // Roadmaps
         const roadmaps = get('st_roadmap_v3', []);
         if (Array.isArray(roadmaps)) {
             this.run('DELETE FROM roadmaps');

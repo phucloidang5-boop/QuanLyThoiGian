@@ -29,6 +29,153 @@
     const WEEKDAYS_SHORT = ['CN','T2','T3','T4','T5','T6','T7'];
     const WEEKDAYS_LONG  = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
 
+    /* ═══════════════════════════════════════════════════════════
+       NGÀY LỄ VIỆT NAM — FULL + THEME 
+       ═══════════════════════════════════════════════════════════ */
+    const VN_HOLIDAYS_FIXED = {
+        '01-01': { name: 'Tết Dương lịch', type: 'major', theme: 'newyear' },
+        '09-01': { name: 'Ngày Học sinh, Sinh viên VN', type: 'minor', theme: 'default' },
+        '03-02': { name: 'Thành lập Đảng Cộng sản Việt Nam', type: 'minor', theme: 'national' },
+        '14-02': { name: 'Valentine', type: 'minor', theme: 'valentine' },
+        '27-02': { name: 'Ngày Thầy thuốc Việt Nam', type: 'minor', theme: 'default' },
+        '08-03': { name: 'Quốc tế Phụ nữ', type: 'minor', theme: 'flowers' },
+        '26-03': { name: 'Thành lập Đoàn TNCS Hồ Chí Minh', type: 'minor', theme: 'default' },
+        '30-04': { name: 'Giải phóng miền Nam', type: 'major', theme: 'national' },
+        '01-05': { name: 'Quốc tế Lao động', type: 'major', theme: 'national' },
+        '07-05': { name: 'Chiến thắng Điện Biên Phủ', type: 'minor', theme: 'national' },
+        '19-05': { name: 'Sinh nhật Chủ tịch Hồ Chí Minh', type: 'minor', theme: 'flowers' },
+        '01-06': { name: 'Quốc tế Thiếu nhi', type: 'minor', theme: 'kids' },
+        '27-07': { name: 'Thương binh - Liệt sĩ', type: 'minor', theme: 'national' },
+        '19-08': { name: 'Cách mạng Tháng Tám', type: 'minor', theme: 'national' },
+        '02-09': { name: 'Quốc khánh Việt Nam', type: 'major', theme: 'national' },
+        '10-10': { name: 'Giải phóng Thủ đô', type: 'minor', theme: 'national' },
+        '20-10': { name: 'Phụ nữ Việt Nam', type: 'minor', theme: 'flowers' },
+        '31-10': { name: 'Halloween', type: 'minor', theme: 'halloween' },
+        '11-11': { name: 'Singles Day (11.11)', type: 'minor', theme: 'shopping' },
+        '20-11': { name: 'Nhà giáo Việt Nam', type: 'minor', theme: 'flowers' },
+        '12-12': { name: 'Ngày hội mua sắm 12.12', type: 'minor', theme: 'shopping' },
+        '22-12': { name: 'Thành lập Quân đội Nhân dân VN', type: 'minor', theme: 'national' },
+        '24-12': { name: 'Đêm Giáng sinh', type: 'minor', theme: 'christmas' },
+        '25-12': { name: 'Lễ Giáng sinh', type: 'minor', theme: 'christmas' },
+        '31-12': { name: 'Giao thừa Dương lịch', type: 'minor', theme: 'newyear' },
+    };
+
+    const VN_HOLIDAYS_LUNAR = {
+        '2024': {
+            '02-03': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-10': { name: 'Tết Nguyên Đán (Giáp Thìn)', type: 'major', theme: 'tet' },
+            '02-24': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-18': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-22': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '06-10': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '08-18': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '09-17': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2025': {
+            '01-22': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '01-29': { name: 'Tết Nguyên Đán (Ất Tỵ)', type: 'major', theme: 'tet' },
+            '02-12': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-07': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-12': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '05-31': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '09-06': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '10-06': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2026': {
+            '02-10': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-17': { name: 'Tết Nguyên Đán (Bính Ngọ)', type: 'major', theme: 'tet' },
+            '03-03': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-26': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-31': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '06-19': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '08-27': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '09-25': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2027': {
+            '01-30': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-06': { name: 'Tết Nguyên Đán (Đinh Mùi)', type: 'major', theme: 'tet' },
+            '02-20': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-16': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-20': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '06-09': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '08-15': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '09-15': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2028': {
+            '01-19': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '01-26': { name: 'Tết Nguyên Đán (Mậu Thân)', type: 'major', theme: 'tet' },
+            '02-09': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-04': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-09': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '05-28': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '09-03': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '10-03': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2029': {
+            '02-06': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-13': { name: 'Tết Nguyên Đán (Kỷ Dậu)', type: 'major', theme: 'tet' },
+            '02-27': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-23': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-27': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '06-16': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '08-24': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '09-22': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+        '2030': {
+            '01-27': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-03': { name: 'Tết Nguyên Đán (Canh Tuất)', type: 'major', theme: 'tet' },
+            '02-17': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
+            '04-13': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
+            '05-17': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
+            '06-05': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
+            '08-12': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
+            '09-12': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
+        },
+    };
+
+    function getNthWeekday(year, month, weekday, n) {
+        const first = new Date(year, month - 1, 1);
+        const offset = (weekday - first.getDay() + 7) % 7;
+        return new Date(year, month - 1, 1 + offset + (n - 1) * 7);
+    }
+    function getLastWeekday(year, month, weekday) {
+        const last = new Date(year, month, 0);
+        const offset = (last.getDay() - weekday + 7) % 7;
+        return new Date(year, month - 1, last.getDate() - offset);
+    }
+    function toMMDD(d) {
+        return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function buildVariableHolidays(year) {
+        const out = {};
+        out[toMMDD(getNthWeekday(year, 5, 0, 2))] = { name: 'Ngày của Mẹ', type: 'minor', theme: 'flowers' };
+        out[toMMDD(getNthWeekday(year, 6, 0, 3))] = { name: 'Ngày của Cha', type: 'minor', theme: 'flowers' };
+        out[toMMDD(getNthWeekday(year, 3, 5, 3))] = { name: 'Quốc tế Giấc ngủ', type: 'minor', theme: 'default' };
+        out[toMMDD(getLastWeekday(year, 3, 6))] = { name: 'Giờ Trái Đất', type: 'minor', theme: 'default' };
+        out[toMMDD(getNthWeekday(year, 10, 1, 1))] = { name: 'Ngày Kiến trúc Thế giới', type: 'minor', theme: 'default' };
+        out[toMMDD(getNthWeekday(year, 10, 4, 2))] = { name: 'Ngày Thị giác Thế giới', type: 'minor', theme: 'default' };
+        out[toMMDD(getNthWeekday(year, 10, 6, 2))] = { name: 'Chăm sóc giảm nhẹ Thế giới', type: 'minor', theme: 'default' };
+        out[toMMDD(getNthWeekday(year, 10, 2, 2))] = { name: 'Quốc tế giảm nhẹ thiên tai', type: 'minor', theme: 'default' };
+        const thanksgiving = getNthWeekday(year, 11, 4, 4);
+        out[toMMDD(thanksgiving)] = { name: 'Lễ Tạ ơn', type: 'minor', theme: 'default' };
+        const blackFriday = new Date(thanksgiving); blackFriday.setDate(blackFriday.getDate() + 1);
+        out[toMMDD(blackFriday)] = { name: 'Black Friday', type: 'minor', theme: 'shopping' };
+        const cyberMonday = new Date(thanksgiving); cyberMonday.setDate(cyberMonday.getDate() + 4);
+        out[toMMDD(cyberMonday)] = { name: 'Cyber Monday', type: 'minor', theme: 'shopping' };
+        out[toMMDD(getNthWeekday(year, 11, 3, 2))] = { name: 'Thế giới phòng chống COPD', type: 'minor', theme: 'default' };
+        return out;
+    }
+    function getHolidayInfo(date) {
+        const year = date.getFullYear();
+        const mmdd = String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+        const lunar = VN_HOLIDAYS_LUNAR[year];
+        if (lunar && lunar[mmdd]) return lunar[mmdd];
+        if (VN_HOLIDAYS_FIXED[mmdd]) return VN_HOLIDAYS_FIXED[mmdd];
+        const variable = buildVariableHolidays(year);
+        if (variable[mmdd]) return variable[mmdd];
+        return null;
+    }
+
     const State = {
     days:    {},
     roadmap: [],
@@ -178,9 +325,10 @@
         const out = {};
 
         rows.forEach(r => {
-            let goals = [], slots = [];
+            let goals = [], slots = [], work = {};
             try { goals = JSON.parse(r.goals_json || '[]'); } catch (e) {}
             try { slots = JSON.parse(r.slots_json || '[]'); } catch (e) {}
+            try { work = JSON.parse(r.work_json || '{}') || {}; } catch (e) {}
             out[r.date] = {
             minutes: r.minutes || 0,
             notes:   r.notes || '',
@@ -188,6 +336,7 @@
             frozen:  !!r.frozen,
             goals,
             slots,
+            work,
             sessions: [],
             };
         });
@@ -298,7 +447,7 @@
     },
     ensureDay(k) {
         if (!State.days[k]) {
-        State.days[k] = { minutes: 0, goals: [], notes: '', slots: [], sessions: [] };
+        State.days[k] = { minutes: 0, goals: [], notes: '', slots: [], sessions: [], work: {} };
         }
         const d = State.days[k];
         if (!Array.isArray(d.goals)) d.goals = [];
@@ -306,6 +455,11 @@
         if (!Array.isArray(d.sessions)) d.sessions = [];
         if (typeof d.notes !== 'string') d.notes = '';
         if (typeof d.minutes !== 'number') d.minutes = 0;
+
+        if (!d.work || typeof d.work !== 'object') d.work = {};
+        if (typeof d.work.hours !== 'number') d.work.hours = 0;
+        if (typeof d.work.startTime !== 'string') d.work.startTime = '';
+        if (typeof d.work.endTime !== 'string') d.work.endTime = '';
         d.slots = d.slots.map(s => {
         if (typeof s === 'number') return { hour: s, text: '', done: false };
         if (s && typeof s === 'object') {
@@ -873,6 +1027,21 @@
         }
         const info = $('#goalInfo');
         if (info) info.innerHTML = msg;
+
+        // ✅ Dòng đi làm hôm nay
+        const workLine = $('#homeWorkLine');
+        if (workLine) {
+        const today = State.days[State.today];
+        const w = today?.work;
+        if (w && w.hours > 0) {
+            let timeRange = '';
+            if (w.startTime && w.endTime) timeRange = ` <span style="opacity:.7">(${w.startTime}–${w.endTime})</span>`;
+            workLine.hidden = false;
+            workLine.innerHTML = `💼 Hôm nay đi làm: <b>${w.hours}h</b>${timeRange}`;
+        } else {
+            workLine.hidden = true;
+        }
+        }
     },
 
     renderRoadmap() {
@@ -928,6 +1097,7 @@
         title: t,
         totalSessions: total,
         completedSessions: 0,
+        completedDates: [],
         createdAt: new Date().toISOString(),
         });
         inp.value = '';
@@ -1337,7 +1507,7 @@
         const daysInMonth  = new Date(State.viewYear, State.viewMonth + 1, 0).getDate();
         const daysPrev     = new Date(State.viewYear, State.viewMonth, 0).getDate();
         const frag = document.createDocumentFragment();
-        
+
         for (let i = 0; i < 42; i++) {
         const idx = i - startWeekday;
         let cellDate, other = false;
@@ -1358,11 +1528,31 @@
         cell.style.position = 'relative';
         if (other) cell.classList.add('other');
         if (k === State.today) cell.classList.add('today');
+
+        // ✅ Ngày lễ — Thêm Theme và Biểu tượng (Deco)
+        const holiday = getHolidayInfo(cellDate);
+        let icon = '';
+        if (holiday) {
+            cell.classList.add('theme-' + (holiday.theme || 'default'));
+            // Gắn biểu tượng (Deco) theo chủ đề
+            if (holiday.theme === 'halloween') icon = ' 🎃';
+            else if (holiday.theme === 'tet') icon = ' 🧨';
+            else if (holiday.theme === 'midautumn') icon = ' 🏮';
+            else if (holiday.theme === 'christmas') icon = ' 🎄';
+            else if (holiday.theme === 'valentine') icon = ' ❤️';
+            else if (holiday.theme === 'national') icon = ' ⭐';
+            else if (holiday.theme === 'shopping') icon = ' 🛒';
+            else if (holiday.theme === 'flowers') icon = ' 🌸';
+            else if (holiday.theme === 'newyear') icon = ' 🎆';
+            else if (holiday.theme === 'kids') icon = ' 🎈';
+        }
+
         const num = document.createElement('div');
         num.className = 'num';
-        num.textContent = cellDate.getDate();
+        // Nếu có lễ thì thêm icon, không thì chỉ hiện số
+        num.innerHTML = cellDate.getDate() + (icon ? `<span class="holiday-icon">${icon}</span>` : '');
         cell.appendChild(num);
-        
+
         const chips = document.createElement('div');
         chips.className = 'chips';
         chips.style.cssText = 'max-height: 90px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;';
@@ -1379,6 +1569,19 @@
             `<div class="chip plan" style="border-color:${planColor}; color:${planColor};" title="${planSlots.length} khung giờ dự định">${planText}</div>`);
         }
 
+        // Work chip (đi làm) — nếu có
+        const workInfo = data && data.work;
+        if (workInfo && workInfo.hours > 0) {
+            const timeRange = (workInfo.startTime && workInfo.endTime)
+            ? ` (${workInfo.startTime}–${workInfo.endTime})`
+            : '';
+            const label = Number.isInteger(workInfo.hours)
+            ? `${workInfo.hours}h`
+            : `${workInfo.hours.toFixed(1)}h`;
+            chips.insertAdjacentHTML('beforeend',
+            `<div class="chip work" title="Đi làm ${label}${timeRange}">💼 ${label}</div>`);
+        }
+
         const subjectStats = {};
         sessions.forEach(s => {
             const tag = s.tag || 'Khác';
@@ -1389,7 +1592,7 @@
         if (daySubject && sessions.length === 0 && (!activeFilter || daySubject === activeFilter)) {
             subjectStats[daySubject] = (subjectStats[daySubject] || 0) + (data.minutes || 0);
         }
-        
+
         let totalActualMins = 0;
         Object.entries(subjectStats).forEach(([tag, mins]) => {
             if (mins <= 0) return;
@@ -1405,14 +1608,12 @@
                 if (activeFilter && t.tag !== activeFilter) return false;
                 return true;
             });
-            
             todos.sort((a, b) => {
                 if (a.done !== b.done) return a.done ? 1 : -1;
                 const pA = a.priority === 'high' ? 0 : (a.priority === 'normal' ? 1 : 2);
                 const pB = b.priority === 'high' ? 0 : (b.priority === 'normal' ? 1 : 2);
                 return pA - pB;
             });
-
             if (todos.length > 0) {
                 const isSoon = k >= State.today;
                 todos.forEach(t => {
@@ -1421,17 +1622,15 @@
                     let todoColor = (typeof SubjectManager !== 'undefined')
                         ? SubjectManager.getColor(tagName)
                         : (isSoon ? 'var(--accent)' : 'var(--danger)');
-                    
                     const icon = t.done ? '✅' : '⏰';
                     const label = tagName ? `${icon} ${escapeHtml(tagName)}` : `${icon} ${safeTitle.slice(0, 10)}...`;
                     const opacity = t.done ? 'opacity: 0.6; text-decoration: line-through;' : '';
-                    
                     chips.insertAdjacentHTML('beforeend',
                     `<div class="chip deadline ${isSoon ? '' : 'overdue'}" style="background:${todoColor}; border-color:${todoColor}; color: #fff; ${opacity}" data-todo-id="${t.id}" title="${t.done ? 'Đã xong' : 'Chưa xong'}: ${safeTitle}">${label}</div>`);
                 });
             }
         }
-        
+
         if (chips.children.length === 0 && data && !activeFilter) {
             if ((data.minutes || 0) > 0) {
             const c = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
@@ -1443,7 +1642,7 @@
             }
         }
 
-        // ✅ Roadmap chips — ngày này hoàn thành buổi của roadmap nào
+        // Roadmap chip (nếu có)
         if (Array.isArray(State.roadmap)) {
             State.roadmap.forEach(r => {
             const dates = Array.isArray(r.completedDates) ? r.completedDates : [];
@@ -1487,9 +1686,20 @@
         const title = $('#modalTitle');
         if (title) title.textContent = `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
         const sub = $('#modalSub');
-        if (sub) sub.textContent = 'Nhập tổng phút học và chi tiết từng khung giờ';
+        if (sub) sub.textContent = 'Nhập giờ học, giờ làm và chi tiết từng khung giờ';
         const mins = $('#modalMinutes');
         if (mins) mins.value = State.modal.minutes || '';
+
+        // ✅ Load work data
+        const work = data.work || {};
+        const wStart = $('#modalWorkStart');
+        const wEnd = $('#modalWorkEnd');
+        const wHours = $('#modalWorkHours');
+        if (wStart) wStart.value = work.startTime || '';
+        if (wEnd) wEnd.value = work.endTime || '';
+        if (wHours) wHours.value = (work.hours > 0) ? work.hours : '';
+        this._bindWorkCalc();
+
         if (typeof SubjectManager !== 'undefined') SubjectManager.renderModalSelect();
         const subjSel = $('#modalSubject');
         if (subjSel) subjSel.value = data.subject || '';
@@ -1497,6 +1707,28 @@
         this.renderModalRoadmaps(k);
         const modal = $('#hourModal');
         if (modal) modal.classList.add('show');
+    },
+
+    // ✅ Hàm bị thiếu — thêm vào để tính giờ đi làm
+    _bindWorkCalc() {
+        const wStart = $('#modalWorkStart');
+        const wEnd = $('#modalWorkEnd');
+        const wHours = $('#modalWorkHours');
+        if (!wStart || !wEnd || !wHours) return;
+        if (wStart.dataset.bound) return;
+        wStart.dataset.bound = '1';
+
+        const recalc = () => {
+        if (!wStart.value || !wEnd.value) return;
+        const [sh, sm] = wStart.value.split(':').map(Number);
+        const [eh, em] = wEnd.value.split(':').map(Number);
+        let mins = (eh * 60 + em) - (sh * 60 + sm);
+        if (mins < 0) mins += 24 * 60; // Qua đêm
+        wHours.value = (mins / 60).toFixed(1);
+        };
+
+        wStart.addEventListener('change', recalc);
+        wEnd.addEventListener('change', recalc);
     },
 
     renderHourList() {
@@ -1579,6 +1811,21 @@
         dayData.minutes = mins;
         dayData.slots = slots.sort((a, b) => a.hour - b.hour);
         if (subject) dayData.subject = subject;
+
+        // ✅ Lưu work
+        const workStart = $('#modalWorkStart')?.value || '';
+        const workEnd = $('#modalWorkEnd')?.value || '';
+        const workHours = parseFloat($('#modalWorkHours')?.value) || 0;
+        if (workStart || workEnd || workHours > 0) {
+        dayData.work = {
+            startTime: workStart,
+            endTime: workEnd,
+            hours: workHours,
+        };
+        } else {
+        delete dayData.work;
+        }
+
         Storage.saveDays();
         this.closeModal();
         this.render();
@@ -2823,7 +3070,6 @@
         if (this.isDone()) return;
         setTimeout(() => this.show(), 400);
     },
-    // ✅ FIX: Đọc từ DB trước, fallback localStorage
     isDone() {
         try {
         if (window.DB && window.DB.ready && window.DB.getMeta) {
@@ -2833,7 +3079,6 @@
         return localStorage.getItem(STORE.ONBOARD) === '1';
         } catch (e) { return false; }
     },
-    // ✅ FIX: Ghi vào cả DB
     markDone() {
         try { localStorage.setItem(STORE.ONBOARD, '1'); } catch (e) {}
         try {
@@ -2842,7 +3087,6 @@
         }
         } catch (e) {}
     },
-    // ✅ FIX: Xóa cả DB
     reset() {
         try { localStorage.removeItem(STORE.ONBOARD); } catch (e) {}
         try {
@@ -3266,7 +3510,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         }
         return null;
     },
-    // ✅ FIX: Nới ngưỡng cảnh báo — chỉ warn khi thực sự bất thường
     checkMinutesMismatch(totalMin, slots) {
         if (!slots || !slots.length) return null;
         const slotCount = slots.length;
@@ -4413,7 +4656,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         this.timerId = setInterval(() => this.check(), 60000);
         setTimeout(() => this.check(), 5000);
     },
-    // ✅ FIX: sessionStorage → localStorage (không spam khi mở tab mới) + auto-cleanup
     _cleanupOldNotifKeys() {
         try {
         const cutoff = new Date();
@@ -4510,7 +4752,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         }
         } catch (e) {}
         const usedMB = (total / 1024 / 1024).toFixed(2);
-        const limitMB = 5;
+        const limitMB = 10;
         const pct = Math.round((total / (limitMB * 1024 * 1024)) * 100);
         return { usedMB, limitMB, pct };
     },
@@ -4830,7 +5072,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         '◀': 'Trước', '▶': 'Sau', '−': 'Giảm', '+': 'Tăng',
         '📥': 'Nhập', '📦': 'Xuất', '⬇': 'Xuất', '⬆': 'Nhập',
     },
-    // ✅ FIX: Debounce observer — tránh spam khi render Heatmap 365 cells
     init() {
         this.autoLabelAll();
         const debouncedLabel = debounce(() => this.autoLabelAll(), 200);

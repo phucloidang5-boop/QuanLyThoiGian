@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="logo.png">
     </head>
     <body>
 
@@ -65,6 +66,7 @@
             <div class="goal-bar"><div class="goal-fill" id="goalFill"></div></div>
             <div class="goal-info" id="goalInfo"></div>
             </div>
+            <div class="goal-work-line" id="homeWorkLine" hidden></div>
         </div>
 
         <div class="card">
@@ -269,6 +271,30 @@
         <div class="card">
             <h2 class="card-title">📈 Giờ học 14 ngày gần đây</h2>
             <div class="chart chart-lg" id="statsChart"></div>
+        </div>
+
+        <!-- 💼 CARD THỐNG KÊ ĐI LÀM MỚI -->
+        <div class="card work-stats-card">
+            <h2 class="card-title" style="color:#d97706">💼 Thống kê đi làm (Tách biệt)</h2>
+            <div class="work-summary-grid">
+                <div class="work-stat-box">
+                    <div class="ws-label">Tuần này</div>
+                    <div class="ws-val" id="workWeek">0h</div>
+                </div>
+                <div class="work-stat-box">
+                    <div class="ws-label">Tháng này</div>
+                    <div class="ws-val" id="workMonth">0h</div>
+                </div>
+                <div class="work-stat-box">
+                    <div class="ws-label">Tổng cộng</div>
+                    <div class="ws-val" id="workTotal">0h</div>
+                </div>
+                <div class="work-stat-box">
+                    <div class="ws-label">TB / ngày đi làm</div>
+                    <div class="ws-val" id="workAvg">0h</div>
+                </div>
+            </div>
+            <div class="chart chart-lg" id="workChart14" style="margin-top:20px"></div>
         </div>
 
         <div class="card">
@@ -574,11 +600,27 @@
         <div class="modal-content">
         <h3 class="modal-title" id="modalTitle">Ghi giờ học</h3>
         <p class="modal-sub" id="modalSub"></p>
+        <div id="modalHolidayBanner" class="holiday-banner" hidden></div>
         <label class="field-label">Tổng số phút học thực tế</label>
         <div class="input-row">
             <input type="number" id="modalMinutes" class="input" min="0" placeholder="VD: 120">
             <span class="unit-label">phút</span>
         </div>
+
+        <label class="field-label">💼 Đi làm (nếu có)</label>
+        <div class="work-input-group">
+            <div class="work-time-pair">
+                <input type="time" id="modalWorkStart" class="input" title="Giờ bắt đầu">
+                <span class="unit-label">→</span>
+                <input type="time" id="modalWorkEnd" class="input" title="Giờ kết thúc">
+            </div>
+            <div class="work-hours-wrap">
+                <input type="number" id="modalWorkHours" class="input" min="0" max="24" step="0.5" placeholder="0">
+                <span class="unit-label">giờ</span>
+            </div>
+        </div>
+        <p class="hint" style="text-align:left;margin:4px 0 10px;font-size:11px">Nhập giờ bắt đầu + kết thúc để tự tính, hoặc nhập số giờ trực tiếp</p>
+
         <label class="field-label">Môn học chủ đạo</label>
         <select id="modalSubject"><option value="">— Không chọn —</option></select>
         <label class="field-label">Chi tiết từng khung giờ (Kế hoạch / Thực tế)</label>
