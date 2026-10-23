@@ -1,0 +1,107 @@
+Xem tất cả Ngày đã học (Thực tế):
+
+sql
+SELECT date AS "Ngày", subject AS "Môn", minutes AS "Số phút", notes AS "Ghi chú"
+FROM days 
+WHERE minutes > 0 OR subject != ''
+ORDER BY date DESC;
+2. Xem tất cả Deadline (Dù xong hay chưa xong):
+
+sql
+SELECT deadline AS "Ngày", title AS "Công việc", tag AS "Môn", 
+       CASE WHEN done = 1 THEN '✅ Đã xong' ELSE '⏰ Chưa xong' END AS "Trạng thái"
+FROM todos 
+WHERE deadline IS NOT NULL AND deadline != ''
+ORDER BY deadline DESC;
+3. Xem tất cả các Phiên học (Pomodoro & Thủ công):
+
+sql
+SELECT date AS "Ngày", time(at) AS "Giờ", minutes AS "Phút", 
+       tag AS "Môn", text AS "Ghi chú" 
+FROM sessions 
+ORDER BY date DESC, at DESC;
+4. Xem tất cả các Môn học đã tạo:
+
+sql
+SELECT id, name AS "Tên Môn", color AS "Mã Màu", created_at AS "Ngày Tạo" 
+FROM subjects;
+5. Xem tất cả Lộ trình:
+
+sql
+SELECT title AS "Tên Lộ Trình", total_sessions AS "Tổng số buổi", 
+       completed_sessions AS "Đã xong" 
+FROM roadmaps;
+6. Xem Thông tin cá nhân & Cài đặt (Profile, Theme...):
+
+sql
+SELECT key AS "Tên cài đặt", value AS "Giá trị" FROM meta;
+PHẦN 2: TRUY VẤN BẰNG CONSOLE (F12)
+(Mày bấm F12 -> Chuyển sang tab Console -> Dán code -> Ấn Enter)
+
+1. Bảng tổng hợp TẤT CẢ Lịch Học (Kế hoạch + Thực tế + Deadline):
+Lệnh này gom ngày nào có kế hoạch, ngày nào đã học, ngày nào có deadline ra chung 1 bảng cực dễ nhìn.
+
+javascript
+(function tongHopLichHoc() {
+    const days = window.DB.query('SELECT * FROM days');
+    const todos = window.DB.query('SELECT * FROM todos');
+    const ketQua = {};
+
+    // Quét Kế hoạch và Thực tế
+    days.forEach(d => {
+        let slots = [];
+        try { slots = JSON.parse(d.slots_json || '[]'); } catch(e){}
+        if (slots.length > 0 || d.minutes > 0 || d.subject) {
+            ketQua[d.date] = {
+                "Ngày": d.date,
+                "Môn": d.subject || '---',
+                "Phút đã học": d.minutes || 0,
+                "Kế hoạch (Khung giờ)": slots.map(s => `${s.hour}:00 - ${s.text}`).join(' | ') || 'Trống',
+                "Deadline": []
+            };
+        }
+    });
+
+    // Quét Deadline
+    todos.forEach(t => {
+        if (t.deadline) {
+            if (!ketQua[t.deadline]) {
+                ketQua[t.deadline] = {
+                    "Ngày": t.deadline, "Môn": '---', "Phút đã học": 0, "Kế hoạch (Khung giờ)": 'Trống', "Deadline": []
+                };
+            }
+            ketQua[t.deadline]["Deadline"].push(`[${t.done ? 'Xong' : 'Chưa'}] ${t.title} (${t.tag || 'Ko môn'})`);
+        }
+    });
+
+    const mang = Object.values(ketQua).sort((a, b) => b["Ngày"].localeCompare(a["Ngày"]));
+    mang.forEach(item => { item["Deadline"] = item["Deadline"].join(' | ') || 'Trống'; });
+    
+    console.log("%c=== TỔNG HỢP LỊCH HỌC ===", "color: #4f46e5; font-weight: bold; font-size: 14px");
+    console.table(mang);
+})();
+2. Xem TOÀN BỘ Dữ liệu thô (JSON) của từng bảng:
+Lệnh này in ra mọi thứ kể cả mấy cái lặt vặt.
+
+javascript
+console.log("--- BẢNG NGÀY ---", window.DB.query('SELECT * FROM days'));
+console.log("--- BẢNG PHIÊN HỌC ---", window.DB.query('SELECT * FROM sessions'));
+console.log("--- BẢNG TODO ---", window.DB.query('SELECT * FROM todos'));
+console.log("--- BẢNG MÔN ---", window.DB.query('SELECT * FROM subjects'));
+console.log("--- BẢNG LỘ TRÌNH ---", window.DB.query('SELECT * FROM roadmaps'));
+3. Đếm số lượng dòng trong từng bảng (Xem App đang lưu bao nhiêu data):
+
+javascript
+console.log(window.DB.query(`
+  SELECT 
+    (SELECT COUNT(*) FROM days) AS "Tổng Ngày",
+    (SELECT COUNT(*) FROM sessions) AS "Tổng Phiên",
+    (SELECT COUNT(*) FROM todos) AS "Tổng Todo",
+    (SELECT COUNT(*) FROM subjects) AS "Tổng Môn",
+    (SELECT COUNT(*) FROM roadmaps) AS "Tổng Lộ Trình"
+`));
+4. Xuất Toàn Bộ Dữ Liệu Ra File JSON (Backup khẩn cấp):
+(Tương đương với việc mày bấm nút "⬇ Xuất JSON" trong tab Quản lý)
+
+javascript
+Profile.exportJSON();

@@ -70,12 +70,10 @@
             return;
         }
 
-        // Load sql.js
         this.sql = await initSqlJs({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/${file}`,
         });
 
-        // Load DB từ IndexedDB (nếu có)
         const saved = await IDB.get();
         if (saved && saved.byteLength > 0) {
             try {
@@ -91,7 +89,6 @@
             this.createSchema();
         }
 
-        // Migration tự động: nếu localStorage có data và DB trống
         const hasLocalData = (() => {
             try { return !!localStorage.getItem('st_days_v3'); } catch (e) { return false; }
         })();
@@ -109,7 +106,6 @@
         this.ready = true;
         console.log('✅ [DB] SQLite ready — ' + this.getOne('SELECT COUNT(*) as n FROM days')?.n + ' ngày');
 
-        // Fire ready callbacks
         this._readyCallbacks.forEach(fn => { try { fn(); } catch (e) {} });
         this._readyCallbacks = [];
         },
@@ -165,13 +161,14 @@
             );
             CREATE INDEX IF NOT EXISTS idx_todos_deadline ON todos(deadline);
 
-            CREATE TABLE IF NOT EXISTS roadmaps (
-            id TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
-            total_sessions INTEGER NOT NULL,
-            completed_sessions INTEGER DEFAULT 0,
-            created_at TEXT
-            );
+CREATE TABLE IF NOT EXISTS roadmaps (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    total_sessions INTEGER NOT NULL,
+    completed_sessions INTEGER DEFAULT 0,
+    completed_dates_json TEXT DEFAULT '[]',
+    created_at TEXT
+);
 
             CREATE TABLE IF NOT EXISTS meta (
             key TEXT PRIMARY KEY,
@@ -179,10 +176,18 @@
             );
         `;
         this.db.run(schema);
+
+        // Migration: thêm cột completed_dates_json cho DB cũ
+        try {
+            const cols = this.query('PRAGMA table_info(roadmaps)');
+            if (cols.length > 0 && !cols.some(c => c.name === 'completed_dates_json')) {
+                this.db.run("ALTER TABLE roadmaps ADD COLUMN completed_dates_json TEXT DEFAULT '[]'");
+                console.log('[DB] Migrated: added completed_dates_json column');
+            }
+        } catch (e) { console.warn('[DB] Migration column failed:', e); }
+
         this.save();
         },
-
-        /* ═══ CRUD ═══ */
         run(sql, params = []) {
         if (!this.db) return;
         try {
@@ -214,7 +219,6 @@
         return r[0] || null;
         },
 
-        /* ═══ Persist (debounced 200ms) ═══ */
         save() {
         if (this._saveTimer) return;
         this._saveTimer = setTimeout(async () => {
@@ -240,7 +244,6 @@
         await IDB.set(buf);
         },
 
-        /* ═══ Export / Import / Reset ═══ */
         exportFile() {
         if (!this.db) { alert('Database chưa sẵn sàng'); return; }
         const data = this.db.export();
@@ -269,7 +272,6 @@
         await this.saveNow();
         },
 
-        /* ═══ Meta (key-value) ═══ */
         getMeta(key, fb = null) {
         const r = this.getOne('SELECT value FROM meta WHERE key = ?', [key]);
         if (!r) return fb;
@@ -281,7 +283,7 @@
             [key, JSON.stringify(value)]);
         },
 
-        /* ═══ SYNC từ State (source of truth) ═══ */
+        // ✅ FIX: Guard — không wipe DB nếu State.days rỗng đột ngột
         syncDays(days) {
         if (!this.db) return;
         const keys = Object.keys(days || {});
@@ -333,16 +335,26 @@
         if (keys.length > 0) {
             const ph = keys.map(() => '?').join(',');
             this.run(`DELETE FROM days WHERE date NOT IN (${ph})`, keys);
-        } else {
-            this.run('DELETE FROM days');
-        }
-
-        const ids = Array.from(sessionIds);
-        if (ids.length > 0) {
-            const ph = ids.map(() => '?').join(',');
-            this.run(`DELETE FROM sessions WHERE id NOT IN (${ph})`, ids);
-        } else {
+            const ids = Array.from(sessionIds);
+            if (ids.length > 0) {
+            const ph2 = ids.map(() => '?').join(',');
+            this.run(`DELETE FROM sessions WHERE id NOT IN (${ph2})`, ids);
+            } else {
             this.run('DELETE FROM sessions');
+            }
+        } else {
+            // ⚠️ Safety: nếu State.days rỗng nhưng localStorage CÒN data → có thể load fail, KHÔNG xoá DB
+            let lsEmpty = true;
+            try {
+            const raw = localStorage.getItem('st_days_v3');
+            lsEmpty = !raw || raw === '{}' || raw === 'null' || raw === 'undefined';
+            } catch (e) { lsEmpty = false; }
+            if (lsEmpty) {
+            this.run('DELETE FROM days');
+            this.run('DELETE FROM sessions');
+            } else {
+            console.warn('[DB] syncDays: State.days rỗng nhưng localStorage còn data — bỏ qua để tránh mất dữ liệu');
+            }
         }
         },
 
@@ -385,14 +397,21 @@
         this.run('DELETE FROM roadmaps');
         (roadmaps || []).forEach(r => {
             this.run(
-            `INSERT OR REPLACE INTO roadmaps (id, title, total_sessions, completed_sessions, created_at)
-            VALUES (?, ?, ?, ?, ?)`,
-            [r.id || 'r_' + Date.now(), r.title, r.totalSessions || 1, r.completedSessions || 0, r.createdAt || new Date().toISOString()]
+            `INSERT OR REPLACE INTO roadmaps
+            (id, title, total_sessions, completed_sessions, completed_dates_json, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                r.id || 'r_' + Date.now(),
+                r.title,
+                r.totalSessions || 1,
+                r.completedSessions || 0,
+                JSON.stringify(Array.isArray(r.completedDates) ? r.completedDates : []),
+                r.createdAt || new Date().toISOString(),
+            ]
             );
         });
         },
 
-        /* ═══ MIGRATION từ localStorage ═══ */
         async migrateFromLocalStorage() {
         const get = (k, fb) => {
             try {
@@ -403,7 +422,6 @@
 
         const stats = { days: 0, sessions: 0, subjects: 0, todos: 0, roadmaps: 0 };
 
-        // Days + Sessions
         const days = get('st_days_v3', {});
         Object.keys(days).forEach(date => {
             const d = days[date] || {};
@@ -448,7 +466,6 @@
             });
         });
 
-        // Subjects
         const subjects = get('st_subjects_v1', []);
         if (Array.isArray(subjects)) {
             this.run('DELETE FROM subjects');
@@ -461,7 +478,6 @@
             });
         }
 
-        // Todos
         const todos = get('st_todos_v1', []);
         if (Array.isArray(todos)) {
             this.run('DELETE FROM todos');
@@ -492,15 +508,22 @@
             this.run('DELETE FROM roadmaps');
             roadmaps.forEach(r => {
             this.run(
-                `INSERT OR REPLACE INTO roadmaps (id, title, total_sessions, completed_sessions, created_at)
-                VALUES (?, ?, ?, ?, ?)`,
-                [r.id || 'r_' + Date.now(), r.title, r.totalSessions || 1, r.completedSessions || 0, r.createdAt || new Date().toISOString()]
+                `INSERT OR REPLACE INTO roadmaps
+                (id, title, total_sessions, completed_sessions, completed_dates_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                r.id || 'r_' + Date.now(),
+                r.title,
+                r.totalSessions || 1,
+                r.completedSessions || 0,
+                JSON.stringify(Array.isArray(r.completedDates) ? r.completedDates : []),
+                r.createdAt || new Date().toISOString(),
+                ]
             );
             stats.roadmaps++;
             });
         }
 
-        // Meta
         const profile = get('st_profile_v3', null);
         if (profile) this.setMeta('profile', profile);
 
@@ -629,7 +652,6 @@
             return;
         }
 
-        // Safety: chỉ cho SELECT
         const clean = sql.toUpperCase().replace(/\s+/g, ' ').trim();
         const firstWord = clean.split(' ')[0];
         const dangerous = ['INSERT','UPDATE','DELETE','DROP','ALTER','CREATE','TRUNCATE','ATTACH','DETACH','PRAGMA','VACUUM'];
@@ -695,12 +717,10 @@
         }
     }
 
-    // Expose globally
     window.DB = DB;
     window.IDB = IDB;
     window.SQLRunner = SQLRunner;
 
-    // Tự init
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAll);
     } else {

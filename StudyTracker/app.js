@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — app.js
-    Bản v5 + SQLite integration
+    Bản v5 + SQLite integration + Worker Pomodoro
     ═══════════════════════════════════════════════════════════ */
     (function () {
     'use strict';
@@ -118,6 +118,28 @@
         State.roadmap = this.get(STORE.ROADMAP, []) || [];
         }
 
+        // ✅ Migrate roadmap cũ: nếu chỉ có completedSessions (số) mà chưa có completedDates
+        State.roadmap = State.roadmap.map(r => {
+        if (!Array.isArray(r.completedDates)) {
+            r.completedDates = [];
+            const n = Math.max(0, Math.min(
+            typeof r.completedSessions === 'number' ? r.completedSessions : 0,
+            typeof r.totalSessions === 'number' ? r.totalSessions : 0
+            ));
+            const today = new Date();
+            for (let i = n; i >= 1; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            r.completedDates.push(dateKey(d));
+            }
+            if (n > 0) {
+            console.log(`[Migrate] Roadmap "${r.title}": chuyển ${n} buổi → ${n} ngày`);
+            }
+        }
+        r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
+        return r;
+        });
+
         let profile = null;
         if (this._useSQL() && window.DB.getMeta) {
         profile = window.DB.getMeta('profile', null);
@@ -195,13 +217,21 @@
         if (!window.DB || !window.DB.ready) return null;
         try {
         const rows = window.DB.query('SELECT * FROM roadmaps ORDER BY created_at DESC');
-        return rows.map(r => ({
-            id:                r.id,
-            title:             r.title,
-            totalSessions:     r.total_sessions,
+        return rows.map(r => {
+            let completedDates = [];
+            try {
+            const parsed = JSON.parse(r.completed_dates_json || '[]');
+            if (Array.isArray(parsed)) completedDates = parsed;
+            } catch (e) {}
+            return {
+            id: r.id,
+            title: r.title,
+            totalSessions: r.total_sessions,
             completedSessions: r.completed_sessions,
-            createdAt:         r.created_at,
-        }));
+            completedDates,
+            createdAt: r.created_at,
+            };
+        });
         } catch (e) {
         return null;
         }
@@ -563,6 +593,7 @@
         saveGoalBtn.addEventListener('click', () => {
             const v = parseInt($('#dailyGoalInput').value, 10);
             if (isNaN(v) || v < 0) { toast('❌ Số phút không hợp lệ'); return; }
+            if (v > 1440) { toast('❌ Mục tiêu không thể vượt 24h/ngày (1440 phút)'); return; }
             State.profile.dailyGoal = v;
             Storage.saveProfile();
             toast('✅ Đã lưu mục tiêu');
@@ -925,22 +956,60 @@
     completeSession(id) {
         const r = State.roadmap.find(x => x.id === id);
         if (!r) return;
+        if (!Array.isArray(r.completedDates)) r.completedDates = [];
         const total = r.totalSessions || 0;
-        if ((r.completedSessions || 0) >= total) return;
-        r.completedSessions = (r.completedSessions || 0) + 1;
+        if (r.completedDates.length >= total) {
+        toast('⚠️ Đã hoàn thành hết buổi');
+        return;
+        }
+
+        const todayKey = State.today;
+        let targetDate = null;
+
+        // Ưu tiên hôm nay nếu chưa đánh dấu
+        if (!r.completedDates.includes(todayKey)) {
+        targetDate = todayKey;
+        } else {
+        // Hôm nay đã đánh dấu → tìm ngày gần nhất chưa đánh dấu (trong 365 ngày qua)
+        for (let i = 1; i <= 365; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const k = dateKey(d);
+            if (!r.completedDates.includes(k)) {
+            targetDate = k;
+            break;
+            }
+        }
+        }
+
+        if (!targetDate) {
+        toast('⚠️ Không còn ngày trống để đánh dấu');
+        return;
+        }
+
+        r.completedDates.push(targetDate);
+        r.completedSessions = Math.min(r.completedDates.length, total);
         Storage.saveRoadmap();
         this.renderRoadmap();
-        toast(`✅ ${r.completedSessions}/${total} buổi`);
+        Calendar.render();
+        toast(`✅ Đánh dấu buổi ngày ${targetDate} (${r.completedDates.length}/${total})`);
     },
 
     undoSession(id) {
         const r = State.roadmap.find(x => x.id === id);
         if (!r) return;
-        if ((r.completedSessions || 0) <= 0) return;
-        r.completedSessions--;
+        if (!Array.isArray(r.completedDates) || r.completedDates.length === 0) {
+        toast('ℹ️ Không có buổi nào để hủy');
+        return;
+        }
+        // Sắp xếp desc → lấy ngày mới nhất
+        r.completedDates.sort((a, b) => b.localeCompare(a));
+        const removed = r.completedDates.shift();
+        r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
         Storage.saveRoadmap();
         this.renderRoadmap();
-        toast(`↩️ Còn ${r.completedSessions}/${r.totalSessions} buổi`);
+        Calendar.render();
+        toast(`↩️ Đã bỏ đánh dấu ngày ${removed} (${r.completedDates.length}/${r.totalSessions})`);
     },
 
     renderStats() {
@@ -1296,14 +1365,12 @@
         
         const chips = document.createElement('div');
         chips.className = 'chips';
-        // Cho phép cuộn nếu có quá nhiều deadline
         chips.style.cssText = 'max-height: 90px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;';
 
         const daySubject = (data && data.subject) || '';
         const sessions = (data && data.sessions) ? data.sessions : [];
         const planSlots = (data && data.slots) ? data.slots : [];
 
-        // Plan chip
         const showPlan = planSlots.length > 0 && (!activeFilter || daySubject === activeFilter);
         if (showPlan) {
             const planColor = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
@@ -1312,7 +1379,6 @@
             `<div class="chip plan" style="border-color:${planColor}; color:${planColor};" title="${planSlots.length} khung giờ dự định">${planText}</div>`);
         }
 
-        // Actual study chips
         const subjectStats = {};
         sessions.forEach(s => {
             const tag = s.tag || 'Khác';
@@ -1333,15 +1399,13 @@
             `<div class="chip actual" style="background:${color}; border-color:${color};" title="${mins} phút đã học">✅ ${escapeHtml(tag)} (${fmtMinutes(mins)})</div>`);
         });
 
-        // Todos - HIỂN THỊ TẤT CẢ (Bỏ t.done)
         if (typeof TodoManager !== 'undefined') {
             const todos = TodoManager.todos.filter(t => {
                 if (t.deadline !== k) return false;
                 if (activeFilter && t.tag !== activeFilter) return false;
-                return true; // BỎ t.done Ở ĐÂY
+                return true;
             });
             
-            // Sắp xếp: Chưa xong lên trước, đã xong xuống dưới
             todos.sort((a, b) => {
                 if (a.done !== b.done) return a.done ? 1 : -1;
                 const pA = a.priority === 'high' ? 0 : (a.priority === 'normal' ? 1 : 2);
@@ -1378,6 +1442,18 @@
             chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${c}22; color:${c};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
             }
         }
+
+        // ✅ Roadmap chips — ngày này hoàn thành buổi của roadmap nào
+        if (Array.isArray(State.roadmap)) {
+            State.roadmap.forEach(r => {
+            const dates = Array.isArray(r.completedDates) ? r.completedDates : [];
+            if (dates.includes(k)) {
+                chips.insertAdjacentHTML('beforeend',
+                `<div class="chip roadmap" style="background:#8b5cf6; border-color:#8b5cf6; color:#fff;" title="Buổi lộ trình: ${escapeHtml(r.title)}">🗺️ ${escapeHtml(r.title.slice(0, 12))}${r.title.length > 12 ? '…' : ''}</div>`);
+            }
+            });
+        }
+
         if (chips.children.length > 0) cell.appendChild(chips);
         if (planSlots.length > 0 && totalActualMins > 0) cell.classList.add('has-both');
         frag.appendChild(cell);
@@ -1418,6 +1494,7 @@
         const subjSel = $('#modalSubject');
         if (subjSel) subjSel.value = data.subject || '';
         this.renderHourList();
+        this.renderModalRoadmaps(k);
         const modal = $('#hourModal');
         if (modal) modal.classList.add('show');
     },
@@ -1515,6 +1592,103 @@
     closeModal() {
         const modal = $('#hourModal');
         if (modal) modal.classList.remove('show');
+    },
+
+    renderModalRoadmaps(dateKey) {
+        const modal = $('#hourModal');
+        if (!modal) return;
+
+        // Tạo section 1 lần (idempotent)
+        let section = modal.querySelector('#modalRoadmapsSection');
+        if (!section) {
+        section = document.createElement('div');
+        section.id = 'modalRoadmapsSection';
+        section.innerHTML = `
+            <label class="field-label" style="margin-top:14px">🗺️ Đánh dấu buổi lộ trình</label>
+            <div id="modalRoadmaps" class="roadmap-check-list"></div>
+        `;
+        const actions = modal.querySelector('.modal-actions');
+        if (actions) actions.parentNode.insertBefore(section, actions);
+        else modal.querySelector('.modal-content')?.appendChild(section);
+        }
+
+        const list = section.querySelector('#modalRoadmaps');
+        if (!list) return;
+        list.innerHTML = '';
+
+        if (!State.roadmap.length) {
+        list.innerHTML = '<p style="font-size:12px;color:var(--text-mute);margin:0;font-style:italic">Chưa có lộ trình nào. Tạo ở Trang chủ.</p>';
+        return;
+        }
+
+        State.roadmap.forEach(r => {
+        const dates = Array.isArray(r.completedDates) ? r.completedDates : [];
+        const checked = dates.includes(dateKey);
+        const done = dates.length;
+        const total = r.totalSessions || 1;
+        const isFull = done >= total && !checked;
+
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface-2);border-radius:8px;cursor:pointer;margin-bottom:6px;transition:background .15s;border:1.5px solid transparent;';
+        label.innerHTML = `
+            <input type="checkbox" data-roadmap-id="${r.id}" ${checked ? 'checked' : ''} ${isFull ? 'disabled' : ''} style="width:18px;height:18px;accent-color:#8b5cf6;flex-shrink:0;cursor:pointer;">
+            <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:13px;word-break:break-word;color:var(--text)">${escapeHtml(r.title)}</div>
+            <div style="font-size:11px;color:var(--text-mute);margin-top:2px;">${done}/${total} buổi${isFull ? ' · Đã đầy' : ''}</div>
+            </div>
+            <span style="font-size:16px;color:${checked ? 'var(--success)' : 'var(--text-mute)'}">${checked ? '✅' : '⚪'}</span>
+        `;
+
+        const cb = label.querySelector('input');
+        cb.addEventListener('change', () => {
+            this.toggleRoadmapDate(r.id, dateKey, cb.checked);
+            this.renderModalRoadmaps(dateKey);
+        });
+
+        list.appendChild(label);
+        });
+    },
+
+    toggleRoadmapDate(roadmapId, dateKey, checked) {
+        const r = State.roadmap.find(x => x.id === roadmapId);
+        if (!r) return;
+        if (!Array.isArray(r.completedDates)) r.completedDates = [];
+
+        const wasChecked = r.completedDates.includes(dateKey);
+        if (wasChecked === checked) return;
+
+        if (checked) {
+        if (r.completedDates.length >= (r.totalSessions || 0)) {
+            toast('⚠️ Lộ trình đã đủ số buổi');
+            return;
+        }
+        r.completedDates.push(dateKey);
+        } else {
+        r.completedDates = r.completedDates.filter(d => d !== dateKey);
+        }
+        r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
+
+        Storage.saveRoadmap();
+        Home.renderRoadmap();
+        Calendar.render();
+
+        Undo.push(
+        checked ? `Đánh dấu "${r.title}" ngày ${dateKey}` : `Bỏ đánh dấu "${r.title}" ngày ${dateKey}`,
+        () => {
+            if (checked) {
+            r.completedDates = r.completedDates.filter(d => d !== dateKey);
+            } else {
+            if (!r.completedDates.includes(dateKey)) r.completedDates.push(dateKey);
+            }
+            r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
+            Storage.saveRoadmap();
+            Home.renderRoadmap();
+            Calendar.render();
+            if (State.modal.date === dateKey) this.renderModalRoadmaps(dateKey);
+        }
+        );
+
+        toast(checked ? `✅ Đã đánh dấu buổi lộ trình (${r.completedDates.length}/${r.totalSessions})` : `↩️ Đã bỏ đánh dấu (${r.completedDates.length}/${r.totalSessions})`);
     },
     };
 
@@ -1748,12 +1922,9 @@
     },
 
     getRandomColor() {
-        // Tạo màu ngẫu nhiên dạng HSL (độ sáng vừa phải để chữ trắng dễ đọc)
         const h = Math.floor(Math.random() * 360);
-        const s = Math.floor(Math.random() * 20) + 70; // 70-90%
-        const l = Math.floor(Math.random() * 15) + 45; // 45-60%
-        
-        // Chuyển HSL sang HEX
+        const s = Math.floor(Math.random() * 20) + 70;
+        const l = Math.floor(Math.random() * 15) + 45;
         l /= 100;
         const a = s * Math.min(l, 1 - l) / 100;
         const f = n => {
@@ -1770,10 +1941,8 @@
         if (!nameInput) return;
         const name = nameInput.value.trim();
         
-        // Nếu user không tự chọn màu, hoặc màu đó bị trùng, tự động sinh màu mới
         let color = (colorInput && colorInput.value) ? colorInput.value : this.getRandomColor();
         
-        // Nếu phát hiện màu này đã có môn khác xài rồi, tự đổi sang màu random khác
         let attempts = 0;
         while (this.subjects.some(s => s.color === color) && attempts < 20) {
             color = this.getRandomColor();
@@ -1792,7 +1961,6 @@
         
         this.save();
         nameInput.value = '';
-        // Tự động gợi ý một màu mới tinh cho lần thêm tiếp theo
         if (colorInput) colorInput.value = this.getRandomColor();
         
         this.render();
@@ -1937,6 +2105,10 @@
     renderTagPicker() {
         const picker = $('#tagPicker');
         if (!picker) return;
+        
+        // ✅ FIX: Lưu lại tag đang được chọn trước khi render lại
+        const prevSelectedTag = (typeof Pomodoro !== 'undefined') ? Pomodoro.selectedTag : null;
+        
         picker.innerHTML = '';
         if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = null;
         if (this.subjects.length === 0) {
@@ -1976,6 +2148,15 @@
             if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = null;
             }
         });
+        // ✅ FIX: Restore selection nếu môn này vẫn tồn tại
+        if (prevSelectedTag && sub.name === prevSelectedTag) {
+            b.classList.add('active');
+            b.style.background = sub.color;
+            b.style.color = '#fff';
+            b.style.border = '2px solid #fff';
+            b.style.boxShadow = '0 0 0 2px ' + sub.color;
+            if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = sub.name;
+        }
         picker.appendChild(b);
         });
     },
@@ -2026,14 +2207,12 @@
         const sub = this.subjects.find(s => s.name === name);
         if (sub) return sub.color;
         
-        // Fallback: Băm tên môn ra một màu cố định nếu bị xóa
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
             hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
         const h = Math.abs(hash) % 360;
         
-        // Convert HSL to Hex
         const s = 70, l = 55;
         const lDecimal = l / 100;
         const a = s * Math.min(lDecimal, 1 - lDecimal) / 100;
@@ -2060,6 +2239,7 @@
     },
     selectedTag: null,
     selectedStar: 0,
+    _worker: null,
 
     init() {
         $$('#pomodoroModes .pmode').forEach(btn => {
@@ -2100,6 +2280,57 @@
         });
         this.render();
         this.renderButtons();
+    },
+
+    _ensureWorker() {
+        if (this._worker) return true;
+        if (typeof Worker === 'undefined') return false;
+        try {
+        this._worker = new Worker('timer-worker.js');
+        this._worker.onmessage = (e) => {
+            if (e.data === 'tick' && this.state.running) {
+                this._tick();
+            }
+        };
+        this._worker.onerror = (err) => {
+            console.warn('[Pomodoro] Worker error, fallback to setInterval:', err.message);
+            this._worker = null;
+        };
+        return true;
+        } catch (e) {
+        console.warn('[Pomodoro] Worker init failed:', e.message);
+        this._worker = null;
+        return false;
+        }
+    },
+
+    _tick() {
+        if (!this.state.running) return;
+        const remain = Math.max(0, Math.round((this.state.endAt - Date.now()) / 1000));
+        if (remain === this.state.remaining) return;
+        this.state.remaining = remain;
+        this.render();
+        if (remain <= 0) this.finish();
+    },
+
+    startTick() {
+        if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
+        // Worker drive chính (chạy được khi tab ẩn)
+        if (this._ensureWorker() && this._worker) {
+            try { this._worker.postMessage('start'); } catch (e) {}
+        }
+        // Fallback interval (phòng khi worker fail — dedup trong _tick)
+        this.state.id = setInterval(() => {
+            if (!this.state.running) return;
+            this._tick();
+        }, 500);
+    },
+
+    stopTick() {
+        if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
+        if (this._worker) {
+            try { this._worker.postMessage('stop'); } catch (e) {}
+        }
     },
 
     initCustomTime() {
@@ -2227,7 +2458,7 @@
         if (!this.state.running) return;
         this.state.running = false;
         this.state.paused = true;
-        if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
+        this.stopTick();
         const remain = Math.max(0, Math.round((this.state.endAt - Date.now()) / 1000));
         this.state.remaining = remain;
         const card = $('.pomodoro-card');
@@ -2242,21 +2473,16 @@
         toast('⏸ Đã tạm dừng');
     },
 
-    startTick() {
-        if (this.state.id) clearInterval(this.state.id);
-        this.state.id = setInterval(() => {
-        const remain = Math.max(0, Math.round((this.state.endAt - Date.now()) / 1000));
-        this.state.remaining = remain;
-        this.render();
-        if (remain <= 0) this.finish();
-        }, 250);
-    },
-
     reset() {
         if (this.state.running || this.state.paused) {
         if (!confirm('Đang có phiên. Reset sẽ hủy phiên. Tiếp tục?')) return;
         }
-        if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
+        this._forceReset();
+    },
+
+    // ✅ FIX: Reset không confirm, dùng nội bộ sau khi đã confirm / lưu phiên
+    _forceReset() {
+        this.stopTick();
         this.state.running = false;
         this.state.paused = false;
         this.state.endAt = 0;
@@ -2276,35 +2502,44 @@
         const elapsed = Math.round((fullSec - this.state.remaining) / 60);
         if (elapsed <= 0) {
         toast('ℹ️ Chưa học phút nào');
-        this.reset();
+        this._forceReset();
         return;
         }
         if (!confirm(`Dừng và lưu ${elapsed} phút đã học?`)) return;
         this.saveWorkSession(elapsed);
-        this.reset();
+        this._forceReset();
     },
 
-    saveWorkSession(mins) {
+    // ✅ FIX: Thêm dateOverride — cho phép lưu phiên vào ngày trong quá khứ (restore)
+    saveWorkSession(mins, dateOverride) {
         if (this.modes[this.state.mode].kind !== 'work') return;
-        const today = State.today;
-        if (typeof Guards !== 'undefined') {
+        const sessionDate = dateOverride || State.today;
+        const isToday = sessionDate === State.today;
+        
+        if (isToday && typeof Guards !== 'undefined') {
         const now = new Date();
-        const dup = Guards.checkTimeDuplicate(today, now.getHours(), now.getMinutes());
+        const dup = Guards.checkTimeDuplicate(sessionDate, now.getHours(), now.getMinutes());
         if (dup) {
             const t = new Date(dup.at);
             const tStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
             if (!confirm(`⚠️ Đã có phiên lúc ${tStr} (${dup.minutes}p). Ghi thêm?`)) return;
         }
         }
-        const day = Storage.ensureDay(today);
+        const day = Storage.ensureDay(sessionDate);
         day.minutes = (day.minutes || 0) + mins;
         day.sessions = day.sessions || [];
         const tagName = this.selectedTag || 'Khác';
         const tagColor = (typeof SubjectManager !== 'undefined')
         ? SubjectManager.getColor(tagName) : '#64748b';
+        
+        // Dùng sessionStartAt gốc nếu restore, tránh lệch ngày
+        const at = (dateOverride && this.state.sessionStartAt)
+            ? new Date(this.state.sessionStartAt).toISOString()
+            : new Date().toISOString();
+        
         day.sessions.push({
         id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-        at: new Date().toISOString(),
+        at: at,
         minutes: mins,
         tag: tagName,
         tagColor: tagColor,
@@ -2322,7 +2557,7 @@
     },
 
     finish() {
-        if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
+        this.stopTick();
         const mode = this.modes[this.state.mode];
         const fullMin = mode.min;
         this.state.running = false;
@@ -2533,6 +2768,18 @@
         if (d.running && d.endAt) {
             const remain = Math.max(0, Math.round((d.endAt - Date.now()) / 1000));
             if (remain <= 0) {
+            // ✅ FIX: Pomodoro hoàn thành trong lúc tab đóng → vẫn LƯU phiên
+            if (this.modes[this.state.mode].kind === 'work') {
+                try {
+                const sessionDate = d.sessionStartAt
+                    ? dateKey(new Date(d.sessionStartAt))
+                    : State.today;
+                this.saveWorkSession(this.modes[this.state.mode].min, sessionDate);
+                toast(`✅ Đã lưu phiên ${this.modes[this.state.mode].min}p (${sessionDate}) — hoàn thành lúc đóng tab`);
+                } catch (e) {
+                console.warn('[Pomodoro] Failed to save restored session:', e);
+                }
+            }
             this.state.remaining = this.modes[this.state.mode].min * 60;
             this.state.running = false;
             this.state.paused = false;
@@ -2576,15 +2823,33 @@
         if (this.isDone()) return;
         setTimeout(() => this.show(), 400);
     },
+    // ✅ FIX: Đọc từ DB trước, fallback localStorage
     isDone() {
-        try { return localStorage.getItem(STORE.ONBOARD) === '1'; }
-        catch (e) { return false; }
+        try {
+        if (window.DB && window.DB.ready && window.DB.getMeta) {
+            const v = window.DB.getMeta('onboarded', null);
+            if (v === '1' || v === true || v === 1) return true;
+        }
+        return localStorage.getItem(STORE.ONBOARD) === '1';
+        } catch (e) { return false; }
     },
+    // ✅ FIX: Ghi vào cả DB
     markDone() {
         try { localStorage.setItem(STORE.ONBOARD, '1'); } catch (e) {}
+        try {
+        if (window.DB && window.DB.ready && window.DB.setMeta) {
+            window.DB.setMeta('onboarded', '1');
+        }
+        } catch (e) {}
     },
+    // ✅ FIX: Xóa cả DB
     reset() {
         try { localStorage.removeItem(STORE.ONBOARD); } catch (e) {}
+        try {
+        if (window.DB && window.DB.ready && window.DB.setMeta) {
+            window.DB.setMeta('onboarded', 0);
+        }
+        } catch (e) {}
         this.currentStep = 1;
         this.data = { name: '', dailyGoal: 60, subject: '' };
         this.show();
@@ -3001,12 +3266,13 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         }
         return null;
     },
+    // ✅ FIX: Nới ngưỡng cảnh báo — chỉ warn khi thực sự bất thường
     checkMinutesMismatch(totalMin, slots) {
         if (!slots || !slots.length) return null;
         const slotCount = slots.length;
         const estMin = slotCount * 60;
-        if (totalMin < estMin * 0.5 || totalMin > estMin * 2) {
-        return { msg: `Bạn có ${slotCount} khung giờ nhưng tổng chỉ ${totalMin} phút. Kiểm tra lại?` };
+        if (totalMin > 0 && (totalMin < estMin * 0.2 || totalMin > estMin * 3)) {
+        return { msg: `Bạn có ${slotCount} khung giờ nhưng tổng ${totalMin} phút. Kiểm tra lại nhé!` };
         }
         return null;
     },
@@ -3535,7 +3801,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         this.render();
         Calendar.render();
         
-        // Hiện thông báo Hoàn tác dưới góc màn hình
         const msg = todo.done ? `Đã xong: "${todo.title}"` : `Đã khôi phục: "${todo.title}"`;
         Undo.push(msg, () => {
             todo.done = oldDone;
@@ -3673,7 +3938,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         
         item.querySelector('.todo-check').addEventListener('change', () => this.toggleDone(todo.id));
         
-        // Nếu có nút Khôi phục thì gắn sự kiện
         if (todo.done) {
             item.querySelector('.restore').addEventListener('click', (e) => { 
                 e.stopPropagation(); 
@@ -4149,6 +4413,22 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         this.timerId = setInterval(() => this.check(), 60000);
         setTimeout(() => this.check(), 5000);
     },
+    // ✅ FIX: sessionStorage → localStorage (không spam khi mở tab mới) + auto-cleanup
+    _cleanupOldNotifKeys() {
+        try {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 7);
+        const cutoffKey = dateKey(cutoff);
+        Object.keys(localStorage).forEach(k => {
+            if (!k.startsWith('notif_')) return;
+            const parts = k.split('_');
+            const datePart = parts[parts.length - 1];
+            if (datePart.length === 10 && datePart < cutoffKey) {
+                localStorage.removeItem(k);
+            }
+        });
+        } catch (e) {}
+    },
     check() {
         const now = new Date();
         const hhmm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -4168,24 +4448,25 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         const soon = TodoManager.countSoon(1);
         const overdue = TodoManager.countOverdue();
         const notifiedKey = 'notif_dl_' + todayKey;
-        if (!sessionStorage.getItem(notifiedKey)) {
+        if (!localStorage.getItem(notifiedKey)) {
             if (overdue > 0) {
             this.send('⚠️ Có việc quá hạn!', `${overdue} việc đã quá hạn.`, 'danger');
-            sessionStorage.setItem(notifiedKey, '1');
+            localStorage.setItem(notifiedKey, '1');
             } else if (soon.length > 0) {
             const firstTodo = soon[0];
             this.send('⏰ Deadline sắp đến', `${soon.length} việc sẽ đến hạn trong 24h. Sắp nhất: "${firstTodo.title}"`, 'warning');
-            sessionStorage.setItem(notifiedKey, '1');
+            localStorage.setItem(notifiedKey, '1');
             }
         }
         }
         if (now.getHours() >= 22 && StreakFreeze.needsFreeze()) {
         const notifiedKey = 'notif_streak_' + todayKey;
-        if (!sessionStorage.getItem(notifiedKey)) {
+        if (!localStorage.getItem(notifiedKey)) {
             this.send('🔥 Streak sắp mất!', 'Bạn chưa học hôm nay. Học nhanh hoặc dùng Freeze!', 'warning');
-            sessionStorage.setItem(notifiedKey, '1');
+            localStorage.setItem(notifiedKey, '1');
         }
         }
+        this._cleanupOldNotifKeys();
     },
     };
 
@@ -4549,17 +4830,20 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         '◀': 'Trước', '▶': 'Sau', '−': 'Giảm', '+': 'Tăng',
         '📥': 'Nhập', '📦': 'Xuất', '⬇': 'Xuất', '⬆': 'Nhập',
     },
+    // ✅ FIX: Debounce observer — tránh spam khi render Heatmap 365 cells
     init() {
         this.autoLabelAll();
+        const debouncedLabel = debounce(() => this.autoLabelAll(), 200);
         const observer = new MutationObserver((mutations) => {
+        let hasAdded = false;
         mutations.forEach(m => {
+            if (m.addedNodes.length > 0) {
             m.addedNodes.forEach(node => {
-            if (node.nodeType === 1) {
-                if (node.tagName === 'BUTTON') this.autoLabel(node);
-                if (node.querySelectorAll) node.querySelectorAll('button').forEach(b => this.autoLabel(b));
-            }
+                if (node.nodeType === 1) hasAdded = true;
             });
+            }
         });
+        if (hasAdded) debouncedLabel();
         });
         observer.observe(document.body, { childList: true, subtree: true });
     },
@@ -4847,7 +5131,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         }
     });
 
-    console.log('%c✅ Study Tracker v5 + SQLite ready!',
+    console.log('%c✅ Study Tracker v5 + SQLite + Worker ready!',
         'color:#4f46e5;font-weight:bold;font-size:14px;');
     }
 
@@ -4856,5 +5140,6 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
     } else {
     init();
     }
-
+        window.TodoManager = TodoManager;
+    window.State = State;
     })();

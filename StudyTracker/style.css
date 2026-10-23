@@ -1781,3 +1781,25 @@
 .todo-actions button.restore:hover {
     background: var(--accent-soft) !important;
 }
+/* ═══════ ROADMAP CHECK (Modal lịch) ═══════ */
+#modalRoadmapsSection { margin-top: 6px; }
+.roadmap-check-list { display: flex; flex-direction: column; gap: 6px; }
+.roadmap-check-list label:hover {
+  background: var(--border) !important;
+  border-color: #8b5cf6 !important;
+}
+.roadmap-check-list label:has(input:checked) {
+  background: #f5f3ff !important;
+  border-color: #8b5cf6 !important;
+}
+[data-theme="dark"] .roadmap-check-list label:has(input:checked) {
+  background: #2a1f4a !important;
+}
+
+/* ═══════ CHIP ROADMAP (Lịch) ═══════ */
+.chip.roadmap {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: #fff;
+  font-weight: 600;
+  border: 1px solid #7c3aed;
+}
