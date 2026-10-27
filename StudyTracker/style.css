@@ -475,10 +475,13 @@
     background: transparent; border: 1px dashed var(--accent);
     color: var(--accent); font-style: normal;
   }
-  .chip.actual {
-    background: linear-gradient(135deg, var(--success), #34d399);
-    color: #fff; font-weight: 600;
-  }
+/* MỚI — THAY */
+.chip.actual {
+  /* Màu thực tế được set qua inline style="background:${color}" từ JS */
+  background: var(--accent); /* fallback phòng hờ */
+  color: #fff;
+  font-weight: 600;
+}
   .chip.deadline {
     cursor: pointer; 
     transition: transform var(--t-fast), box-shadow var(--t-fast); 
@@ -2091,4 +2094,274 @@
 .cell[class*="theme-"] {
   border-width: 2px !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+/* ═══════════════════════════════════════════════════════════
+   NGÀY LỄ — THEME + PATTERN + BANNER (v2)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Cell ngày lễ ─── */
+.cell[class*="theme-"] {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Icon lớn mờ (pattern nền) */
+.cell .holiday-bg-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 42px;
+    opacity: 0.14;
+    pointer-events: none;
+    z-index: 0;
+    animation: holidayFloat 5s ease-in-out infinite;
+    filter: saturate(1.2);
+}
+@keyframes holidayFloat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
+    50%      { transform: translate(-50%, -50%) scale(1.12) rotate(3deg); }
+}
+
+/* Icon nhỏ góc phải pulse */
+.cell .holiday-icon {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-size: 15px;
+    z-index: 3;
+    animation: holidayPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+@keyframes holidayPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.28); }
+}
+
+/* Nội dung cell nằm trên pattern */
+.cell[class*="theme-"] .num,
+.cell[class*="theme-"] .chips {
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── Từng theme cụ thể ─── */
+.cell.theme-tet {
+    border: 2px solid #ef4444 !important;
+    background: linear-gradient(135deg, #fef2f2, #fce7f3) !important;
+    box-shadow: inset 0 0 15px rgba(239,68,68,0.15);
+}
+.cell.theme-tet .num { color: #b91c1c !important; font-weight: 800; }
+
+.cell.theme-halloween {
+    border: 2px dashed #f97316 !important;
+    background: linear-gradient(135deg, #fff7ed, #f3e8ff) !important;
+}
+.cell.theme-halloween .num { color: #c2410c !important; font-weight: 800; }
+
+.cell.theme-midautumn,
+.cell.theme-lantern {
+    border: 2px solid #f59e0b !important;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7) !important;
+    box-shadow: inset 0 0 12px rgba(245,158,11,0.25);
+}
+.cell.theme-midautumn .num,
+.cell.theme-lantern .num { color: #b45309 !important; }
+
+.cell.theme-christmas {
+    border: 2px solid #10b981 !important;
+    background: linear-gradient(135deg, #ecfdf5, #fef2f2) !important;
+}
+.cell.theme-christmas .num { color: #047857 !important; }
+
+.cell.theme-valentine {
+    border: 2px solid #ec4899 !important;
+    background: #fdf2f8 !important;
+}
+.cell.theme-valentine .num { color: #be185d !important; }
+
+.cell.theme-national {
+    border: 2px solid #dc2626 !important;
+    background: linear-gradient(135deg, #fef2f2, #ffffff) !important;
+}
+.cell.theme-national .num { color: #dc2626 !important; font-weight: 900; }
+
+.cell.theme-newyear {
+    border: 2px solid #6366f1 !important;
+    background: linear-gradient(135deg, #e0e7ff, #f3e8ff) !important;
+}
+
+.cell.theme-shopping {
+    border: 2px solid #06b6d4 !important;
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa) !important;
+}
+
+.cell.theme-flowers {
+    border: 2px dashed #d946ef !important;
+    background: linear-gradient(135deg, #fdf4ff, #fae8ff) !important;
+}
+
+.cell.theme-kids {
+    border: 2px dashed #38bdf8 !important;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important;
+}
+
+/* Ngày lễ lớn — viền dày + đổ bóng */
+.cell.holiday-major {
+    border-width: 3px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+}
+
+/* ─── Dark mode ─── */
+[data-theme="dark"] .cell.theme-tet         { background: linear-gradient(135deg,#451a1a,#3b1c2b) !important; border-color:#f87171 !important; }
+[data-theme="dark"] .cell.theme-halloween   { background: linear-gradient(135deg,#2a1b12,#2e1a3b) !important; border-color:#fb923c !important; }
+[data-theme="dark"] .cell.theme-midautumn,
+[data-theme="dark"] .cell.theme-lantern     { background: linear-gradient(135deg,#3a2a10,#2a1f08) !important; border-color:#fbbf24 !important; }
+[data-theme="dark"] .cell.theme-christmas   { background: linear-gradient(135deg,#0f2e22,#2e1212) !important; border-color:#34d399 !important; }
+[data-theme="dark"] .cell.theme-valentine   { background: #3a182a !important; border-color:#f472b6 !important; }
+[data-theme="dark"] .cell.theme-national    { background: linear-gradient(135deg,#3a1414,#1a1a1a) !important; border-color:#ef4444 !important; }
+[data-theme="dark"] .cell.theme-newyear     { background: linear-gradient(135deg,#1e1b4b,#2e1065) !important; border-color:#818cf8 !important; }
+[data-theme="dark"] .cell.theme-shopping    { background: linear-gradient(135deg,#164e63,#042f2e) !important; border-color:#22d3ee !important; }
+[data-theme="dark"] .cell.theme-flowers     { background: linear-gradient(135deg,#4a044e,#3b0764) !important; border-color:#e879f9 !important; }
+[data-theme="dark"] .cell.theme-kids        { background: linear-gradient(135deg,#082f49,#0c4a6e) !important; border-color:#38bdf8 !important; }
+
+[data-theme="dark"] .cell[class*="theme-"] .num {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* ─── BANNER ngày lễ trong modal ghi giờ ─── */
+.holiday-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent-soft), #fce7f3);
+    border-left: 4px solid var(--accent);
+    animation: hbSlideIn 0.4s cubic-bezier(.4,0,.2,1);
+}
+@keyframes hbSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.holiday-banner[hidden] { display: none !important; }
+.holiday-banner .hb-icon {
+    font-size: 40px;
+    line-height: 1;
+    flex-shrink: 0;
+    animation: holidayPulse 2s ease-in-out infinite;
+}
+.holiday-banner .hb-content { flex: 1; min-width: 0; }
+.holiday-banner .hb-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+}
+.holiday-banner .hb-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+.holiday-banner .hb-date {
+    font-size: 12px;
+    color: var(--text-mute);
+}
+
+/* Theme riêng cho banner */
+.holiday-banner.theme-tet        { background: linear-gradient(135deg,#fef2f2,#fce7f3); border-left-color:#ef4444; }
+.holiday-banner.theme-tet        .hb-type { color:#b91c1c; }
+.holiday-banner.theme-halloween  { background: linear-gradient(135deg,#fff7ed,#f3e8ff); border-left-color:#f97316; }
+.holiday-banner.theme-halloween  .hb-type { color:#c2410c; }
+.holiday-banner.theme-midautumn,
+.holiday-banner.theme-lantern    { background: linear-gradient(135deg,#fffbeb,#fef3c7); border-left-color:#f59e0b; }
+.holiday-banner.theme-midautumn  .hb-type { color:#b45309; }
+.holiday-banner.theme-christmas  { background: linear-gradient(135deg,#ecfdf5,#fef2f2); border-left-color:#10b981; }
+.holiday-banner.theme-christmas  .hb-type { color:#047857; }
+.holiday-banner.theme-valentine  { background: #fdf2f8; border-left-color:#ec4899; }
+.holiday-banner.theme-valentine  .hb-type { color:#be185d; }
+.holiday-banner.theme-national   { background: linear-gradient(135deg,#fef2f2,#fff); border-left-color:#dc2626; }
+.holiday-banner.theme-national   .hb-type { color:#dc2626; }
+.holiday-banner.theme-newyear    { background: linear-gradient(135deg,#e0e7ff,#f3e8ff); border-left-color:#6366f1; }
+.holiday-banner.theme-shopping   { background: linear-gradient(135deg,#ecfeff,#f0fdfa); border-left-color:#06b6d4; }
+.holiday-banner.theme-flowers    { background: linear-gradient(135deg,#fdf4ff,#fae8ff); border-left-color:#d946ef; }
+.holiday-banner.theme-kids       { background: linear-gradient(135deg,#f0f9ff,#e0f2fe); border-left-color:#38bdf8; }
+
+[data-theme="dark"] .holiday-banner.theme-tet       { background: linear-gradient(135deg,#451a1a,#3b1c2b); }
+[data-theme="dark"] .holiday-banner.theme-christmas { background: linear-gradient(135deg,#0f2e22,#2e1212); }
+[data-theme="dark"] .holiday-banner.theme-national  { background: linear-gradient(135deg,#3a1414,#1a1a1a); }
+[data-theme="dark"] .holiday-banner.theme-midautumn { background: linear-gradient(135deg,#3a2a10,#2a1f08); }
+[data-theme="dark"] .holiday-banner.theme-halloween { background: linear-gradient(135deg,#2a1b12,#2e1a3b); }
+[data-theme="dark"] .holiday-banner.theme-valentine { background: #3a182a; }
+[data-theme="dark"] .holiday-banner.theme-newyear   { background: linear-gradient(135deg,#1e1b4b,#2e1065); }
+[data-theme="dark"] .holiday-banner.theme-shopping  { background: linear-gradient(135deg,#164e63,#042f2e); }
+[data-theme="dark"] .holiday-banner.theme-flowers   { background: linear-gradient(135deg,#4a044e,#3b0764); }
+[data-theme="dark"] .holiday-banner.theme-kids      { background: linear-gradient(135deg,#082f49,#0c4a6e); }
+[data-theme="dark"] .holiday-banner .hb-name { color: #fff; }
+/* Nút "Áp dụng tất cả" trong modal Todo */
+#todoApplyAllTags {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+@media (max-width: 500px) {
+    .todo-modal-tag-row { flex-wrap: wrap; }
+    #todoApplyAllTags { width: 100%; margin-left: 0; margin-top: 6px; }
+}
+
+/* Modal chế độ "chỉ xem" cho ngày tương lai */
+.modal input:disabled,
+.modal select:disabled,
+.modal textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--surface-2);
+}
+/* ═══════ CHIP TODO TRÊN LỊCH (Hiển thị tên môn trên cùng) ═══════ */
+.chip.deadline {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 5px 6px !important;
+    line-height: 1.25 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+.chip.deadline:hover {
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2) !important;
+}
+
+.chip.deadline .chip-subject {
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    opacity: 0.95 !important;
+    margin-bottom: 2px !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.chip.deadline .chip-title {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }

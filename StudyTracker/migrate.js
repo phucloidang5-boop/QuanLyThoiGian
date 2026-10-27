@@ -1,4 +1,4 @@
-    /* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — migrate.js
     Chuyển dữ liệu từ localStorage → SQLite (IndexedDB)
 
@@ -127,12 +127,13 @@
         const d = days[date] || {};
         const goals = Array.isArray(d.goals) ? d.goals : [];
         const slots = Array.isArray(d.slots) ? d.slots : [];
+        const work  = (d.work && typeof d.work === 'object') ? d.work : {};
 
         try {
             window.DB.run(
             `INSERT OR REPLACE INTO days 
-            (date, minutes, notes, subject, frozen, goals_json, slots_json, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            (date, minutes, notes, subject, frozen, goals_json, slots_json, work_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 date,
                 d.minutes || 0,
@@ -141,6 +142,7 @@
                 d.frozen ? 1 : 0,
                 JSON.stringify(goals),
                 JSON.stringify(slots),
+                JSON.stringify(work),
                 new Date().toISOString(),
             ]
             );
@@ -220,6 +222,7 @@
         }
 
         // ─── ROADMAPS ───
+        // ✅ FIX: Thêm completed_dates_json để không mất lịch sử ngày hoàn thành
         const roadmaps = parse(KEYS.ROADMAP, []);
         if (Array.isArray(roadmaps)) {
         try { window.DB.run('DELETE FROM roadmaps'); } catch(e) {}
@@ -227,13 +230,14 @@
             try {
             window.DB.run(
                 `INSERT OR REPLACE INTO roadmaps 
-                (id, title, total_sessions, completed_sessions, created_at)
-                VALUES (?, ?, ?, ?, ?)`,
+                (id, title, total_sessions, completed_sessions, completed_dates_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)`,
                 [
                 r.id || ('r_' + Date.now()),
                 r.title,
                 r.totalSessions || 1,
                 r.completedSessions || 0,
+                JSON.stringify(Array.isArray(r.completedDates) ? r.completedDates : []),
                 r.createdAt || new Date().toISOString(),
                 ]
             );

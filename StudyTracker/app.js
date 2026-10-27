@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════
     STUDY TRACKER — app.js
     Bản v5 + SQLite integration + Worker Pomodoro
+    FIXED: Hiển thị Tag trên Lịch, màu riêng biệt, Undo 30s
     ═══════════════════════════════════════════════════════════ */
     (function () {
     'use strict';
@@ -30,104 +31,106 @@
     const WEEKDAYS_LONG  = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
 
     /* ═══════════════════════════════════════════════════════════
-       NGÀY LỄ VIỆT NAM — FULL + THEME 
+       NGÀY LỄ — CHỈ THEO DANH SÁCH USER GỬI (Mỹ + VN)
        ═══════════════════════════════════════════════════════════ */
     const VN_HOLIDAYS_FIXED = {
-        '01-01': { name: 'Tết Dương lịch', type: 'major', theme: 'newyear' },
-        '09-01': { name: 'Ngày Học sinh, Sinh viên VN', type: 'minor', theme: 'default' },
-        '03-02': { name: 'Thành lập Đảng Cộng sản Việt Nam', type: 'minor', theme: 'national' },
-        '14-02': { name: 'Valentine', type: 'minor', theme: 'valentine' },
-        '27-02': { name: 'Ngày Thầy thuốc Việt Nam', type: 'minor', theme: 'default' },
-        '08-03': { name: 'Quốc tế Phụ nữ', type: 'minor', theme: 'flowers' },
-        '26-03': { name: 'Thành lập Đoàn TNCS Hồ Chí Minh', type: 'minor', theme: 'default' },
-        '30-04': { name: 'Giải phóng miền Nam', type: 'major', theme: 'national' },
-        '01-05': { name: 'Quốc tế Lao động', type: 'major', theme: 'national' },
-        '07-05': { name: 'Chiến thắng Điện Biên Phủ', type: 'minor', theme: 'national' },
-        '19-05': { name: 'Sinh nhật Chủ tịch Hồ Chí Minh', type: 'minor', theme: 'flowers' },
-        '01-06': { name: 'Quốc tế Thiếu nhi', type: 'minor', theme: 'kids' },
-        '27-07': { name: 'Thương binh - Liệt sĩ', type: 'minor', theme: 'national' },
-        '19-08': { name: 'Cách mạng Tháng Tám', type: 'minor', theme: 'national' },
-        '02-09': { name: 'Quốc khánh Việt Nam', type: 'major', theme: 'national' },
-        '10-10': { name: 'Giải phóng Thủ đô', type: 'minor', theme: 'national' },
-        '20-10': { name: 'Phụ nữ Việt Nam', type: 'minor', theme: 'flowers' },
-        '31-10': { name: 'Halloween', type: 'minor', theme: 'halloween' },
-        '11-11': { name: 'Singles Day (11.11)', type: 'minor', theme: 'shopping' },
-        '20-11': { name: 'Nhà giáo Việt Nam', type: 'minor', theme: 'flowers' },
-        '12-12': { name: 'Ngày hội mua sắm 12.12', type: 'minor', theme: 'shopping' },
-        '22-12': { name: 'Thành lập Quân đội Nhân dân VN', type: 'minor', theme: 'national' },
-        '24-12': { name: 'Đêm Giáng sinh', type: 'minor', theme: 'christmas' },
-        '25-12': { name: 'Lễ Giáng sinh', type: 'minor', theme: 'christmas' },
-        '31-12': { name: 'Giao thừa Dương lịch', type: 'minor', theme: 'newyear' },
+        '01-01': { name: 'Tết Dương lịch / New Year\'s Day', type: 'major', theme: 'newyear', region: 'vn' },
+        '08-03': { name: 'Quốc tế Phụ nữ', type: 'minor', theme: 'flowers', region: 'vn' },
+        '30-04': { name: 'Giải phóng miền Nam, Thống nhất đất nước', type: 'major', theme: 'national', region: 'vn' },
+        '01-05': { name: 'Quốc tế Lao động', type: 'major', theme: 'national', region: 'vn' },
+        '01-06': { name: 'Quốc tế Thiếu nhi', type: 'minor', theme: 'kids', region: 'vn' },
+        '02-09': { name: 'Quốc khánh nước CHXHCN Việt Nam', type: 'major', theme: 'national', region: 'vn' },
+        '20-10': { name: 'Phụ nữ Việt Nam', type: 'minor', theme: 'flowers', region: 'vn' },
+        '20-11': { name: 'Nhà giáo Việt Nam', type: 'minor', theme: 'flowers', region: 'vn' },
+        '25-12': { name: 'Giáng sinh / Christmas Day', type: 'minor', theme: 'christmas', region: 'vn' },
+        '19-06': { name: 'Juneteenth (Mỹ)', type: 'minor', theme: 'default', region: 'us' },
+        '04-07': { name: 'Quốc khánh Mỹ / Independence Day', type: 'minor', theme: 'default', region: 'us' },
+        '11-11': { name: 'Cựu chiến binh / Veterans Day (Mỹ)', type: 'minor', theme: 'default', region: 'us' },
+        '31-10': { name: 'Halloween', type: 'minor', theme: 'halloween', region: 'us' },
     };
 
     const VN_HOLIDAYS_LUNAR = {
         '2024': {
-            '02-03': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '02-10': { name: 'Tết Nguyên Đán (Giáp Thìn)', type: 'major', theme: 'tet' },
+            '02-02': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
+            '02-10': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '02-11': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '02-12': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-13': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-24': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-18': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-22': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '06-10': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '08-18': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '09-17': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2025': {
             '01-22': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '01-29': { name: 'Tết Nguyên Đán (Ất Tỵ)', type: 'major', theme: 'tet' },
+            '01-29': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '01-30': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '01-31': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-01': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-12': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-07': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-12': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '05-31': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '09-06': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '10-06': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2026': {
             '02-10': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '02-17': { name: 'Tết Nguyên Đán (Bính Ngọ)', type: 'major', theme: 'tet' },
+            '02-17': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '02-18': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '02-19': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-20': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '03-03': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-26': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-31': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '06-19': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '08-27': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '09-25': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2027': {
             '01-30': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '02-06': { name: 'Tết Nguyên Đán (Đinh Mùi)', type: 'major', theme: 'tet' },
+            '02-06': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '02-07': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '02-08': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-09': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-20': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-16': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-20': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '06-09': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '08-15': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '09-15': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2028': {
             '01-19': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '01-26': { name: 'Tết Nguyên Đán (Mậu Thân)', type: 'major', theme: 'tet' },
+            '01-26': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '01-27': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '01-28': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '01-29': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-09': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-04': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-09': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '05-28': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '09-03': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '10-03': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2029': {
             '02-06': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '02-13': { name: 'Tết Nguyên Đán (Kỷ Dậu)', type: 'major', theme: 'tet' },
+            '02-13': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '02-14': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '02-15': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-16': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-27': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-23': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-27': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '06-16': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '08-24': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '09-22': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
         '2030': {
             '01-27': { name: 'Ông Công Ông Táo', type: 'minor', theme: 'tet' },
-            '02-03': { name: 'Tết Nguyên Đán (Canh Tuất)', type: 'major', theme: 'tet' },
+            '02-03': { name: 'Tết Nguyên Đán (Mùng 1)', type: 'major', theme: 'tet' },
+            '02-04': { name: 'Tết Nguyên Đán (Mùng 2)', type: 'major', theme: 'tet' },
+            '02-05': { name: 'Tết Nguyên Đán (Mùng 3)', type: 'major', theme: 'tet' },
+            '02-06': { name: 'Tết Nguyên Đán (Mùng 4)', type: 'major', theme: 'tet' },
             '02-17': { name: 'Tết Nguyên Tiêu', type: 'minor', theme: 'lantern' },
             '04-13': { name: 'Giỗ Tổ Hùng Vương', type: 'major', theme: 'national' },
             '05-17': { name: 'Lễ Phật Đản', type: 'minor', theme: 'default' },
-            '06-05': { name: 'Tết Đoan Ngọ', type: 'minor', theme: 'default' },
             '08-12': { name: 'Lễ Vu Lan', type: 'minor', theme: 'default' },
             '09-12': { name: 'Tết Trung Thu', type: 'minor', theme: 'midautumn' },
         },
@@ -146,31 +149,63 @@
     function toMMDD(d) {
         return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
+
+    function calcEaster(year) {
+        const a = year % 19;
+        const b = Math.floor(year / 100);
+        const c = year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const month = Math.floor((h + l - 7 * m + 114) / 31);
+        const day = ((h + l - 7 * m + 114) % 31) + 1;
+        return new Date(year, month - 1, day);
+    }
+
     function buildVariableHolidays(year) {
         const out = {};
-        out[toMMDD(getNthWeekday(year, 5, 0, 2))] = { name: 'Ngày của Mẹ', type: 'minor', theme: 'flowers' };
-        out[toMMDD(getNthWeekday(year, 6, 0, 3))] = { name: 'Ngày của Cha', type: 'minor', theme: 'flowers' };
-        out[toMMDD(getNthWeekday(year, 3, 5, 3))] = { name: 'Quốc tế Giấc ngủ', type: 'minor', theme: 'default' };
-        out[toMMDD(getLastWeekday(year, 3, 6))] = { name: 'Giờ Trái Đất', type: 'minor', theme: 'default' };
-        out[toMMDD(getNthWeekday(year, 10, 1, 1))] = { name: 'Ngày Kiến trúc Thế giới', type: 'minor', theme: 'default' };
-        out[toMMDD(getNthWeekday(year, 10, 4, 2))] = { name: 'Ngày Thị giác Thế giới', type: 'minor', theme: 'default' };
-        out[toMMDD(getNthWeekday(year, 10, 6, 2))] = { name: 'Chăm sóc giảm nhẹ Thế giới', type: 'minor', theme: 'default' };
-        out[toMMDD(getNthWeekday(year, 10, 2, 2))] = { name: 'Quốc tế giảm nhẹ thiên tai', type: 'minor', theme: 'default' };
+        const add = (date, info) => {
+            const key = toMMDD(date);
+            const existing = out[key];
+            if (!existing) {
+                out[key] = info;
+            } else if (info.region === 'vn' && existing.region !== 'vn') {
+                out[key] = info;
+            }
+        };
+
+        add(getNthWeekday(year, 1, 1, 3),   { name: 'Martin Luther King Jr. Day (Mỹ)', type: 'minor', theme: 'default',  region: 'us' });
+        add(getNthWeekday(year, 2, 1, 3),   { name: 'Presidents\' Day (Mỹ)',           type: 'minor', theme: 'default',  region: 'us' });
+        add(getLastWeekday(year, 5, 1),     { name: 'Memorial Day (Mỹ)',               type: 'minor', theme: 'default',  region: 'us' });
+        add(getNthWeekday(year, 9, 1, 1),   { name: 'Labor Day (Mỹ)',                  type: 'minor', theme: 'default',  region: 'us' });
+        add(getNthWeekday(year, 10, 1, 2),  { name: 'Columbus Day (Mỹ)',               type: 'minor', theme: 'default',  region: 'us' });
         const thanksgiving = getNthWeekday(year, 11, 4, 4);
-        out[toMMDD(thanksgiving)] = { name: 'Lễ Tạ ơn', type: 'minor', theme: 'default' };
+        add(thanksgiving, { name: 'Thanksgiving Day (Mỹ)', type: 'minor', theme: 'default', region: 'us' });
         const blackFriday = new Date(thanksgiving); blackFriday.setDate(blackFriday.getDate() + 1);
-        out[toMMDD(blackFriday)] = { name: 'Black Friday', type: 'minor', theme: 'shopping' };
-        const cyberMonday = new Date(thanksgiving); cyberMonday.setDate(cyberMonday.getDate() + 4);
-        out[toMMDD(cyberMonday)] = { name: 'Cyber Monday', type: 'minor', theme: 'shopping' };
-        out[toMMDD(getNthWeekday(year, 11, 3, 2))] = { name: 'Thế giới phòng chống COPD', type: 'minor', theme: 'default' };
+        add(blackFriday, { name: 'Black Friday (Mỹ)', type: 'minor', theme: 'shopping', region: 'us' });
+        add(calcEaster(year), { name: 'Lễ Phục sinh / Easter', type: 'minor', theme: 'flowers', region: 'us' });
+
         return out;
     }
+
     function getHolidayInfo(date) {
         const year = date.getFullYear();
         const mmdd = String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+        const fixed = VN_HOLIDAYS_FIXED[mmdd];
         const lunar = VN_HOLIDAYS_LUNAR[year];
-        if (lunar && lunar[mmdd]) return lunar[mmdd];
-        if (VN_HOLIDAYS_FIXED[mmdd]) return VN_HOLIDAYS_FIXED[mmdd];
+        const lunarHoliday = lunar ? lunar[mmdd] : null;
+
+        if (lunarHoliday && lunarHoliday.type === 'major') return lunarHoliday;
+        if (fixed && fixed.type === 'major') return fixed;
+        if (lunarHoliday) return lunarHoliday;
+        if (fixed) return fixed;
+
         const variable = buildVariableHolidays(year);
         if (variable[mmdd]) return variable[mmdd];
         return null;
@@ -265,7 +300,6 @@
         State.roadmap = this.get(STORE.ROADMAP, []) || [];
         }
 
-        // ✅ Migrate roadmap cũ: nếu chỉ có completedSessions (số) mà chưa có completedDates
         State.roadmap = State.roadmap.map(r => {
         if (!Array.isArray(r.completedDates)) {
             r.completedDates = [];
@@ -278,9 +312,6 @@
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             r.completedDates.push(dateKey(d));
-            }
-            if (n > 0) {
-            console.log(`[Migrate] Roadmap "${r.title}": chuyển ${n} buổi → ${n} ngày`);
             }
         }
         r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
@@ -416,7 +447,6 @@
         try { window.DB.setMeta('bg', State.bg); } catch (e) {}
         }
     },
-
     saveSubjects(subjects) {
         this.set(STORE.SUBJECTS, subjects);
         if (this._useSQL() && window.DB.syncSubjects) {
@@ -1028,7 +1058,6 @@
         const info = $('#goalInfo');
         if (info) info.innerHTML = msg;
 
-        // ✅ Dòng đi làm hôm nay
         const workLine = $('#homeWorkLine');
         if (workLine) {
         const today = State.days[State.today];
@@ -1136,11 +1165,9 @@
         const todayKey = State.today;
         let targetDate = null;
 
-        // Ưu tiên hôm nay nếu chưa đánh dấu
         if (!r.completedDates.includes(todayKey)) {
         targetDate = todayKey;
         } else {
-        // Hôm nay đã đánh dấu → tìm ngày gần nhất chưa đánh dấu (trong 365 ngày qua)
         for (let i = 1; i <= 365; i++) {
             const d = new Date();
             d.setDate(d.getDate() - i);
@@ -1148,6 +1175,13 @@
             if (!r.completedDates.includes(k)) {
             targetDate = k;
             break;
+            }
+        }
+        if (targetDate) {
+            const dd = parseKey(targetDate);
+            const label = `${WEEKDAYS_SHORT[dd.getDay()]}, ${dd.getDate()}/${dd.getMonth()+1}/${dd.getFullYear()}`;
+            if (!confirm(`Hôm nay đã được đánh dấu cho lộ trình này.\n\nĐánh dấu cho ngày gần nhất chưa có?\n👉 ${label}`)) {
+            return;
             }
         }
         }
@@ -1172,7 +1206,6 @@
         toast('ℹ️ Không có buổi nào để hủy');
         return;
         }
-        // Sắp xếp desc → lấy ngày mới nhất
         r.completedDates.sort((a, b) => b.localeCompare(a));
         const removed = r.completedDates.shift();
         r.completedSessions = Math.min(r.completedDates.length, r.totalSessions || 0);
@@ -1378,7 +1411,8 @@
         sessionsHtml = sessions.map(s => {
             const time = new Date(s.at).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
             const stars = '★'.repeat(s.focus || 0) + '☆'.repeat(5 - (s.focus || 0));
-            const color = s.tagColor || (typeof SubjectManager !== 'undefined' ? SubjectManager.getColor(s.tag) : '#64748b');
+            // ✅ Ưu tiên lấy màu mới nhất từ SubjectManager
+            const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(s.tag) : (s.tagColor || '#64748b');
             return `
             <div class="slot-row" style="border-left-color:${color}">
                 <div class="slot-time" style="color:${color}">${time}</div>
@@ -1529,59 +1563,71 @@
         if (other) cell.classList.add('other');
         if (k === State.today) cell.classList.add('today');
 
-        // ✅ Ngày lễ — Thêm Theme và Biểu tượng (Deco)
+        // ✅ Ngày lễ — Theme + Icon nền + Data cho popup
         const holiday = getHolidayInfo(cellDate);
-        let icon = '';
+        let holidayIcon = '';
         if (holiday) {
             cell.classList.add('theme-' + (holiday.theme || 'default'));
-            // Gắn biểu tượng (Deco) theo chủ đề
-            if (holiday.theme === 'halloween') icon = ' 🎃';
-            else if (holiday.theme === 'tet') icon = ' 🧨';
-            else if (holiday.theme === 'midautumn') icon = ' 🏮';
-            else if (holiday.theme === 'christmas') icon = ' 🎄';
-            else if (holiday.theme === 'valentine') icon = ' ❤️';
-            else if (holiday.theme === 'national') icon = ' ⭐';
-            else if (holiday.theme === 'shopping') icon = ' 🛒';
-            else if (holiday.theme === 'flowers') icon = ' 🌸';
-            else if (holiday.theme === 'newyear') icon = ' 🎆';
-            else if (holiday.theme === 'kids') icon = ' 🎈';
+            if (holiday.type === 'major') cell.classList.add('holiday-major');
+            if (holiday.region) cell.classList.add('holiday-' + holiday.region);
+
+            if (holiday.theme === 'halloween')  holidayIcon = '🎃';
+            else if (holiday.theme === 'tet')        holidayIcon = '🧨';
+            else if (holiday.theme === 'midautumn')  holidayIcon = '🏮';
+            else if (holiday.theme === 'lantern')    holidayIcon = '🏮';
+            else if (holiday.theme === 'christmas')  holidayIcon = '🎄';
+            else if (holiday.theme === 'valentine')  holidayIcon = '❤️';
+            else if (holiday.theme === 'national')   holidayIcon = '⭐';
+            else if (holiday.theme === 'shopping')   holidayIcon = '🛒';
+            else if (holiday.theme === 'flowers')    holidayIcon = '🌸';
+            else if (holiday.theme === 'newyear')    holidayIcon = '🎆';
+            else if (holiday.theme === 'kids')       holidayIcon = '🎈';
+            else                                     holidayIcon = '🎉';
+
+            const bgIcon = document.createElement('span');
+            bgIcon.className = 'holiday-bg-icon';
+            bgIcon.textContent = holidayIcon;
+            bgIcon.setAttribute('aria-hidden', 'true');
+            cell.appendChild(bgIcon);
+
+            cell.dataset.holiday       = '1';
+            cell.dataset.holidayName   = holiday.name;
+            cell.dataset.holidayType   = holiday.type || 'minor';
+            cell.dataset.holidayTheme  = holiday.theme || 'default';
+            cell.title = `🎉 ${holiday.name}${holiday.type === 'major' ? ' (Ngày lễ lớn)' : ''}`;
         }
 
         const num = document.createElement('div');
         num.className = 'num';
-        // Nếu có lễ thì thêm icon, không thì chỉ hiện số
-        num.innerHTML = cellDate.getDate() + (icon ? `<span class="holiday-icon">${icon}</span>` : '');
+        num.textContent = cellDate.getDate();
         cell.appendChild(num);
+
+        if (holidayIcon) {
+            const iconEl = document.createElement('span');
+            iconEl.className = 'holiday-icon';
+            iconEl.textContent = holidayIcon;
+            iconEl.setAttribute('aria-hidden', 'true');
+            cell.appendChild(iconEl);
+        }
 
         const chips = document.createElement('div');
         chips.className = 'chips';
-        chips.style.cssText = 'max-height: 90px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;';
+        chips.style.cssText = 'max-height: 110px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; display: flex; flex-direction: column; gap: 3px; margin-top: 4px;';
 
         const daySubject = (data && data.subject) || '';
         const sessions = (data && data.sessions) ? data.sessions : [];
         const planSlots = (data && data.slots) ? data.slots : [];
 
+        // 1. KẾ HOẠCH (Có nền màu nhạt)
         const showPlan = planSlots.length > 0 && (!activeFilter || daySubject === activeFilter);
         if (showPlan) {
             const planColor = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
-            const planText = daySubject ? `📚 ${escapeHtml(daySubject)}` : `📅 ${planSlots.length} KH`;
+            const planText = daySubject ? escapeHtml(daySubject) : `Kế hoạch`;
             chips.insertAdjacentHTML('beforeend',
-            `<div class="chip plan" style="border-color:${planColor}; color:${planColor};" title="${planSlots.length} khung giờ dự định">${planText}</div>`);
+            `<div class="chip plan" style="background:${planColor}33 !important; border: 1px dashed ${planColor} !important; color:${planColor} !important; padding: 4px; border-radius: 6px; font-weight: 700; font-size: 10px; text-align: center;" title="${planSlots.length} khung giờ dự định">${planText}</div>`);
         }
 
-        // Work chip (đi làm) — nếu có
-        const workInfo = data && data.work;
-        if (workInfo && workInfo.hours > 0) {
-            const timeRange = (workInfo.startTime && workInfo.endTime)
-            ? ` (${workInfo.startTime}–${workInfo.endTime})`
-            : '';
-            const label = Number.isInteger(workInfo.hours)
-            ? `${workInfo.hours}h`
-            : `${workInfo.hours.toFixed(1)}h`;
-            chips.insertAdjacentHTML('beforeend',
-            `<div class="chip work" title="Đi làm ${label}${timeRange}">💼 ${label}</div>`);
-        }
-
+        // 2. GIỜ HỌC THỰC TẾ (Nền đặc, chữ trắng - GIỐNG ẢNH)
         const subjectStats = {};
         sessions.forEach(s => {
             const tag = s.tag || 'Khác';
@@ -1598,61 +1644,55 @@
             if (mins <= 0) return;
             totalActualMins += mins;
             const color = SubjectManager.getColor(tag);
+            // ✅ Chỉ hiện tên môn, nền đặc, chữ trắng, bo góc y hệt ảnh
             chips.insertAdjacentHTML('beforeend',
-            `<div class="chip actual" style="background:${color}; border-color:${color};" title="${mins} phút đã học">✅ ${escapeHtml(tag)} (${fmtMinutes(mins)})</div>`);
+            `<div class="chip actual" style="background:${color} !important; border:none !important; color: #fff !important; padding: 4px 8px; border-radius: 999px; font-weight: 700; font-size: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" title="${mins} phút đã học">${escapeHtml(tag)}</div>`);
         });
 
+        // 3. TODO (Việc cần làm) - Hiển thị từng cái, chỉ hiện tên môn
         if (typeof TodoManager !== 'undefined') {
             const todos = TodoManager.todos.filter(t => {
                 if (t.deadline !== k) return false;
                 if (activeFilter && t.tag !== activeFilter) return false;
                 return true;
             });
-            todos.sort((a, b) => {
-                if (a.done !== b.done) return a.done ? 1 : -1;
-                const pA = a.priority === 'high' ? 0 : (a.priority === 'normal' ? 1 : 2);
-                const pB = b.priority === 'high' ? 0 : (b.priority === 'normal' ? 1 : 2);
-                return pA - pB;
-            });
+            
             if (todos.length > 0) {
                 const isSoon = k >= State.today;
                 todos.forEach(t => {
-                    const safeTitle = escapeHtml(t.title).slice(0, 40);
                     const tagName = t.tag || '';
-                    let todoColor = (typeof SubjectManager !== 'undefined')
+                    let todoColor = (typeof SubjectManager !== 'undefined' && tagName)
                         ? SubjectManager.getColor(tagName)
                         : (isSoon ? 'var(--accent)' : 'var(--danger)');
-                    const icon = t.done ? '✅' : '⏰';
-                    const label = tagName ? `${icon} ${escapeHtml(tagName)}` : `${icon} ${safeTitle.slice(0, 10)}...`;
-                    const opacity = t.done ? 'opacity: 0.6; text-decoration: line-through;' : '';
+                    
+                    const opacity = t.done ? 'opacity: 0.5; text-decoration: line-through;' : '';
+                    const displayText = tagName ? escapeHtml(tagName) : 'Cần làm';
+
+                    // ✅ Ép thành 1 dòng duy nhất, ghi đè CSS flex-direction: column cũ
                     chips.insertAdjacentHTML('beforeend',
-                    `<div class="chip deadline ${isSoon ? '' : 'overdue'}" style="background:${todoColor}; border-color:${todoColor}; color: #fff; ${opacity}" data-todo-id="${t.id}" title="${t.done ? 'Đã xong' : 'Chưa xong'}: ${safeTitle}">${label}</div>`);
+                    `<div class="chip deadline ${isSoon ? '' : 'overdue'}" 
+                        style="background:${todoColor} !important; border:none !important; color: #fff !important; ${opacity}; display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; padding: 4px 8px !important; border-radius: 999px !important; font-size: 10px !important; font-weight: 700 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" 
+                        data-todo-id="${t.id}" 
+                        title="${t.done ? 'Đã xong' : 'Chưa xong'}: ${escapeHtml(t.title)}">
+                        ${displayText}
+                    </div>`);
                 });
             }
         }
 
-        if (chips.children.length === 0 && data && !activeFilter) {
-            if ((data.minutes || 0) > 0) {
-            const c = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
-            chips.insertAdjacentHTML('beforeend', `<div class="chip t" style="background:${c}22; color:${c};" title="${fmtMinutes(data.minutes)}">⏱️ ${fmtMinutes(data.minutes)}</div>`);
-            }
-            if (data.slots && data.slots.length) {
-            const c = daySubject ? SubjectManager.getColor(daySubject) : 'var(--accent)';
-            chips.insertAdjacentHTML('beforeend', `<div class="chip n" style="background:${c}22; color:${c};" title="${data.slots.length} khung giờ">🕐 ${data.slots.length} giờ</div>`);
-            }
-        }
-
-        // Roadmap chip (nếu có)
+        // 4. LỘ TRÌNH
         if (Array.isArray(State.roadmap)) {
             State.roadmap.forEach(r => {
             const dates = Array.isArray(r.completedDates) ? r.completedDates : [];
             if (dates.includes(k)) {
                 chips.insertAdjacentHTML('beforeend',
-                `<div class="chip roadmap" style="background:#8b5cf6; border-color:#8b5cf6; color:#fff;" title="Buổi lộ trình: ${escapeHtml(r.title)}">🗺️ ${escapeHtml(r.title.slice(0, 12))}${r.title.length > 12 ? '…' : ''}</div>`);
+                `<div class="chip roadmap" style="background:#8b5cf6 !important; border:none !important; color:#fff !important; padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" title="Lộ trình: ${escapeHtml(r.title)}">${escapeHtml(r.title.slice(0, 15))}${r.title.length > 15 ? '…' : ''}</div>`);
             }
             });
         }
 
+        if (chips.children.length > 0) cell.appendChild(chips);
+        if (planSlots.length > 0 && totalActualMins > 0) cell.classList.add('has-both');
         if (chips.children.length > 0) cell.appendChild(chips);
         if (planSlots.length > 0 && totalActualMins > 0) cell.classList.add('has-both');
         frag.appendChild(cell);
@@ -1675,7 +1715,9 @@
     },
 
     openModal(k) {
-        if (k > State.today) { toast('⚠️ Không thể ghi vào ngày tương lai'); return; }
+        const isFuture = k > State.today;
+        this.renderHolidayBanner(k);
+
         const data = Storage.getDay(k);
         State.modal.date = k;
         State.modal.minutes = data.minutes || 0;
@@ -1686,30 +1728,75 @@
         const title = $('#modalTitle');
         if (title) title.textContent = `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
         const sub = $('#modalSub');
-        if (sub) sub.textContent = 'Nhập giờ học, giờ làm và chi tiết từng khung giờ';
+        if (sub) sub.textContent = isFuture
+            ? '🔮 Ngày tương lai — chỉ xem thông tin, không thể ghi giờ'
+            : 'Nhập giờ học, giờ làm và chi tiết từng khung giờ';
         const mins = $('#modalMinutes');
-        if (mins) mins.value = State.modal.minutes || '';
+        if (mins) { mins.value = State.modal.minutes || ''; mins.disabled = isFuture; }
 
-        // ✅ Load work data
         const work = data.work || {};
         const wStart = $('#modalWorkStart');
         const wEnd = $('#modalWorkEnd');
         const wHours = $('#modalWorkHours');
-        if (wStart) wStart.value = work.startTime || '';
-        if (wEnd) wEnd.value = work.endTime || '';
-        if (wHours) wHours.value = (work.hours > 0) ? work.hours : '';
+        if (wStart) { wStart.value = work.startTime || ''; wStart.disabled = isFuture; }
+        if (wEnd) { wEnd.value = work.endTime || ''; wEnd.disabled = isFuture; }
+        if (wHours) { wHours.value = (work.hours > 0) ? work.hours : ''; wHours.disabled = isFuture; }
         this._bindWorkCalc();
 
         if (typeof SubjectManager !== 'undefined') SubjectManager.renderModalSelect();
         const subjSel = $('#modalSubject');
-        if (subjSel) subjSel.value = data.subject || '';
+        if (subjSel) { subjSel.value = data.subject || ''; subjSel.disabled = isFuture; }
         this.renderHourList();
+        if (isFuture) {
+        $$('#hourList input').forEach(inp => inp.disabled = true);
+        $$('#hourList .hour-clear').forEach(btn => btn.disabled = true);
+        }
         this.renderModalRoadmaps(k);
+        if (isFuture) {
+        $$('#modalRoadmaps input').forEach(inp => inp.disabled = true);
+        }
+
+        const saveBtn = $('#modalSave');
+        if (saveBtn) saveBtn.style.display = isFuture ? 'none' : '';
+
         const modal = $('#hourModal');
         if (modal) modal.classList.add('show');
     },
 
-    // ✅ Hàm bị thiếu — thêm vào để tính giờ đi làm
+    renderHolidayBanner(k) {
+        const banner = $('#modalHolidayBanner');
+        if (!banner) return;
+
+        const date    = parseKey(k);
+        const holiday = getHolidayInfo(date);
+
+        if (!holiday) {
+            banner.hidden = true;
+            banner.innerHTML = '';
+            return;
+        }
+
+        const icons = {
+            tet: '🧨', midautumn: '🏮', lantern: '🏮', christmas: '🎄',
+            valentine: '❤️', national: '⭐', shopping: '🛒', flowers: '🌸',
+            newyear: '🎆', kids: '🎈', halloween: '🎃', default: '🎉'
+        };
+        const icon       = icons[holiday.theme] || '🎉';
+        const majorLabel = holiday.type === 'major' ? '🎊 Ngày lễ lớn' : '🎉 Ngày lễ';
+        const regionLbl  = holiday.region === 'us' ? '🇺🇸' : (holiday.region === 'vn' ? '🇻🇳' : '');
+
+        banner.hidden    = false;
+        banner.className = 'holiday-banner theme-' + (holiday.theme || 'default');
+        banner.innerHTML = `
+            <div class="hb-icon">${icon}</div>
+            <div class="hb-content">
+                <div class="hb-type">${regionLbl} ${majorLabel}</div>
+                <div class="hb-name">${escapeHtml(holiday.name)}</div>
+                <div class="hb-date">${WEEKDAYS_LONG[date.getDay()]}, ${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}</div>
+            </div>
+        `;
+    },
+
     _bindWorkCalc() {
         const wStart = $('#modalWorkStart');
         const wEnd = $('#modalWorkEnd');
@@ -1723,7 +1810,7 @@
         const [sh, sm] = wStart.value.split(':').map(Number);
         const [eh, em] = wEnd.value.split(':').map(Number);
         let mins = (eh * 60 + em) - (sh * 60 + sm);
-        if (mins < 0) mins += 24 * 60; // Qua đêm
+        if (mins < 0) mins += 24 * 60;
         wHours.value = (mins / 60).toFixed(1);
         };
 
@@ -1812,16 +1899,11 @@
         dayData.slots = slots.sort((a, b) => a.hour - b.hour);
         if (subject) dayData.subject = subject;
 
-        // ✅ Lưu work
         const workStart = $('#modalWorkStart')?.value || '';
         const workEnd = $('#modalWorkEnd')?.value || '';
         const workHours = parseFloat($('#modalWorkHours')?.value) || 0;
         if (workStart || workEnd || workHours > 0) {
-        dayData.work = {
-            startTime: workStart,
-            endTime: workEnd,
-            hours: workHours,
-        };
+        dayData.work = { startTime: workStart, endTime: workEnd, hours: workHours };
         } else {
         delete dayData.work;
         }
@@ -1839,13 +1921,19 @@
     closeModal() {
         const modal = $('#hourModal');
         if (modal) modal.classList.remove('show');
+        const banner = $('#modalHolidayBanner');
+        if (banner) { banner.hidden = true; banner.innerHTML = ''; }
+        ['#modalMinutes', '#modalWorkStart', '#modalWorkEnd', '#modalWorkHours', '#modalSubject'].forEach(sel => {
+        const el = $(sel); if (el) el.disabled = false;
+        });
+        const saveBtn = $('#modalSave');
+        if (saveBtn) saveBtn.style.display = '';
     },
 
     renderModalRoadmaps(dateKey) {
         const modal = $('#hourModal');
         if (!modal) return;
 
-        // Tạo section 1 lần (idempotent)
         let section = modal.querySelector('#modalRoadmapsSection');
         if (!section) {
         section = document.createElement('div');
@@ -2132,6 +2220,10 @@
             if (e.key === 'Enter') { e.preventDefault(); this.add(); }
         });
         }
+        // ✅ Tự động chọn màu random khi mở trang để mỗi môn thêm vào có màu khác nhau
+        const colorInput = $('#subjectColorInput');
+        if (colorInput) colorInput.value = this.getRandomColor();
+
         this.render();
         this.renderTagPicker();
         this.renderModalSelect();
@@ -2171,7 +2263,7 @@
     getRandomColor() {
         const h = Math.floor(Math.random() * 360);
         const s = Math.floor(Math.random() * 20) + 70;
-        const l = Math.floor(Math.random() * 15) + 45;
+        let   l = Math.floor(Math.random() * 15) + 45;
         l /= 100;
         const a = s * Math.min(l, 1 - l) / 100;
         const f = n => {
@@ -2226,7 +2318,18 @@
         if (this.subjects.some(s => s.id !== id && s.name.toLowerCase() === trimmed.toLowerCase())) {
         toast('⚠️ Trùng tên với môn khác'); return;
         }
+        const oldName = sub.name;
         sub.name = trimmed;
+        // ✅ Cập nhật tên môn trong tất cả sessions
+        if (oldName !== trimmed) {
+            let updated = 0;
+            Object.keys(State.days).forEach(k => {
+                (State.days[k].sessions || []).forEach(s => {
+                    if (s.tag === oldName) { s.tag = trimmed; updated++; }
+                });
+            });
+            if (updated > 0) Storage.saveDays();
+        }
         this.save();
         this.render();
         this.renderTagPicker();
@@ -2234,14 +2337,56 @@
         toast('✅ Đã sửa môn');
     },
 
+    // ✅ SỬA LỖI: Đổi màu môn sẽ đổi toàn bộ màu ở mọi nơi (Lịch, Học tập, Todo)
     changeColor(id, newColor) {
         const sub = this.subjects.find(s => s.id === id);
         if (!sub) return;
+        const oldColor = sub.color;
+        if (oldColor === newColor) { toast('ℹ️ Màu không đổi'); return; }
+
         sub.color = newColor;
         this.save();
         this.render();
         this.renderTagPicker();
-        toast('🎨 Đã đổi màu');
+        this.renderModalSelect();
+
+        // Cập nhật tagColor cho TẤT CẢ session đang dùng môn này
+        let updated = 0;
+        Object.keys(State.days).forEach(k => {
+            (State.days[k].sessions || []).forEach(s => {
+                if (s.tag === sub.name) { s.tagColor = newColor; updated++; }
+            });
+        });
+        if (updated > 0) Storage.saveDays();
+
+        // Ép toàn bộ giao diện vẽ lại
+        if (typeof Calendar    !== 'undefined') Calendar.render();
+        if (typeof Study       !== 'undefined') Study.render();
+        if (typeof Home        !== 'undefined') Home.render();
+        if (typeof TodoManager !== 'undefined') TodoManager.render();
+
+        // Hoàn tác 30s
+        Undo.push(`🎨 Đã đổi màu "${sub.name}"`, () => {
+            const s2 = this.subjects.find(s => s.id === id);
+            if (!s2) return;
+            s2.color = oldColor;
+            Object.keys(State.days).forEach(k => {
+                (State.days[k].sessions || []).forEach(s => {
+                    if (s.tag === sub.name) { s.tagColor = oldColor; }
+                });
+            });
+            Storage.saveDays();
+            this.save();
+            this.render();
+            this.renderTagPicker();
+            this.renderModalSelect();
+            if (typeof Calendar    !== 'undefined') Calendar.render();
+            if (typeof Study       !== 'undefined') Study.render();
+            if (typeof Home        !== 'undefined') Home.render();
+            if (typeof TodoManager !== 'undefined') TodoManager.render();
+        }, 30000);
+
+        toast(`🎨 Đã đổi màu "${sub.name}" — bấm ↩ Hoàn tác nếu sai`);
     },
 
     remove(id) {
@@ -2330,30 +2475,47 @@
         });
         list.appendChild(frag);
     },
-        assignToTodos(sub) {
-        if (typeof TodoManager === 'undefined' || !TodoManager.todos.length) { toast('ℹ️ Chưa có Todo nào'); return; }
+    
+    // ✅ SỬA: Đổi môn cho TẤT CẢ Todo (không chỉ cái trống)
+    assignToTodos(sub) {
+        if (typeof TodoManager === 'undefined' || !TodoManager.todos.length) {
+            toast('ℹ️ Chưa có Todo nào'); return;
+        }
         const total = TodoManager.todos.length;
-        const untagged = TodoManager.todos.filter(t => !t.tag).length;
-        const choice = prompt(`Gán môn "${sub.name}" cho Todos:\n\n1. Chỉ Todos CHƯA có môn (${untagged} cái)\n2. TẤT CẢ Todos (${total} cái)\n\nNhập 1 hoặc 2:`, '1');
-        if (!choice || !['1', '2'].includes(choice)) return;
-        let count = 0;
-        TodoManager.todos.forEach(t => {
-            if (choice === '1' && t.tag) return;
-            t.tag = sub.name;
-            count++;
-        });
-        if (count === 0) { toast('ℹ️ Không có Todo nào cần gán'); return; }
+        const changed = TodoManager.todos.filter(t => t.tag !== sub.name).length;
+        if (changed === 0) {
+            toast(`ℹ️ Tất cả ${total} Todo đã có môn "${sub.name}"`);
+            return;
+        }
+        if (!confirm(
+            `Đổi môn của TẤT CẢ ${total} Todo sang "${sub.name}"?\n\n` +
+            `✔ ${changed} Todo sẽ được cập nhật\n` +
+            `✖ ${total - changed} Todo đã đúng môn (giữ nguyên)`
+        )) return;
+
+        const backup = TodoManager.todos.map(t => ({ id: t.id, tag: t.tag }));
+        TodoManager.todos.forEach(t => { t.tag = sub.name; });
         TodoManager.save();
         TodoManager.render();
         if (typeof Calendar !== 'undefined') Calendar.render();
-        toast(`✅ Đã gán "${sub.name}" cho ${count} Todos`);
+
+        Undo.push(`Đã đổi ${changed} Todo sang "${sub.name}"`, () => {
+            backup.forEach(b => {
+                const td = TodoManager.todos.find(t => t.id === b.id);
+                if (td) td.tag = b.tag;
+            });
+            TodoManager.save();
+            TodoManager.render();
+            if (typeof Calendar !== 'undefined') Calendar.render();
+        }, 30000);
+
+        toast(`✅ Đã đổi "${sub.name}" cho ${changed} Todo`);
     },
 
     renderTagPicker() {
         const picker = $('#tagPicker');
         if (!picker) return;
         
-        // ✅ FIX: Lưu lại tag đang được chọn trước khi render lại
         const prevSelectedTag = (typeof Pomodoro !== 'undefined') ? Pomodoro.selectedTag : null;
         
         picker.innerHTML = '';
@@ -2395,7 +2557,6 @@
             if (typeof Pomodoro !== 'undefined') Pomodoro.selectedTag = null;
             }
         });
-        // ✅ FIX: Restore selection nếu môn này vẫn tồn tại
         if (prevSelectedTag && sub.name === prevSelectedTag) {
             b.classList.add('active');
             b.style.background = sub.color;
@@ -2562,11 +2723,9 @@
 
     startTick() {
         if (this.state.id) { clearInterval(this.state.id); this.state.id = null; }
-        // Worker drive chính (chạy được khi tab ẩn)
         if (this._ensureWorker() && this._worker) {
             try { this._worker.postMessage('start'); } catch (e) {}
         }
-        // Fallback interval (phòng khi worker fail — dedup trong _tick)
         this.state.id = setInterval(() => {
             if (!this.state.running) return;
             this._tick();
@@ -2727,7 +2886,6 @@
         this._forceReset();
     },
 
-    // ✅ FIX: Reset không confirm, dùng nội bộ sau khi đã confirm / lưu phiên
     _forceReset() {
         this.stopTick();
         this.state.running = false;
@@ -2757,7 +2915,6 @@
         this._forceReset();
     },
 
-    // ✅ FIX: Thêm dateOverride — cho phép lưu phiên vào ngày trong quá khứ (restore)
     saveWorkSession(mins, dateOverride) {
         if (this.modes[this.state.mode].kind !== 'work') return;
         const sessionDate = dateOverride || State.today;
@@ -2779,7 +2936,6 @@
         const tagColor = (typeof SubjectManager !== 'undefined')
         ? SubjectManager.getColor(tagName) : '#64748b';
         
-        // Dùng sessionStartAt gốc nếu restore, tránh lệch ngày
         const at = (dateOverride && this.state.sessionStartAt)
             ? new Date(this.state.sessionStartAt).toISOString()
             : new Date().toISOString();
@@ -3015,9 +3171,9 @@
         if (d.running && d.endAt) {
             const remain = Math.max(0, Math.round((d.endAt - Date.now()) / 1000));
             if (remain <= 0) {
-            // ✅ FIX: Pomodoro hoàn thành trong lúc tab đóng → vẫn LƯU phiên
             if (this.modes[this.state.mode].kind === 'work') {
                 try {
+                if (d.sessionStartAt) this.state.sessionStartAt = d.sessionStartAt;
                 const sessionDate = d.sessionStartAt
                     ? dateKey(new Date(d.sessionStartAt))
                     : State.today;
@@ -3062,6 +3218,7 @@
         }
     },
     };
+
     /* ═══════ 16. ONBOARDING ═══════ */
     const Onboarding = {
     currentStep: 1,
@@ -3320,8 +3477,8 @@
     buildRow(s) {
         const row = document.createElement('div');
         row.className = 'session-row ' + (s.source === 'manual' ? 'manual' : 'pomodoro');
-        const tagColor = s.tagColor || (typeof SubjectManager !== 'undefined' ? SubjectManager.getColor(s.tag) : '#64748b');
-        const color = tagColor || '#64748b';
+        // ✅ Ưu tiên lấy màu mới nhất từ SubjectManager
+        const color = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(s.tag) : (s.tagColor || '#64748b');
         row.style.borderLeftColor = color;
         const time = new Date(s.at);
         const timeStr = time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -3813,6 +3970,13 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         });
         const saveBtn = $('#todoSave');
         if (saveBtn) saveBtn.addEventListener('click', () => this.saveModal());
+        // ✅ Nút "Áp dụng tag cho tất cả Todo"
+        const applyAllBtn = $('#todoApplyAllTags');
+        if (applyAllBtn) applyAllBtn.addEventListener('click', () => this.applyTagToAll());
+        // ✅ Nút Reset Todo (được gọi ở init)
+        const resetBtn = $('#resetTodoTagsBtn');
+        if (resetBtn) resetBtn.addEventListener('click', () => this.resetAllTodoTags());
+        
         this.initTagPicker();
         const titleInput = $('#todoTitle');
         if (titleInput) {
@@ -3864,6 +4028,74 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         this.syncMidnight();
         }, delay);
     },
+    // ✅ SỬA: Đổi môn cho TẤT CẢ Todo (không chỉ cái trống)
+    applyTagToAll() {
+        if (!this.selectedTag) {
+            toast('⚠️ Chọn môn trước rồi bấm nút này');
+            return;
+        }
+        const tag = this.selectedTag;
+        const total = this.todos.length;
+        if (total === 0) {
+            toast('ℹ️ Chưa có Todo nào');
+            return;
+        }
+        const changed = this.todos.filter(t => t.tag !== tag).length;
+        if (changed === 0) {
+            toast(`ℹ️ Tất cả ${total} Todo đã có môn "${tag}"`);
+            return;
+        }
+        if (!confirm(
+            `Đổi môn của TẤT CẢ ${total} Todo sang "${tag}"?\n\n` +
+            `✔ ${changed} Todo sẽ được cập nhật\n` +
+            `✖ ${total - changed} Todo đã đúng môn (giữ nguyên)`
+        )) return;
+
+        const backup = this.todos.map(t => ({ id: t.id, tag: t.tag }));
+        this.todos.forEach(t => { t.tag = tag; });
+
+        this.save();
+        this.render();
+        if (typeof Calendar !== 'undefined') Calendar.render();
+        if (typeof SubjectManager !== 'undefined') SubjectManager.render();
+
+        Undo.push(`Đã đổi ${changed} Todo sang "${tag}"`, () => {
+            backup.forEach(b => {
+                const td = this.todos.find(t => t.id === b.id);
+                if (td) td.tag = b.tag;
+            });
+            this.save();
+            this.render();
+            if (typeof Calendar !== 'undefined') Calendar.render();
+        }, 30000);
+
+        toast(`✅ Đã đổi "${tag}" cho ${changed} Todo`);
+    },
+    
+    // 🆘 Reset tất cả Todo về "không có môn" (fix lỗi bấm nhầm)
+    resetAllTodoTags() {
+        const total = this.todos.length;
+        if (total === 0) { toast('ℹ️ Không có Todo nào'); return; }
+        if (!confirm(`Xóa HẾT môn đang gán cho ${total} Todo?\n\nSau đó bạn có thể gán lại từng cái.`)) return;
+
+        const backup = this.todos.map(t => ({ id: t.id, tag: t.tag }));
+        this.todos.forEach(t => { t.tag = ''; });
+        this.save();
+        this.render();
+        if (typeof Calendar !== 'undefined') Calendar.render();
+
+        Undo.push(`Đã xóa môn của ${total} Todo`, () => {
+            backup.forEach(b => {
+                const td = this.todos.find(t => t.id === b.id);
+                if (td) td.tag = b.tag;
+            });
+            this.save();
+            this.render();
+            if (typeof Calendar !== 'undefined') Calendar.render();
+        }, 30000);
+
+        toast(`🆘 Đã reset môn của ${total} Todo — bấm Hoàn tác nếu lỡ`);
+    },
     initTagPicker() {
         const tags = (typeof SubjectManager !== 'undefined')
         ? SubjectManager.subjects.map(s => s.name)
@@ -3872,6 +4104,31 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         if (!picker) return;
         picker.innerHTML = '';
         this.selectedTag = '';
+        
+        // ✅ THÊM NÚT "KHÔNG CHỌN" MÔN
+        const noneBtn = document.createElement('button');
+        noneBtn.type = 'button';
+        noneBtn.className = 'tag';
+        noneBtn.style.background = 'var(--surface-2)';
+        noneBtn.style.color = 'var(--text-2)';
+        noneBtn.style.border = '2px solid transparent';
+        noneBtn.textContent = '❌ Không chọn';
+        noneBtn.addEventListener('click', () => {
+            picker.querySelectorAll('.tag').forEach(x => {
+                x.classList.remove('active');
+                const t = x.textContent;
+                const c = (typeof SubjectManager !== 'undefined') ? SubjectManager.getColor(t) : '#64748b';
+                x.style.background = c;
+                x.style.color = '#fff';
+                x.style.border = '2px solid transparent';
+                x.style.boxShadow = 'none';
+            });
+            noneBtn.style.background = 'var(--accent)';
+            noneBtn.style.color = '#fff';
+            this.selectedTag = '';
+        });
+        picker.appendChild(noneBtn);
+
         tags.forEach(tag => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -3892,6 +4149,10 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
             x.style.border = '2px solid transparent';
             x.style.boxShadow = 'none';
             });
+            // reset noneBtn
+            noneBtn.style.background = 'var(--surface-2)';
+            noneBtn.style.color = 'var(--text-2)';
+            
             if (!was) { 
                 b.classList.add('active'); 
                 b.style.background = color; 
@@ -4747,8 +5008,10 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
     getStorageInfo() {
         let total = 0;
         try {
-        for (let key in localStorage) {
-            if (localStorage.hasOwnProperty(key)) total += (localStorage[key].length + key.length) * 2;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const val = localStorage.getItem(key);
+            if (val) total += (val.length + key.length) * 2;
         }
         } catch (e) {}
         const usedMB = (total / 1024 / 1024).toFixed(2);
@@ -5023,7 +5286,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
         if (!btn) return;
         btn.addEventListener('click', () => this.rollback());
     },
-    push(msg, fn, duration = 6000) {
+    push(msg, fn, duration = 15000) {
         this.stack.push(fn);
         const msgEl = $('#undoMsg');
         const toastEl = $('#undoToast');
@@ -5322,6 +5585,7 @@ ${s.tag ? `<span class="session-tag" style="background:${color}22;color:${color}
 
     SubjectManager.init();
     TodoManager.init();
+
     StreakFreeze.init();
     NotifManager.init();
 
